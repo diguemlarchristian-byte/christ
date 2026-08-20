@@ -118,7 +118,17 @@ Titulaire :
 </div>
 <div>
 <label class="text-xs text-gray-500 block mb-1">Niveau</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" id="input-niveau" name="niveau" type="text"/>
+<select class="w-full p-2 border border-gray-300 rounded-lg" id="input-niveau" name="niveau" required="required">
+<option disabled="disabled" value="">-- Selectionner --</option>
+<optgroup label="Niveaux deja utilises" th:if="${!niveauxExistants.isEmpty()}">
+<option th:each="n : ${niveauxExistants}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<optgroup label="Niveaux standards">
+<option th:each="n : ${niveauxStandards}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<option value="__autre__">Autre (a preciser)...</option>
+</select>
+<input class="hidden w-full p-2 border border-gray-300 rounded-lg mt-1" id="input-niveau-autre" placeholder="Precisez le niveau" type="text"/>
 </div>
 <div>
 <label class="text-xs text-gray-500 block mb-1">Annee scolaire</label>
@@ -153,13 +163,51 @@ Titulaire :
 
 <script>
     function fermerModal() { document.getElementById('modal-classe').classList.add('hidden'); }
+
+    var niveauSelect = document.getElementById('input-niveau');
+    var niveauAutre = document.getElementById('input-niveau-autre');
+    function appliquerNiveau(valeur) {
+        var optionExiste = Array.prototype.some.call(niveauSelect.options, function (o) { return o.value === valeur; });
+        if (valeur && optionExiste) {
+            niveauSelect.value = valeur;
+            niveauAutre.classList.add('hidden');
+            niveauAutre.removeAttribute('name');
+            niveauSelect.name = 'niveau';
+        } else if (valeur) {
+            niveauSelect.value = '__autre__';
+            niveauAutre.classList.remove('hidden');
+            niveauAutre.value = valeur;
+            niveauAutre.name = 'niveau';
+            niveauSelect.removeAttribute('name');
+        } else {
+            niveauSelect.value = '';
+            niveauAutre.classList.add('hidden');
+            niveauAutre.value = '';
+            niveauAutre.removeAttribute('name');
+            niveauSelect.name = 'niveau';
+        }
+    }
+    niveauSelect.addEventListener('change', function () {
+        if (niveauSelect.value === '__autre__') {
+            niveauAutre.classList.remove('hidden');
+            niveauAutre.name = 'niveau';
+            niveauAutre.value = '';
+            niveauSelect.removeAttribute('name');
+            niveauAutre.focus();
+        } else {
+            niveauAutre.classList.add('hidden');
+            niveauAutre.removeAttribute('name');
+            niveauSelect.name = 'niveau';
+        }
+    });
+
     document.querySelectorAll('.bouton-modifier').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var row = btn.closest('.ligne-classe');
             document.getElementById('modal-titre').textContent = 'Modifier la classe';
             document.getElementById('form-classe').action = '/gestion-classes/' + row.getAttribute('data-id') + '/modifier';
             document.getElementById('input-nom').value = row.getAttribute('data-nom') || '';
-            document.getElementById('input-niveau').value = row.getAttribute('data-niveau') || '';
+            appliquerNiveau(row.getAttribute('data-niveau') || '');
             document.getElementById('input-annee').value = row.getAttribute('data-annee') || '';
             document.getElementById('input-titulaire').value = row.getAttribute('data-titulaire') || '';
             document.getElementById('input-capacite').value = row.getAttribute('data-capacite') || '';

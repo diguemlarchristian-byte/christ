@@ -32,11 +32,40 @@ public class ClasseGestionController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
 
+    // Niveaux de reference proposes en complement des niveaux deja utilises par l'etablissement :
+    // saisir librement le "Niveau" d'une classe (comme auparavant) faisait qu'un niveau tape avec
+    // une orthographe/accent legerement different de celui choisi dans Parametres > Frais Scolaires
+    // ne matchait jamais ce frais a l'inscription — parametrage "reussi" mais jamais applique. En
+    // proposant une liste fermee (niveaux existants + standards) avec repli "Autre" pour les cas
+    // hors norme, on garde la coherence sans bloquer les etablissements aux besoins particuliers.
+    private static final List<String> NIVEAUX_STANDARDS = List.of(
+        "Petite Section", "Moyenne Section", "Grande Section",
+        "CP1", "CP2", "CE1", "CE2", "CM1", "CM2",
+        "6ème", "5ème", "4ème", "3ème",
+        "2nde", "1ère", "Terminale",
+        "2nde G", "1ère G", "Terminale G"
+    );
+
+    private void ajouterSuggestionsNiveaux(Model model, Long etabId) {
+        List<String> niveauxExistants = classeRepository.findByEtablissementId(etabId).stream()
+            .map(Classe::getNiveau)
+            .filter(n -> n != null && !n.isBlank())
+            .distinct()
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .toList();
+        List<String> niveauxStandards = NIVEAUX_STANDARDS.stream()
+            .filter(n -> niveauxExistants.stream().noneMatch(e -> e.equalsIgnoreCase(n)))
+            .toList();
+        model.addAttribute("niveauxExistants", niveauxExistants);
+        model.addAttribute("niveauxStandards", niveauxStandards);
+    }
+
     @GetMapping
     public String index(Model model) {
         Long etabId = etablissementService.getCurrentEtablissementId();
         model.addAttribute("classes", classeRepository.findByEtablissementId(etabId));
         model.addAttribute("enseignants", utilisateurRepository.findByRoleAndEtablissementIdOrderByNomAsc("ENSEIGNANT", etabId));
+        ajouterSuggestionsNiveaux(model, etabId);
         return "gestion-classes";
     }
 
@@ -50,6 +79,7 @@ public class ClasseGestionController {
         model.addAttribute("enseignants", utilisateurRepository.findByRoleAndEtablissementIdOrderByNomAsc("ENSEIGNANT", etabId));
         model.addAttribute("anneeScolaire", anneeScolaire);
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
+        ajouterSuggestionsNiveaux(model, etabId);
         return "gestion-classes-nouveau";
     }
 

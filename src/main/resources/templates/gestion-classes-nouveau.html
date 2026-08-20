@@ -61,7 +61,17 @@
 </div>
 <div class="flex flex-col gap-xs">
 <label class="font-label-md text-label-md text-on-surface-variant">Niveau</label>
-<input class="border border-outline-variant p-2.5 rounded-lg bg-surface text-sm" name="niveau" placeholder="ex: Collège - Niveau 1" type="text"/>
+<select class="border border-outline-variant p-2.5 rounded-lg bg-surface text-sm" id="select-niveau-m" name="niveau" required="required">
+<option disabled="disabled" selected="selected" value="">-- Sélectionner --</option>
+<optgroup label="Niveaux déjà utilisés" th:if="${!niveauxExistants.isEmpty()}">
+<option th:each="n : ${niveauxExistants}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<optgroup label="Niveaux standards">
+<option th:each="n : ${niveauxStandards}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<option value="__autre__">Autre (à préciser)...</option>
+</select>
+<input class="hidden border border-outline-variant p-2.5 rounded-lg bg-surface text-sm mt-xs" id="input-niveau-autre-m" placeholder="Précisez le niveau" type="text"/>
 </div>
 <div class="flex flex-col gap-xs">
 <label class="font-label-md text-label-md text-on-surface-variant">Année Scolaire</label>
@@ -165,7 +175,17 @@
 </div>
 <div class="flex flex-col gap-xs">
 <label class="font-label-md text-label-md text-on-surface-variant">Niveau</label>
-<input class="border border-outline-variant p-md rounded-lg bg-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none font-body-md text-body-md" name="niveau" placeholder="ex: College - Niveau 1" type="text"/>
+<select class="border border-outline-variant p-md rounded-lg bg-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none font-body-md text-body-md" id="select-niveau-d" name="niveau" required="required">
+<option disabled="disabled" selected="selected" value="">-- Selectionner --</option>
+<optgroup label="Niveaux deja utilises" th:if="${!niveauxExistants.isEmpty()}">
+<option th:each="n : ${niveauxExistants}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<optgroup label="Niveaux standards">
+<option th:each="n : ${niveauxStandards}" th:text="${n}" th:value="${n}"></option>
+</optgroup>
+<option value="__autre__">Autre (a preciser)...</option>
+</select>
+<input class="hidden border border-outline-variant p-md rounded-lg bg-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none font-body-md text-body-md mt-xs" id="input-niveau-autre-d" placeholder="Precisez le niveau" type="text"/>
 </div>
 <div class="flex flex-col gap-xs">
 <label class="font-label-md text-label-md text-on-surface-variant">Annee Scolaire</label>
@@ -277,6 +297,29 @@
             progressLabel.textContent = percentage >= 90 ? 'Complet' : 'En cours';
         });
     });
+
+    function attacherToggleNiveau(selectId, autreId) {
+        var select = document.getElementById(selectId);
+        var autre = document.getElementById(autreId);
+        if (!select || !autre) return;
+        select.addEventListener('change', function () {
+            if (select.value === '__autre__') {
+                autre.classList.remove('hidden');
+                autre.name = 'niveau';
+                autre.required = true;
+                select.removeAttribute('name');
+                autre.focus();
+            } else {
+                autre.classList.add('hidden');
+                autre.removeAttribute('name');
+                autre.required = false;
+                autre.value = '';
+                select.name = 'niveau';
+            }
+        });
+    }
+    attacherToggleNiveau('select-niveau-m', 'input-niveau-autre-m');
+    attacherToggleNiveau('select-niveau-d', 'input-niveau-autre-d');
 </script>
 </body>
 </html>
