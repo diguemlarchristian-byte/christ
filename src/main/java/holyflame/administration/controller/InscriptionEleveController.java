@@ -404,7 +404,12 @@ public class InscriptionEleveController {
         if (paiementId != null) {
             ra.addFlashAttribute("paiementRecuId", paiementId);
         }
-        return "redirect:/secretariat";
+        // Le Tresorier/Comptable n'a pas acces au tableau de bord Secretariat : on le ramene
+        // vers son propre espace (Finances) plutot que /secretariat.
+        var utilisateurConnecte = etablissementService.getCurrentUtilisateur();
+        boolean estFinancier = utilisateurConnecte != null
+            && ("TRESORIER".equals(utilisateurConnecte.getRole()) || "COMPTABLE".equals(utilisateurConnecte.getRole()));
+        return estFinancier ? "redirect:/finances" : "redirect:/secretariat";
     }
 
     private void enregistrerDocument(Eleve eleve, MultipartFile fichier, String typeDocument) {

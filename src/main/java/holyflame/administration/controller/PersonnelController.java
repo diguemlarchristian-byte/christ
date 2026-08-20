@@ -297,9 +297,10 @@ public class PersonnelController {
         return switch (fonction) {
             case "ENSEIGNANT"  -> "ENSEIGNANT";
             case "SECRETAIRE"  -> "SECRETAIRE";
-            case "TRESORIER", "COMPTABLE" -> "TRESORIER"; // le comptable utilise le meme espace finances que le tresorier
+            case "TRESORIER"   -> "TRESORIER";
+            case "COMPTABLE"   -> "COMPTABLE";
             case "SURVEILLANT" -> "SURVEILLANT";
-            case "DIRECTEUR"   -> "ADMIN";
+            case "DIRECTEUR"   -> "DIRECTEUR";
             case "COORDONNATEUR" -> "COORDONNATEUR";
             case "MARKETING"   -> "MARKETING";
             default -> null; // AUTRE : fiche RH seule, pas de compte de connexion automatique

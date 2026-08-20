@@ -66,39 +66,85 @@ public class FinanceParentService {
         for (Eleve enfant : enfants) {
             if (enfant.getClasse() == null) continue;
             String niveau = enfant.getClasse().getNiveau();
+            String anneeEnfant = enfant.getClasse().getAnneeScolaire();
             List<FraisScolarite> applicables = tousFrais.stream()
                 .filter(f -> f.getNiveauCible() == null || f.getNiveauCible().isBlank()
                     || f.getNiveauCible().equalsIgnoreCase(niveau))
                 .toList();
 
+            // Tous les paiements de cet eleve. NB : on ne filtre plus ici par egalite stricte sur
+            // Paiement.anneeScolaire, car ce champ est derive de la date calendaire du versement
+            // (voir AnneeScolaireUtil.pour) alors que l'annee "active" d'un etablissement peut deja
+            // avoir ete avancee manuellement (ex: classes 2026-2027 preparees des aout 2026) — un
+            // versement pourtant bien de l'annee en cours pouvait donc etre ecarte a tort et le
+            // solde de l'eleve semblait fige malgre un paiement reel.
+            List<Paiement> paiementsEleve = tousPaiements.stream()
+                .filter(p -> p.getEleve() != null && p.getEleve().getId().equals(enfant.getId()))
+                .toList();
+
+            // Solde des versements enregistres sans frais precis selectionne (cas normal d'un
+            // encaissement enregistre depuis le Journal de caisse) : sans imputation explicite,
+            // ce montant restait jusqu'ici totalement ignore et le solde de l'eleve ne bougeait
+            // jamais, meme apres un paiement bien enregistre. On l'impute desormais sur les frais
+            // les plus anciennement echus d'abord, comme un versement generique.
+            double soldeLibre = paiementsEleve.stream()
+                .filter(p -> p.getFraisScolarite() == null)
+                .mapToDouble(p -> p.getMontantVerse() != null ? p.getMontantVerse() : 0)
+                .sum();
+
+            List<Map<String, Object>> lignesEnfant = new ArrayList<>();
             for (FraisScolarite f : applicables) {
                 double montant = f.getMontant() != null ? f.getMontant() : 0;
-                double verse = tousPaiements.stream()
-                    .filter(p -> p.getEleve() != null && p.getEleve().getId().equals(enfant.getId())
-                        && p.getFraisScolarite() != null && p.getFraisScolarite().getId().equals(f.getId()))
+                double verseAffecte = paiementsEleve.stream()
+                    .filter(p -> p.getFraisScolarite() != null && p.getFraisScolarite().getId().equals(f.getId()))
                     .mapToDouble(p -> p.getMontantVerse() != null ? p.getMontantVerse() : 0)
                     .sum();
-                LocalDate echeanceDate = calculerEcheance(f.getEcheance(), enfant.getClasse().getAnneeScolaire(), etabId);
-
-                String statut;
-                if (montant > 0 && verse >= montant) statut = "PAYE";
-                else if (echeanceDate != null && echeanceDate.isBefore(aujourdHui)) statut = "EN_RETARD";
-                else statut = "EN_ATTENTE";
+                LocalDate echeanceDate = calculerEcheance(f.getEcheance(), anneeEnfant, etabId);
 
                 Map<String, Object> ligne = new LinkedHashMap<>();
                 ligne.put("designation", f.getDesignation());
                 ligne.put("categorie", f.getTypeFrais());
                 ligne.put("enfant", enfant);
                 ligne.put("montant", montant);
-                ligne.put("resteAPayer", Math.max(0, montant - verse));
+                ligne.put("resteAPayer", Math.max(0, montant - verseAffecte));
                 ligne.put("echeanceDate", echeanceDate);
-                ligne.put("statut", statut);
                 ligne.put("fraisId", f.getId());
                 ligne.put("eleveId", enfant.getId());
+                // Un frais non-obligatoire (facultatif) ne doit jamais empecher un eleve d'etre
+                // considere a jour/solde : il reste visible et payable, mais son impaye ne compte
+                // ni dans le solde total a regler, ni dans le statut EN_ATTENTE/EN_RETARD.
+                ligne.put("obligatoire", f.isObligatoire());
+                lignesEnfant.add(ligne);
+            }
+
+            // Un versement libre (non affecte a un frais precis) s'impute d'abord sur les frais
+            // obligatoires (les plus anciennement echus en premier), puis seulement s'il en reste
+            // sur les frais facultatifs — jamais l'inverse.
+            lignesEnfant.sort(Comparator
+                .comparing((Map<String, Object> l) -> Boolean.TRUE.equals(l.get("obligatoire")) ? 0 : 1)
+                .thenComparing(l -> (LocalDate) l.get("echeanceDate"), Comparator.nullsLast(Comparator.naturalOrder())));
+
+            for (Map<String, Object> ligne : lignesEnfant) {
+                double montant = (double) ligne.get("montant");
+                double reste = (double) ligne.get("resteAPayer");
+                if (soldeLibre > 0 && reste > 0) {
+                    double imputation = Math.min(soldeLibre, reste);
+                    reste -= imputation;
+                    soldeLibre -= imputation;
+                    ligne.put("resteAPayer", reste);
+                }
+                boolean obligatoire = (boolean) ligne.get("obligatoire");
+                LocalDate echeanceDate = (LocalDate) ligne.get("echeanceDate");
+                String statut;
+                if (montant > 0 && reste <= 0) statut = "PAYE";
+                else if (!obligatoire) statut = "OPTIONNEL";
+                else if (echeanceDate != null && echeanceDate.isBefore(aujourdHui)) statut = "EN_RETARD";
+                else statut = "EN_ATTENTE";
+                ligne.put("statut", statut);
                 resume.lignes.add(ligne);
 
-                if (!"PAYE".equals(statut)) {
-                    resume.soldeTotalARegler += (montant - verse);
+                if (obligatoire && !"PAYE".equals(statut)) {
+                    resume.soldeTotalARegler += reste;
                     if ("EN_RETARD".equals(statut)) resume.nbEnRetard++;
                     if (echeanceDate != null && (resume.prochaineEcheance == null || echeanceDate.isBefore(resume.prochaineEcheance))) {
                         resume.prochaineEcheance = echeanceDate;
@@ -125,6 +171,7 @@ public class FinanceParentService {
                 ligne.put("statut", "EN_RETARD");
                 ligne.put("arriereId", a.getId());
                 ligne.put("eleveId", enfant.getId());
+                ligne.put("obligatoire", true);
                 resume.lignes.add(ligne);
                 resume.soldeTotalARegler += reste;
                 resume.nbEnRetard++;

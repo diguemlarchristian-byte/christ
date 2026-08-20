@@ -146,7 +146,8 @@
 <p class="font-label-sm text-label-sm text-on-surface-variant">Personnel actif</p>
 </div>
 </div>
-<div class="col-span-2 bg-primary-container p-md rounded-xl flex items-center justify-between overflow-hidden relative">
+<div class="col-span-2 bg-primary-container p-md rounded-xl flex items-center justify-between overflow-hidden relative"
+     th:if="${utilisateurConnecte != null and utilisateurConnecte.role != 'DIRECTEUR'}">
 <div class="relative z-10">
 <p class="font-label-sm text-label-sm text-on-primary-container">Finances du mois</p>
 <p class="font-headline-md text-headline-md text-on-primary" th:text="${#numbers.formatDecimal(totalEncaisseMois,0,'COMMA',0,'POINT')} + ' FCFA'">0</p>
@@ -157,7 +158,8 @@
 </div>
 </section>
 <!-- Graphique revenus -->
-<section class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant space-y-md">
+<section class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant space-y-md"
+          th:if="${utilisateurConnecte != null and utilisateurConnecte.role != 'DIRECTEUR'}">
 <div class="flex justify-between items-center">
 <h3 class="font-headline-sm text-headline-sm text-primary">Revenus</h3>
 <span class="font-label-sm text-label-sm text-on-surface-variant" th:text="${anneeScolaire}">Annee</span>
@@ -341,7 +343,7 @@
 </div>
 <!-- Repartition des notes et resume budgetaire -->
 <div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg grid grid-cols-1 md:grid-cols-4 gap-lg">
-<div class="md:col-span-1 border-r border-outline-variant pr-lg">
+<div class="md:col-span-1 border-r border-outline-variant pr-lg" th:if="${utilisateurConnecte != null and utilisateurConnecte.role != 'DIRECTEUR'}">
 <h4 class="font-headline-sm text-headline-sm mb-md">Resume budgetaire</h4>
 <div class="bg-surface-container-low rounded-lg p-md space-y-md">
 <div>

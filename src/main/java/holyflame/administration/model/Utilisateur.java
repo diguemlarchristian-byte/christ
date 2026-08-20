@@ -30,6 +30,25 @@ public class Utilisateur {
     private String role;
     private boolean actif = true;
 
+    // Modules operationnels supplementaires actives pour ce compte, en plus de ceux
+    // deja lies a son role (codes CSV : SECRETARIAT, SURVEILLANCE, INFIRMERIE,
+    // MARKETING, INVENTAIRE, COORDINATION). Sert uniquement au role DIRECTEUR, pour
+    // permettre a l'ADMIN de lui confier des taches operationnelles supplementaires
+    // dans les etablissements sous-effectif — jamais utilise pour etendre l'acces
+    // aux modules financiers (finances/tresorerie/budget/salaires), volontairement
+    // absents de cette liste.
+    @Column(length = 500)
+    private String modulesOptionnels;
+
+    // Personnalisation des acces financiers pour un compte TRESORIER ou COMPTABLE
+    // (codes CSV : CAISSE, DEPENSES, PAIE_PREPARATION, PAIE_PAIEMENT, BUDGET_PARAMETRAGE,
+    // RAPPORTS). null = pas encore personnalise, le compte utilise les droits par defaut
+    // de son role (voir FinanceModules) ; une valeur non-nulle (meme vide) signifie que
+    // l'ADMIN a explicitement restreint ce compte a exactement ces modules.
+    @Column(length = 500)
+    private String modulesFinance;
+    private boolean modulesFinancePersonnalises = false;
+
     @Column(unique = true)
     private String resetToken;
     private LocalDateTime resetTokenExpiration;
@@ -90,6 +109,42 @@ public class Utilisateur {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public java.util.Set<String> getModulesOptionnelsActifs() {
+        if (modulesOptionnels == null || modulesOptionnels.isBlank()) return java.util.Set.of();
+        return java.util.Arrays.stream(modulesOptionnels.split(","))
+            .map(String::trim).filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toSet());
+    }
+
+    public void setModulesOptionnelsActifs(java.util.Set<String> modules) {
+        this.modulesOptionnels = (modules == null || modules.isEmpty()) ? null : String.join(",", modules);
+    }
+
+    /** null = pas encore personnalise (le compte utilise les droits par defaut de son role). */
+    public java.util.Set<String> getModulesFinanceActifs() {
+        if (!modulesFinancePersonnalises) return null;
+        if (modulesFinance == null || modulesFinance.isBlank()) return java.util.Set.of();
+        return java.util.Arrays.stream(modulesFinance.split(","))
+            .map(String::trim).filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toSet());
+    }
+
+    /** Marque le compte comme personnalise avec exactement cet ensemble (peut etre vide). */
+    public void setModulesFinanceActifs(java.util.Set<String> modules) {
+        this.modulesFinancePersonnalises = true;
+        this.modulesFinance = (modules == null || modules.isEmpty()) ? "" : String.join(",", modules);
+    }
+
+    /** Revient aux droits par defaut du role (annule toute personnalisation). */
+    public void reinitialiserModulesFinance() {
+        this.modulesFinancePersonnalises = false;
+        this.modulesFinance = null;
+    }
+
+    public boolean isModulesFinancePersonnalises() {
+        return modulesFinancePersonnalises;
     }
 
     public Etablissement getEtablissement() {

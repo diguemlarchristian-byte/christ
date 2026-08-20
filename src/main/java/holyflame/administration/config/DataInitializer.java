@@ -69,10 +69,14 @@ public class DataInitializer implements CommandLineRunner {
         // 3. Utilisateurs démo liés à l'établissement par défaut (chaque vérification est indépendante)
         if (utilisateurRepository.findByEmail("admin@holyflame.com").isEmpty())
             saveUser("Admin",   "HolyFlame", "admin@holyflame.com",      "admin123",  "ADMIN",      defEtab);
+        if (utilisateurRepository.findByEmail("directeur@holyflame.com").isEmpty())
+            saveUser("Kone",    "Ibrahim",   "directeur@holyflame.com",  "direct123", "DIRECTEUR",  defEtab);
         if (utilisateurRepository.findByEmail("secretaire@holyflame.com").isEmpty())
             saveUser("Dupont",  "Marie",     "secretaire@holyflame.com", "secret123", "SECRETAIRE", defEtab);
         if (utilisateurRepository.findByEmail("tresorier@holyflame.com").isEmpty())
             saveUser("Martin",  "Paul",      "tresorier@holyflame.com",  "tresor123", "TRESORIER",  defEtab);
+        if (utilisateurRepository.findByEmail("comptable@holyflame.com").isEmpty())
+            saveUser("Kouame",  "Solange",   "comptable@holyflame.com",  "compta123", "COMPTABLE",  defEtab);
         if (utilisateurRepository.findByEmail("enseignant@holyflame.com").isEmpty())
             saveUser("Leclerc", "Jean",      "enseignant@holyflame.com", "ens123",    "ENSEIGNANT", defEtab);
         if (utilisateurRepository.findByEmail("coordonnateur@holyflame.com").isEmpty())

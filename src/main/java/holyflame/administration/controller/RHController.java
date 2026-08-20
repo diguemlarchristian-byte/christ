@@ -227,7 +227,9 @@ public class RHController {
         model.addAttribute("nbEnAttente", nbEnAttente);
         model.addAttribute("nomsMois", List.of("Janvier","Fevrier","Mars","Avril","Mai","Juin",
             "Juillet","Aout","Septembre","Octobre","Novembre","Decembre"));
-        model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
+        var utilisateurConnecte = etablissementService.getCurrentUtilisateur();
+        model.addAttribute("utilisateurConnecte", utilisateurConnecte);
+        model.addAttribute("modulesFinanceActifs", holyflame.administration.service.FinanceModules.effectifs(utilisateurConnecte));
         return "rh-salaires";
     }
 

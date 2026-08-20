@@ -44,11 +44,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         switch (role == null ? "" : role) {
             case "SUPER_ADMIN" -> response.sendRedirect("/super-admin");
+            case "DIRECTEUR"   -> response.sendRedirect("/dashboard");
             case "ENSEIGNANT"  -> response.sendRedirect("/tableau-enseignant");
             case "SECRETAIRE"  -> response.sendRedirect("/secretariat");
             case "SURVEILLANT" -> response.sendRedirect("/surveillant");
             case "INFIRMIER"   -> response.sendRedirect("/infirmerie");
-            case "TRESORIER"   -> response.sendRedirect("/finances");
+            case "TRESORIER", "COMPTABLE" -> response.sendRedirect("/finances");
             case "COORDONNATEUR" -> response.sendRedirect("/coordination");
             case "ELEVE"       -> response.sendRedirect("/portail");
             case "PARENT"      -> response.sendRedirect("/portail-parent");

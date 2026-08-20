@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="light" lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro - Assistant de Cloture - Affectation</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a", "surface-variant": "#e0e3e5", "surface-container-low": "#f2f4f6",
+                    "surface-container": "#eceef0", "surface-container-lowest": "#ffffff", "tertiary-container": "#384055",
+                    "on-primary": "#ffffff", "on-secondary": "#ffffff", "error-container": "#ffdad6",
+                    "background": "#f7f9fb", "secondary-fixed": "#d3e4fe", "primary-fixed-dim": "#b6c4ff",
+                    "on-tertiary": "#ffffff", "secondary": "#505f76", "on-secondary-container": "#54647a",
+                    "surface-container-highest": "#e0e3e5", "secondary-fixed-dim": "#b7c8e1", "surface": "#f7f9fb",
+                    "secondary-container": "#d0e1fb", "outline-variant": "#c5c5d3", "surface-container-high": "#e6e8ea",
+                    "on-secondary-fixed-variant": "#38485d", "on-tertiary-fixed-variant": "#3f465c", "on-background": "#191c1e",
+                    "primary-fixed": "#dce1ff", "error": "#ba1a1a", "primary": "#00236f", "on-primary-container": "#90a8ff",
+                    "tertiary-fixed": "#dae2fd", "on-error": "#ffffff", "on-surface": "#191c1e",
+                    "on-tertiary-container": "#a4acc5", "tertiary-fixed-dim": "#bec6e0", "on-surface-variant": "#444651",
+                    "primary-container": "#1e3a8a", "outline": "#757682", "surface-dim": "#d8dadc",
+                    "surface-bright": "#f7f9fb", "tertiary": [[${accentColor}]], "success-container": "#c8f7d4", "on-success-container": "#0a5c2b"
+            },
+            "borderRadius": {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            "spacing": {"base": "4px", "xl": "32px", "gutter": "24px", "container-max": "1440px", "sidebar-width": "260px", "lg": "24px", "md": "16px", "sm": "8px", "xs": "4px"},
+            "fontFamily": {"headline-lg": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"]},
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<div th:replace="~{fragments/sidebar-admin :: admin('parametres')}"></div>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('parametres')}"></div>
+
+<header class="fixed top-0 left-0 right-0 z-40 bg-surface h-16 border-b border-outline-variant flex items-center ml-0 md:ml-[260px] px-md md:px-gutter">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Assistant de Clôture Annuelle</span>
+</header>
+
+<main class="ml-0 md:ml-sidebar-width mt-16 p-md md:p-gutter max-w-5xl mx-auto">
+
+<div class="mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-xs">Étape 3 : Passage &amp; Affectation</h2>
+<p class="font-body-md text-body-md text-on-surface-variant"
+   th:text="'Aperçu calculé automatiquement du passage de ' + ${ancienneAnnee} + ' vers ' + ${nouvelleAnnee} + ' — lecture seule, basé sur les décisions déjà prises.'"></p>
+</div>
+
+<div th:replace="~{fragments/assistant-cloture-stepper :: stepper(3)}"></div>
+
+<div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
+<div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mb-lg" th:if="${!anneePreparee}">
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-xs">Préparer l'année <span th:text="${nouvelleAnnee}"></span></h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+Duplique les classes (avec capacité, salle et professeur titulaire), le budget prévisionnel et les affectations enseignants
+de <strong th:text="${ancienneAnnee}"></strong> vers <strong th:text="${nouvelleAnnee}"></strong>. À faire une fois, avant de voir les capacités réelles ci-dessous.
+</p>
+<form method="post" th:action="@{/passage/assistant/affectation/preparer-annee}">
+<button class="px-lg py-3 bg-primary text-on-primary rounded-lg font-label-md hover:opacity-90 transition-all flex items-center gap-xs" type="submit">
+<span class="material-symbols-outlined">content_copy</span> Préparer l'année <span th:text="${nouvelleAnnee}"></span>
+</button>
+</form>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden mb-lg" th:if="${anneePreparee}">
+<div class="p-lg border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-background">Récapitulatif prévisionnel des effectifs (<span th:text="${nouvelleAnnee}"></span>)</h3>
+<span class="px-sm py-xs rounded-full text-label-sm font-bold bg-success-container text-on-success-container flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Année préparée
+</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low text-on-surface-variant">
+<tr>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase">Classe cible</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Admis (nouveaux)</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Redoublants (maintenus)</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Total prévisionnel</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Capacité max</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase">Statut</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr th:each="r : ${recap}" th:classappend="${r.surcapacite} ? 'bg-error/5' : ''">
+<td class="px-lg py-sm font-medium" th:text="${r.nom}"></td>
+<td class="px-lg py-sm text-right" th:text="${r.admis}"></td>
+<td class="px-lg py-sm text-right" th:text="${r.redoublants}"></td>
+<td class="px-lg py-sm text-right font-bold" th:text="${r.total}"></td>
+<td class="px-lg py-sm text-right" th:text="${r.capacite} ?: '—'"></td>
+<td class="px-lg py-sm">
+<span class="px-sm py-xs rounded-full text-label-sm font-bold bg-error-container text-on-error-container" th:if="${r.surcapacite}">Surcapacité</span>
+<span class="px-sm py-xs rounded-full text-label-sm font-bold bg-surface-variant text-on-surface-variant" th:if="${!r.existeDeja}">Sera créée</span>
+<span class="px-sm py-xs rounded-full text-label-sm font-bold bg-success-container text-on-success-container" th:if="${r.existeDeja and !r.surcapacite}">OK</span>
+</td>
+</tr>
+<tr th:if="${recap.isEmpty()}">
+<td class="px-lg py-6 text-center text-on-surface-variant" colspan="6">Aucun élève admis ou redoublant décidé pour l'instant.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p-lg text-label-sm text-secondary border-t border-outline-variant">Les classes en surcapacité nécessitent un ajustement manuel (capacité ou répartition) dans Gestion des classes avant de clôturer.</p>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="p-lg border-b border-outline-variant bg-surface-container-low">
+<h3 class="font-headline-sm text-headline-sm text-on-background">Mapping par classe d'origine</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low text-on-surface-variant">
+<tr>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase">Classe actuelle</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase">Niveau suivant</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Admis</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Redoublants</th>
+<th class="px-lg py-sm font-label-sm text-label-sm uppercase text-right">Sortants</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr th:each="m : ${mapping}">
+<td class="px-lg py-sm font-medium" th:text="${m.classeOrigine.nom}"></td>
+<td class="px-lg py-sm" th:text="${m.niveauCibleAdmis}"></td>
+<td class="px-lg py-sm text-right" th:text="${m.admis}"></td>
+<td class="px-lg py-sm text-right" th:text="${m.redoublants}"></td>
+<td class="px-lg py-sm text-right" th:text="${m.sortants}"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="flex justify-between items-center mt-lg pb-xl">
+<a class="px-lg py-3 border border-outline-variant text-on-surface-variant rounded-lg font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-xs" th:href="@{/passage/assistant/deliberations}">
+<span class="material-symbols-outlined">arrow_back</span> Étape précédente
+</a>
+<a class="px-lg py-3 bg-primary text-on-primary rounded-lg font-label-md hover:opacity-90 transition-all flex items-center gap-xs" th:href="@{/passage/assistant/cloture}">
+Suivant : Clôture &amp; Archivage
+<span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+
+</main>
+</body>
+</html>

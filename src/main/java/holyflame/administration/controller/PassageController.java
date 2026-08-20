@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -46,13 +45,9 @@ public class PassageController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
+    @Autowired private holyflame.administration.service.PassageService passageService;
 
     private static final DateTimeFormatter FMT_PARAM_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final List<String> ORDRE_NIVEAUX = List.of(
-        "Petite Section", "Moyenne Section", "Grande Section",
-        "CP1", "CP2", "CE1", "CE2", "CM1", "CM2",
-        "6ème", "5ème", "4ème", "3ème",
-        "2nde", "1ère", "Terminale");
     private static final List<String> ROLES_JURY = List.of(
         "Président du Jury", "Professeur Principal", "Professeur", "CPE", "Économe", "Délégué(e) Parents", "Autre");
 
@@ -70,7 +65,7 @@ public class PassageController {
         model.addAttribute("classes", classes);
         model.addAttribute("effectifParClasse", effectifParClasse);
         model.addAttribute("anneeActuelle", anneeActuelle);
-        model.addAttribute("nouvelleAnneeSuggeree", anneeSuivante(anneeActuelle));
+        model.addAttribute("nouvelleAnneeSuggeree", passageService.anneeSuivante(anneeActuelle));
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
         model.addAttribute("seances", seanceDeliberationRepository.findByEtablissementIdOrderByDateSeanceDesc(etabId));
         return "passage";
@@ -89,7 +84,7 @@ public class PassageController {
                 org.springframework.http.HttpStatus.FORBIDDEN, "Classe introuvable dans cet établissement."));
 
         String nouvelleAnneeFinale = nouvelleAnnee != null && !nouvelleAnnee.isBlank()
-            ? nouvelleAnnee : anneeSuivante(classe.getAnneeScolaire());
+            ? nouvelleAnnee : passageService.anneeSuivante(classe.getAnneeScolaire());
 
         LocalDate debutAnnee = lireParametreDate(etabId, "T1_DEBUT");
         LocalDate finAnnee = lireParametreDate(etabId, "T3_FIN");
@@ -127,7 +122,7 @@ public class PassageController {
         model.addAttribute("classe", classe);
         model.addAttribute("lignes", lignes);
         model.addAttribute("nouvelleAnnee", nouvelleAnneeFinale);
-        model.addAttribute("niveauSuivant", niveauSuivant(classe.getNiveau()));
+        model.addAttribute("niveauSuivant", passageService.niveauSuivant(classe.getNiveau()));
         model.addAttribute("tauxReussite", total > 0 ? Math.round(100.0 * nbAdmis / total) : 0);
         model.addAttribute("tauxRedoublement", total > 0 ? Math.round(100.0 * nbRedouble / total) : 0);
         model.addAttribute("tauxExclusion", total > 0 ? Math.round(100.0 * nbSort / total) : 0);
@@ -228,57 +223,15 @@ public class PassageController {
             .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
                 org.springframework.http.HttpStatus.FORBIDDEN, "Classe introuvable dans cet établissement."));
 
-        anneeScolaireService.verifierModifiable(classeOrigine.getAnneeScolaire(), etabId);
-
-        List<Eleve> eleves = eleveRepository.findByClasseIdOrderByNomAsc(classeId);
-        Map<Long, DecisionPassage> decisionParEleve = decisionPassageRepository
-            .findByClasseOrigineIdAndAnneeScolaire(classeId, classeOrigine.getAnneeScolaire()).stream()
-            .collect(Collectors.toMap(d -> d.getEleve().getId(), d -> d, (a, b) -> a));
-
-        if (eleves.isEmpty() || decisionParEleve.size() < eleves.size()) {
-            ra.addFlashAttribute("erreurMsg", "Toutes les décisions doivent être validées avant de clôturer.");
+        holyflame.administration.service.PassageService.ResultatCloture resultat =
+            passageService.cloturerClasse(classeOrigine, nouvelleAnnee, etabId);
+        if (!resultat.succes) {
+            ra.addFlashAttribute("erreurMsg", resultat.erreur);
             return "redirect:/passage/classe/" + classeId;
         }
 
-        String niveauSuivantVal = niveauSuivant(classeOrigine.getNiveau());
-        int nbAdmis = 0, nbRedouble = 0, nbSortis = 0;
-        for (Eleve eleve : eleves) {
-            String decision = decisionParEleve.get(eleve.getId()).getDecision();
-
-            if ("SORT".equals(decision)) {
-                eleve.setStatutInscription("ABANDON");
-                eleveRepository.save(eleve);
-                nbSortis++;
-                journalService.log("ELEVE_SORTANT", "ELEVES",
-                    eleve.getNom() + " " + eleve.getPrenom() + " (" + eleve.getMatricule() + ") — fin de scolarite dans l'etablissement");
-                continue;
-            }
-
-            String niveauCible = "REDOUBLE".equals(decision) ? classeOrigine.getNiveau() : niveauSuivantVal;
-            if (niveauCible == null) {
-                eleve.setStatutInscription("ABANDON");
-                eleveRepository.save(eleve);
-                nbSortis++;
-                journalService.log("ELEVE_FIN_CYCLE", "ELEVES",
-                    eleve.getNom() + " " + eleve.getPrenom() + " (" + eleve.getMatricule() + ") — fin de cycle, aucun niveau suivant configure");
-                continue;
-            }
-
-            Classe classeCible = trouverOuCreerClasse(classeOrigine, niveauCible, nouvelleAnnee, etabId);
-            eleve.setClasse(classeCible);
-            eleveRepository.save(eleve);
-            if ("REDOUBLE".equals(decision)) {
-                nbRedouble++;
-                journalService.log("ELEVE_REDOUBLE", "ELEVES",
-                    eleve.getNom() + " " + eleve.getPrenom() + " — reprend " + niveauCible + " (" + nouvelleAnnee + ")");
-            } else {
-                nbAdmis++;
-                journalService.log("ELEVE_ADMIS", "ELEVES",
-                    eleve.getNom() + " " + eleve.getPrenom() + " — passe en " + niveauCible + " (" + nouvelleAnnee + ")");
-            }
-        }
-
-        ra.addFlashAttribute("successMsg", "Délibération clôturée : " + nbAdmis + " admis, " + nbRedouble + " redoublant(s), " + nbSortis + " sortant(s).");
+        ra.addFlashAttribute("successMsg", "Délibération clôturée : " + resultat.nbAdmis + " admis, "
+            + resultat.nbRedouble + " redoublant(s), " + resultat.nbSortis + " sortant(s).");
         return "redirect:/passage";
     }
 
@@ -289,37 +242,6 @@ public class PassageController {
             .filter(a -> !a.isEstJustifiee()).count();
     }
 
-    private Classe trouverOuCreerClasse(Classe classeOrigine, String niveauCible, String nouvelleAnnee, Long etabId) {
-        String nomCible = classeOrigine.getNiveau() != null && classeOrigine.getNom() != null
-            ? classeOrigine.getNom().replaceFirst(Pattern.quote(classeOrigine.getNiveau()), niveauCible)
-            : niveauCible;
-        return classeRepository.findByNomIgnoreCaseAndAnneeScolaireAndEtablissementId(nomCible, nouvelleAnnee, etabId)
-            .orElseGet(() -> {
-                Classe c = new Classe();
-                c.setNom(nomCible);
-                c.setNiveau(niveauCible);
-                c.setAnneeScolaire(nouvelleAnnee);
-                c.setEtablissementId(etabId);
-                return classeRepository.save(c);
-            });
-    }
-
-    private String niveauSuivant(String niveauActuel) {
-        int idx = ORDRE_NIVEAUX.indexOf(niveauActuel);
-        if (idx < 0 || idx == ORDRE_NIVEAUX.size() - 1) return null;
-        return ORDRE_NIVEAUX.get(idx + 1);
-    }
-
-    private String anneeSuivante(String annee) {
-        if (annee == null) return null;
-        try {
-            String debutStr = annee.split("-")[0].trim();
-            int debut = Integer.parseInt(debutStr);
-            return (debut + 1) + "-" + (debut + 2);
-        } catch (Exception e) {
-            return annee;
-        }
-    }
 
     private String anneeScolaireActuelle(Long etabId) {
         return etablissementService.getAnneeScolaireActive();

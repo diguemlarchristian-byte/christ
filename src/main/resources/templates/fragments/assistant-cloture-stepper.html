@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stepper(etape)" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col md:flex-row justify-between gap-md mb-lg">
+<div class="flex items-center gap-sm flex-1" th:each="s : ${#numbers.sequence(1,4)}">
+<div class="w-9 h-9 rounded-full flex items-center justify-center font-label-md text-label-sm font-bold border-2 shrink-0"
+     th:classappend="${s < etape} ? 'bg-primary text-on-primary border-primary' : (${s == etape} ? 'bg-primary-container/20 text-primary border-primary' : 'bg-surface text-on-surface-variant border-outline-variant')">
+<span th:if="${s < etape}" class="material-symbols-outlined text-[18px]">check</span>
+<span th:unless="${s < etape}" th:text="${s}">1</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-sm" th:classappend="${s == etape} ? 'text-primary font-bold' : 'text-on-surface-variant'"
+      th:text="${s == 1} ? 'Vérification' : (${s == 2} ? 'Délibérations' : (${s == 3} ? 'Passage' : 'Clôture'))">Etape</span>
+<span class="text-[10px] text-outline uppercase tracking-wider" th:if="${s == etape}">En cours</span>
+</div>
+<div class="hidden md:block flex-1 h-px bg-outline-variant mx-sm" th:if="${s < 4}"></div>
+</div>
+</div>
+</body>
+</html>

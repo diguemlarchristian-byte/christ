@@ -10,6 +10,7 @@ import holyflame.administration.model.FraisScolarite;
 import holyflame.administration.model.LigneBudget;
 import holyflame.administration.model.Paiement;
 import holyflame.administration.model.Parametre;
+import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.ArriereEleveRepository;
 import holyflame.administration.repository.CategorieComptableRepository;
 import holyflame.administration.repository.ClasseRepository;
@@ -23,6 +24,7 @@ import holyflame.administration.repository.ParametreRepository;
 import holyflame.administration.repository.UtilisateurRepository;
 import holyflame.administration.service.EmailService;
 import holyflame.administration.service.EtablissementService;
+import holyflame.administration.service.FinanceModules;
 import holyflame.administration.service.FinanceParentService;
 import holyflame.administration.service.JournalService;
 import holyflame.administration.service.NombreEnLettresService;
@@ -46,6 +48,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -93,7 +96,16 @@ public class FinancesController {
         int anneeFiltre = anneeCivile != null ? anneeCivile : aujourdHui.getYear();
         int trimestreChoisi = rapportTrimestre != null && rapportTrimestre >= 1 && rapportTrimestre <= 3 ? rapportTrimestre : 1;
 
-        model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
+        Utilisateur utilisateurConnecte = etablissementService.getCurrentUtilisateur();
+        model.addAttribute("utilisateurConnecte", utilisateurConnecte);
+
+        // Segmentation Tresorier/Comptable : chaque compte n'a acces qu'aux onglets couverts par
+        // ses modules financiers effectifs (personnalises par l'ADMIN, ou par defaut de son role
+        // sinon — voir FinanceModules). Un onglet demande hors de ce perimetre est neutralise vers
+        // le premier onglet auquel l'utilisateur a droit.
+        Set<String> modulesFinance = FinanceModules.effectifs(utilisateurConnecte);
+        model.addAttribute("modulesFinanceActifs", modulesFinance);
+        tab = ongletAutorise(tab, modulesFinance);
         model.addAttribute("tab", tab);
         model.addAttribute("annee", annee);
 
@@ -104,6 +116,10 @@ public class FinancesController {
         List<CategorieComptable> categories = categorieComptableRepository.findByEtablissementIdAndActifTrueOrderByCodeAsc(etabId);
         List<CategorieComptable> categoriesCharges = categories.stream().filter(c -> "CHARGE".equals(c.getSens())).collect(Collectors.toList());
         List<CategorieComptable> categoriesProduits = categories.stream().filter(c -> "PRODUIT".equals(c.getSens())).collect(Collectors.toList());
+        // Vue de gestion complete du plan comptable (actives + desactivees) pour l'onglet
+        // Parametrage — distincte de "categories" ci-dessus qui reste reservee aux listes
+        // deroulantes de saisie (toujours actives uniquement).
+        model.addAttribute("toutesLesCategories", categorieComptableRepository.findByEtablissementIdOrderByCodeAsc(etabId));
         model.addAttribute("categoriesCharges", categoriesCharges);
         model.addAttribute("categoriesProduits", categoriesProduits);
 
@@ -139,6 +155,26 @@ public class FinancesController {
         model.addAttribute("tauxPaie", tauxPaie);
 
         return "finances";
+    }
+
+    /** Ramene l'onglet demande vers le premier onglet accessible si l'utilisateur n'a pas le module requis. */
+    private String ongletAutorise(String tabDemande, Set<String> modules) {
+        String moduleRequis = switch (tabDemande) {
+            case "depenses" -> FinanceModules.DEPENSES;
+            case "budget" -> FinanceModules.BUDGET_PARAMETRAGE;
+            case "rapports" -> FinanceModules.RAPPORTS;
+            case "parametrage" -> null; // couvre solde initial (CAISSE) et taux de paie (BUDGET_PARAMETRAGE)
+            default -> FinanceModules.CAISSE; // journal, scolarite
+        };
+        boolean autorise = "parametrage".equals(tabDemande)
+            ? (modules.contains(FinanceModules.CAISSE) || modules.contains(FinanceModules.BUDGET_PARAMETRAGE))
+            : modules.contains(moduleRequis);
+        if (autorise) return tabDemande;
+        if (modules.contains(FinanceModules.CAISSE)) return "journal";
+        if (modules.contains(FinanceModules.DEPENSES)) return "depenses";
+        if (modules.contains(FinanceModules.BUDGET_PARAMETRAGE)) return "budget";
+        if (modules.contains(FinanceModules.RAPPORTS)) return "rapports";
+        return "journal";
     }
 
     // ===== ONGLET RAPPORTS — Rapport trimestriel econome (calque du rapport papier de l'econome) =====
@@ -233,6 +269,138 @@ public class FinancesController {
             .ifPresent(c -> { c.setGroupe(groupe); categorieComptableRepository.save(c); });
         ra.addFlashAttribute("successMsg", "Groupe mis a jour.");
         return "redirect:/finances?tab=rapports";
+    }
+
+    // ===== PLAN COMPTABLE : creation/modification/desactivation libres, import CSV, modele SYSCOHADA =====
+
+    @PostMapping("/categories")
+    public String ajouterCategorie(@RequestParam String code, @RequestParam String libelle,
+                                    @RequestParam String sens, @RequestParam(required = false) String groupe,
+                                    RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        String codeTrim = code != null ? code.trim() : "";
+        if (codeTrim.isBlank() || libelle == null || libelle.isBlank()) {
+            ra.addFlashAttribute("erreurMsg", "Code et libelle sont obligatoires.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        if (categorieComptableRepository.findByCodeAndEtablissementId(codeTrim, etabId).isPresent()) {
+            ra.addFlashAttribute("erreurMsg", "Le code \"" + codeTrim + "\" existe deja.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        CategorieComptable c = new CategorieComptable();
+        c.setCode(codeTrim);
+        c.setLibelle(libelle.trim());
+        c.setSens(sens);
+        c.setGroupe(groupe != null && !groupe.isBlank() ? groupe : null);
+        c.setActif(true);
+        c.setEtablissementId(etabId);
+        categorieComptableRepository.save(c);
+        ra.addFlashAttribute("successMsg", "Categorie \"" + codeTrim + " — " + libelle.trim() + "\" creee.");
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    @PostMapping("/categories/{id}/modifier")
+    public String modifierCategorie(@PathVariable Long id, @RequestParam String code, @RequestParam String libelle,
+                                     @RequestParam String sens, @RequestParam(required = false) String groupe,
+                                     RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        CategorieComptable c = categorieComptableRepository.findById(id)
+            .filter(x -> etabId != null && etabId.equals(x.getEtablissementId())).orElse(null);
+        if (c == null) {
+            ra.addFlashAttribute("erreurMsg", "Categorie introuvable.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        String codeTrim = code != null ? code.trim() : "";
+        if (codeTrim.isBlank()) {
+            ra.addFlashAttribute("erreurMsg", "Le code est obligatoire.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        boolean codeDejaPris = categorieComptableRepository.findByCodeAndEtablissementId(codeTrim, etabId)
+            .filter(autre -> !autre.getId().equals(id)).isPresent();
+        if (codeDejaPris) {
+            ra.addFlashAttribute("erreurMsg", "Le code \"" + codeTrim + "\" est deja utilise par une autre categorie.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        c.setCode(codeTrim);
+        c.setLibelle(libelle.trim());
+        c.setSens(sens);
+        c.setGroupe(groupe != null && !groupe.isBlank() ? groupe : null);
+        categorieComptableRepository.save(c);
+        ra.addFlashAttribute("successMsg", "Categorie mise a jour.");
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    @PostMapping("/categories/{id}/toggle-actif")
+    public String toggleActifCategorie(@PathVariable Long id, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        categorieComptableRepository.findById(id)
+            .filter(c -> etabId != null && etabId.equals(c.getEtablissementId()))
+            .ifPresent(c -> {
+                c.setActif(!c.isActif());
+                categorieComptableRepository.save(c);
+                ra.addFlashAttribute("successMsg", c.isActif()
+                    ? "Categorie reactivee." : "Categorie desactivee (elle disparait des listes de saisie, mais l'historique reste intact).");
+            });
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    /** Import CSV du plan comptable : une ligne "code;libelle;sens;groupe" (ou avec des virgules —
+        les deux separateurs sont acceptes). Le "sens" et le "groupe" sont optionnels ; sans "sens"
+        fourni, le code est classe CHARGE sauf s'il commence par 7 (convention SYSCOHADA : classe 7
+        = produits). Une ligne d'en-tete ("code;libelle;...") est detectee et ignoree automatiquement.
+        Les codes deja existants sont ignores (jamais ecrases) pour ne rien casser de l'historique. */
+    @PostMapping("/categories/importer")
+    public String importerCategoriesCsv(@RequestParam("fichier") org.springframework.web.multipart.MultipartFile fichier,
+                                         RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        if (fichier == null || fichier.isEmpty()) {
+            ra.addFlashAttribute("erreurMsg", "Choisissez un fichier CSV avant d'importer.");
+            return "redirect:/finances?tab=parametrage";
+        }
+        List<holyflame.administration.service.PlanComptableService.Poste> aImporter = new ArrayList<>();
+        int ignorees = 0;
+        try (java.io.BufferedReader lecteur = new java.io.BufferedReader(
+                new java.io.InputStreamReader(fichier.getInputStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+            String ligne;
+            boolean premiereLigne = true;
+            while ((ligne = lecteur.readLine()) != null) {
+                if (ligne.isBlank()) continue;
+                String[] p = ligne.split("[;,]", -1);
+                if (premiereLigne) {
+                    premiereLigne = false;
+                    if (p.length > 0 && p[0].trim().equalsIgnoreCase("code")) continue; // ligne d'en-tete
+                }
+                if (p.length < 2 || p[0].trim().isBlank() || p[1].trim().isBlank()) { ignorees++; continue; }
+                String code = p[0].trim();
+                String libelle = p[1].trim();
+                String sens = p.length > 2 && !p[2].trim().isBlank()
+                    ? p[2].trim().toUpperCase()
+                    : (code.startsWith("7") ? "PRODUIT" : "CHARGE");
+                String groupe = p.length > 3 && !p[3].trim().isBlank() ? p[3].trim().toUpperCase() : null;
+                aImporter.add(new holyflame.administration.service.PlanComptableService.Poste(code, libelle, sens, groupe));
+            }
+        } catch (java.io.IOException e) {
+            ra.addFlashAttribute("erreurMsg", "Impossible de lire le fichier : " + e.getMessage());
+            return "redirect:/finances?tab=parametrage";
+        }
+        int crees = planComptableService.importerPostes(etabId, aImporter);
+        int misAJourOuIgnores = aImporter.size() - crees;
+        ra.addFlashAttribute("successMsg", crees + " categorie(s) importee(s)"
+            + (misAJourOuIgnores > 0 ? ", " + misAJourOuIgnores + " deja existante(s) ignoree(s)" : "")
+            + (ignorees > 0 ? ", " + ignorees + " ligne(s) invalide(s) ignoree(s)" : "") + ".");
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    /** Applique le modele "SYSCOHADA simplifie — etablissement scolaire" (codes officiels a 3-4
+        chiffres) : n'ajoute que les codes absents, ne touche jamais aux categories deja en place. */
+    @PostMapping("/categories/modele-syscohada")
+    public String appliquerModeleSyscohada(RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        int crees = planComptableService.importerPostes(etabId, planComptableService.postesModeleSyscohadaScolaire());
+        ra.addFlashAttribute("successMsg", crees > 0
+            ? crees + " poste(s) du modele SYSCOHADA simplifie ajoute(s)."
+            : "Tous les postes du modele SYSCOHADA simplifie existent deja dans votre plan comptable.");
+        return "redirect:/finances?tab=parametrage";
     }
 
     private void buildResume(Model model, List<Paiement> paiements, List<LigneBudget> lignes,
@@ -433,7 +601,12 @@ public class FinancesController {
 
         List<Map<String, Object>> parEleve = new ArrayList<>();
         for (Eleve e : tousLesEleves) {
-            List<Map<String, Object>> lignes = lignesParEleve.getOrDefault(e.getId(), List.of());
+            // Seuls les frais obligatoires comptent pour le solde/statut d'un eleve : un frais
+            // facultatif (ex. cantine optionnelle) reste visible et payable, mais ne doit jamais
+            // empecher l'eleve d'apparaitre "a jour" tant que ses frais obligatoires sont soldes.
+            List<Map<String, Object>> lignes = lignesParEleve.getOrDefault(e.getId(), List.of()).stream()
+                .filter(l -> Boolean.TRUE.equals(l.get("obligatoire")))
+                .toList();
             double du = lignes.stream().mapToDouble(l -> (double) l.get("montant")).sum();
             double reste = lignes.stream().mapToDouble(l -> (double) l.get("resteAPayer")).sum();
             boolean enRetard = lignes.stream().anyMatch(l -> "EN_RETARD".equals(l.get("statut")));
@@ -572,7 +745,12 @@ public class FinancesController {
         p.setEleve(eleve); p.setMontantVerse(montantVerse);
         p.setTypePaiement(typePaiement); p.setModePaiement(modePaiement);
         p.setDatePaiement(dateEffective.atStartOfDay());
-        p.setAnneeScolaire(anneeScolairePaiement);
+        // L'annee scolaire du paiement suit celle de la classe actuelle de l'eleve (a quelle
+        // scolarite ce versement se rattache), pas seulement la date calendaire du jour : une
+        // ecole peut deja avoir avance ses classes sur l'annee suivante avant le bascule de
+        // septembre (ex: inscriptions de rentree en aout).
+        p.setAnneeScolaire(eleve.getClasse() != null && eleve.getClasse().getAnneeScolaire() != null
+            ? eleve.getClasse().getAnneeScolaire() : anneeScolairePaiement);
         p.setDescription(description);
         p.setRecuNumero(recuNumero != null && !recuNumero.isBlank() ? recuNumero : prochainNumeroRecu(etabIdCourant, dateEffective));
         if (fraisScolariteId != null && !fraisScolariteId.isBlank()) {
@@ -584,6 +762,29 @@ public class FinancesController {
         journalService.log("PAIEMENT_ENREGISTRÉ", "FINANCES",
             eleve.getNom() + " " + eleve.getPrenom() + " — " + montantVerse + " F (" + typePaiement + ")");
 
+        // Controle "solde" : si le frais choisi est rattache a ce paiement, on verifie si le cumul
+        // des versements atteint (ou depasse) le montant renseigne dans Parametres > Frais, et on
+        // previent explicitement l'utilisateur — plutot que de le laisser deviner en comparant
+        // lui-meme les montants.
+        String messageSolde = null;
+        if (p.getFraisScolarite() != null) {
+            FraisScolarite frais = p.getFraisScolarite();
+            double montantFrais = frais.getMontant() != null ? frais.getMontant() : 0;
+            double totalVerse = paiementRepository.findByEleveId(eleveId).stream()
+                .filter(pp -> pp.getFraisScolarite() != null && pp.getFraisScolarite().getId().equals(frais.getId()))
+                .filter(pp -> p.getAnneeScolaire().equals(pp.getAnneeScolaire()))
+                .mapToDouble(pp -> pp.getMontantVerse() != null ? pp.getMontantVerse() : 0)
+                .sum();
+            if (montantFrais > 0 && totalVerse >= montantFrais) {
+                double excedent = totalVerse - montantFrais;
+                messageSolde = "\"" + frais.getDesignation() + "\" est desormais SOLDE pour " + eleve.getPrenom() + " " + eleve.getNom()
+                    + (excedent > 0
+                        ? " (excedent de " + Math.round(excedent) + " F au-dela du montant renseigne dans Parametres)."
+                        : ".");
+            }
+        }
+        if (messageSolde != null) ra.addFlashAttribute("soldeInfoMsg", messageSolde);
+
         boolean envoye = envoyerRecuParEmail(p);
         String emailDestinataire = adresseParent(eleve);
         if (envoye) {
@@ -592,6 +793,33 @@ public class FinancesController {
             ra.addFlashAttribute("erreurEmail", "Paiement enregistré, mais le service d'envoi d'email n'est pas configuré sur ce serveur (ou l'envoi a échoué).");
         }
         return "redirect:/finances/paiements/" + p.getId() + "/recu";
+    }
+
+    /** Solde en direct d'un frais precis pour un eleve (utilise par l'auto-completion du formulaire de paiement). */
+    @GetMapping("/frais-solde")
+    @ResponseBody
+    public Map<String, Object> fraisSolde(@RequestParam Long eleveId, @RequestParam Long fraisId) {
+        Map<String, Object> resultat = new LinkedHashMap<>();
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Eleve eleve = eleveRepository.findById(eleveId).orElse(null);
+        FraisScolarite frais = fraisScolariteRepository.findById(fraisId).orElse(null);
+        if (eleve == null || frais == null || etabId == null
+                || !etabId.equals(eleve.getEtablissementId()) || !etabId.equals(frais.getEtablissementId())) {
+            resultat.put("erreur", "Eleve ou frais introuvable.");
+            return resultat;
+        }
+        String anneeEleve = eleve.getClasse() != null ? eleve.getClasse().getAnneeScolaire() : etablissementService.getAnneeScolaireActive();
+        double montantFrais = frais.getMontant() != null ? frais.getMontant() : 0;
+        double dejaVerse = paiementRepository.findByEleveId(eleveId).stream()
+            .filter(p -> p.getFraisScolarite() != null && p.getFraisScolarite().getId().equals(fraisId))
+            .filter(p -> anneeEleve == null || p.getAnneeScolaire() == null || anneeEleve.equals(p.getAnneeScolaire()))
+            .mapToDouble(p -> p.getMontantVerse() != null ? p.getMontantVerse() : 0)
+            .sum();
+        resultat.put("designation", frais.getDesignation());
+        resultat.put("montantFrais", montantFrais);
+        resultat.put("dejaVerse", dejaVerse);
+        resultat.put("reste", Math.max(0, montantFrais - dejaVerse));
+        return resultat;
     }
 
     private String prochainNumeroRecu(Long etabId, LocalDate date) {

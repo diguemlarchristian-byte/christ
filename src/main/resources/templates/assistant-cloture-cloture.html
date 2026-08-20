@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html class="light" lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro - Assistant de Cloture - Cloture</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a", "surface-variant": "#e0e3e5", "surface-container-low": "#f2f4f6",
+                    "surface-container": "#eceef0", "surface-container-lowest": "#ffffff", "tertiary-container": "#384055",
+                    "on-primary": "#ffffff", "on-secondary": "#ffffff", "error-container": "#ffdad6",
+                    "background": "#f7f9fb", "secondary-fixed": "#d3e4fe", "primary-fixed-dim": "#b6c4ff",
+                    "on-tertiary": "#ffffff", "secondary": "#505f76", "on-secondary-container": "#54647a",
+                    "surface-container-highest": "#e0e3e5", "secondary-fixed-dim": "#b7c8e1", "surface": "#f7f9fb",
+                    "secondary-container": "#d0e1fb", "outline-variant": "#c5c5d3", "surface-container-high": "#e6e8ea",
+                    "on-secondary-fixed-variant": "#38485d", "on-tertiary-fixed-variant": "#3f465c", "on-background": "#191c1e",
+                    "primary-fixed": "#dce1ff", "error": "#ba1a1a", "primary": "#00236f", "on-primary-container": "#90a8ff",
+                    "tertiary-fixed": "#dae2fd", "on-error": "#ffffff", "on-surface": "#191c1e",
+                    "on-tertiary-container": "#a4acc5", "tertiary-fixed-dim": "#bec6e0", "on-surface-variant": "#444651",
+                    "primary-container": "#1e3a8a", "outline": "#757682", "surface-dim": "#d8dadc",
+                    "surface-bright": "#f7f9fb", "tertiary": [[${accentColor}]], "success-container": "#c8f7d4", "on-success-container": "#0a5c2b"
+            },
+            "borderRadius": {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            "spacing": {"base": "4px", "xl": "32px", "gutter": "24px", "container-max": "1440px", "sidebar-width": "260px", "lg": "24px", "md": "16px", "sm": "8px", "xs": "4px"},
+            "fontFamily": {"headline-lg": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"]},
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<div th:replace="~{fragments/sidebar-admin :: admin('parametres')}"></div>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('parametres')}"></div>
+
+<header class="fixed top-0 left-0 right-0 z-40 bg-surface h-16 border-b border-outline-variant flex items-center ml-0 md:ml-[260px] px-md md:px-gutter">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Assistant de Clôture Annuelle</span>
+</header>
+
+<main class="ml-0 md:ml-sidebar-width mt-16 p-md md:p-gutter max-w-5xl mx-auto">
+
+<div class="mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-xs">Étape 4 : Clôture &amp; Archivage</h2>
+<p class="font-body-md text-body-md text-on-surface-variant" th:text="'Vérification finale avant de basculer de ' + ${anneeActive} + ' vers ' + ${nouvelleAnnee} + '.'"></p>
+</div>
+
+<div th:replace="~{fragments/assistant-cloture-stepper :: stepper(4)}"></div>
+
+<div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
+<div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
+
+<div class="bg-error-container/40 border border-error rounded-xl p-lg mb-lg flex items-start gap-md">
+<span class="material-symbols-outlined text-error text-[28px]">warning</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-error-container mb-xs">Attention : action irréversible</h3>
+<p class="font-body-md text-body-md text-on-error-container">
+La validation de cette étape verrouille définitivement <strong th:text="${anneeActive}"></strong> en lecture seule et bascule
+l'établissement sur <strong th:text="${nouvelleAnnee}"></strong>. Assurez-vous que toutes les vérifications ont été effectuées
+(étapes 1 à 3) avant de continuer.
+</p>
+</div>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mb-lg" th:unless="${pretPourCloture}">
+<h3 class="font-headline-sm text-headline-sm text-error mb-xs">Blocage : décisions incomplètes</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Classes concernées : <span th:text="${#strings.listJoin(classesIncompletes, ', ')}"></span>. Retournez à l'étape 2 pour terminer les délibérations.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-sm">Bilan académique</h4>
+<div class="space-y-xs font-body-md text-body-md">
+<p>Élèves concernés : <strong th:text="${totalEleves}"></strong></p>
+<p>Admis (passage) : <strong th:text="${totalAdmisPrevus}"></strong></p>
+<p>Redoublants : <strong th:text="${totalRedoublantsPrevus}"></strong></p>
+<p>Sortants (fin de cycle/départ) : <strong th:text="${totalSortantsPrevus}"></strong></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-sm">Bilan financier (<span th:text="${anneeActive}"></span>)</h4>
+<div class="space-y-xs font-body-md text-body-md">
+<p>Total encaissé : <strong th:text="${#numbers.formatDecimal(totalEncaisse, 0, 'COMMA', 0, 'POINT')} + ' F'"></strong></p>
+<p>Total dépensé : <strong th:text="${#numbers.formatDecimal(totalDepense, 0, 'COMMA', 0, 'POINT')} + ' F'"></strong></p>
+<p>Solde de l'année : <strong th:text="${#numbers.formatDecimal(soldeAnnee, 0, 'COMMA', 0, 'POINT')} + ' F'"
+    th:classappend="${soldeAnnee &lt; 0} ? 'text-error' : ''"></strong></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col">
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-sm">Sauvegarde</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">Téléchargez un instantané (élèves, classes, décisions, bilan financier) avant de clôturer, à conserver en archive.</p>
+<a class="mt-auto px-md py-2 border border-primary text-primary rounded-lg font-label-md text-label-sm hover:bg-primary-container/10 transition-colors flex items-center justify-center gap-xs"
+   th:href="@{/passage/assistant/cloture/export}">
+<span class="material-symbols-outlined text-[18px]">download</span> Télécharger le snapshot (JSON)
+</a>
+</div>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg" th:if="${pretPourCloture}">
+<form method="post" th:action="@{/passage/assistant/cloture/executer}" class="space-y-md" onsubmit="return confirm('Confirmer la cloture definitive de l\'annee scolaire ' + document.getElementById('cloture-annee-actuelle').value + ' ? Cette action est irreversible.');">
+<input id="cloture-annee-actuelle" th:value="${anneeActive}" type="hidden"/>
+<label class="flex items-start gap-sm cursor-pointer">
+<input class="mt-1" name="confirmation" required="required" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">
+J'ai pris connaissance des bilans ci-dessus et je confirme vouloir clôturer définitivement
+<strong th:text="${anneeActive}"></strong> et activer <strong th:text="${nouvelleAnnee}"></strong>.
+</span>
+</label>
+<button class="w-full md:w-auto px-xl py-3 bg-error text-on-error rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-xs" type="submit">
+<span class="material-symbols-outlined">lock</span> Clôturer l'année scolaire
+</button>
+</form>
+</div>
+
+<div class="flex justify-between items-center mt-lg pb-xl">
+<a class="px-lg py-3 border border-outline-variant text-on-surface-variant rounded-lg font-label-md hover:bg-surface-container-low transition-colors flex items-center gap-xs" th:href="@{/passage/assistant/affectation}">
+<span class="material-symbols-outlined">arrow_back</span> Étape précédente
+</a>
+</div>
+
+</main>
+</body>
+</html>

@@ -294,6 +294,9 @@ Comptes <span th:if="${filtreRole}" th:text="'— ' + ${filtreRole}"></span>
 <input name="q" th:value="${filtreQ}" type="hidden"/>
 <button class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors" type="submit">Reinitialiser le mot de passe</button>
 </form>
+<a class="px-md py-2 border border-primary text-primary rounded-lg font-label-md text-label-sm hover:bg-primary-container/10 transition-colors"
+   th:if="${compte.role == 'DIRECTEUR' or compte.role == 'TRESORIER' or compte.role == 'COMPTABLE'}"
+   th:href="@{/parametres/roles/{id}/acces(id=${compte.id})}">Acces aux interfaces</a>
 <span class="text-label-sm text-on-surface-variant" th:if="${utilisateurConnecte != null and compte.id == utilisateurConnecte.id}">Votre propre compte</span>
 <span class="text-label-sm text-on-surface-variant" th:if="${compte.role == 'SUPER_ADMIN'}">Non modifiable ici</span>
 </div>
@@ -336,6 +339,9 @@ Comptes <span th:if="${filtreRole}" th:text="'— ' + ${filtreRole}"></span>
 <input name="q" th:value="${filtreQ}" type="hidden"/>
 <button class="w-full px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors" type="submit">Reinitialiser le mot de passe</button>
 </form>
+<a class="w-full text-center px-md py-2 border border-primary text-primary rounded-lg font-label-md text-label-sm hover:bg-primary-container/10 transition-colors"
+   th:if="${compte.role == 'DIRECTEUR' or compte.role == 'TRESORIER' or compte.role == 'COMPTABLE'}"
+   th:href="@{/parametres/roles/{id}/acces(id=${compte.id})}">Acces aux interfaces</a>
 <span class="text-label-sm text-on-surface-variant" th:if="${utilisateurConnecte != null and compte.id == utilisateurConnecte.id}">Votre propre compte</span>
 <span class="text-label-sm text-on-surface-variant" th:if="${compte.role == 'SUPER_ADMIN'}">Non modifiable ici</span>
 </div>

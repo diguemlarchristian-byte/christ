@@ -99,6 +99,9 @@
 <a class="flex items-center gap-xs px-lg py-sm rounded-lg border border-outline-variant text-secondary hover:bg-surface-container transition-all font-label-md text-label-md" th:href="@{/parametres/annees}">
 <span class="material-symbols-outlined text-[18px]">history_edu</span> Annees scolaires
 </a>
+<a class="flex items-center gap-xs px-lg py-sm rounded-lg bg-primary text-on-primary hover:opacity-90 transition-all font-label-md text-label-md" th:href="@{/passage/assistant}">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span> Assistant de clôture annuelle
+</a>
 <a class="flex items-center gap-xs px-lg py-sm rounded-lg border border-outline-variant text-secondary hover:bg-surface-container transition-all font-label-md text-label-md" th:href="@{/parametres/calendrier}">
 <span class="material-symbols-outlined text-[18px]">event</span> Calendrier scolaire
 </a>
@@ -340,7 +343,11 @@
 </div>
 <div>
 <label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Niveau cible</label>
-<input class="w-full p-2 border border-outline-variant rounded-lg text-body-md" id="frais-niveau" name="niveauCible" placeholder="Tous niveaux" type="text"/>
+<select class="w-full p-2 border border-outline-variant rounded-lg text-body-md" id="frais-niveau" name="niveauCible">
+<option value="">Tous niveaux</option>
+<option th:each="n : ${niveauxDisponibles}" th:text="${n}" th:value="${n}"></option>
+</select>
+<p class="text-label-sm text-secondary mt-xs" th:if="${niveauxDisponibles.isEmpty()}">Aucune classe créée pour l'instant — créez vos classes avant de cibler un frais par niveau.</p>
 </div>
 <div class="flex items-center gap-2 md:col-span-3">
 <input class="w-4 h-4" id="frais-obligatoire" name="obligatoire" type="checkbox" value="true"/>

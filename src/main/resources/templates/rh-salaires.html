@@ -151,7 +151,7 @@
 <td class="px-lg py-sm text-right">
 <div class="flex items-center justify-end gap-md">
 <a class="text-primary font-label-sm hover:underline" target="_blank" th:href="@{/rh/salaires/{id}/bulletin(id=${s.id})}">Voir</a>
-<form method="post" th:action="@{/rh/salaires/{id}/payer(id=${s.id})}" th:if="${s.statut == 'EN_ATTENTE'}">
+<form method="post" th:action="@{/rh/salaires/{id}/payer(id=${s.id})}" th:if="${s.statut == 'EN_ATTENTE' and modulesFinanceActifs.contains('PAIE_PAIEMENT')}">
 <button class="text-success font-label-sm hover:underline" type="submit">Marquer paye</button>
 </form>
 </div>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html class="light" lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro - Acces du compte Directeur</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a", "surface-variant": "#e0e3e5", "surface-container-low": "#f2f4f6",
+                    "surface-container": "#eceef0", "surface-container-lowest": "#ffffff", "tertiary-container": "#384055",
+                    "on-primary": "#ffffff", "on-secondary": "#ffffff", "error-container": "#ffdad6",
+                    "background": "#f7f9fb", "secondary-fixed": "#d3e4fe", "primary-fixed-dim": "#b6c4ff",
+                    "on-tertiary": "#ffffff", "secondary": "#505f76", "on-secondary-container": "#54647a",
+                    "surface-container-highest": "#e0e3e5", "secondary-fixed-dim": "#b7c8e1", "surface": "#f7f9fb",
+                    "secondary-container": "#d0e1fb", "outline-variant": "#c5c5d3", "surface-container-high": "#e6e8ea",
+                    "on-secondary-fixed-variant": "#38485d", "on-tertiary-fixed-variant": "#3f465c", "on-background": "#191c1e",
+                    "primary-fixed": "#dce1ff", "error": "#ba1a1a", "primary": "#00236f", "on-primary-container": "#90a8ff",
+                    "tertiary-fixed": "#dae2fd", "on-error": "#ffffff", "on-surface": "#191c1e",
+                    "on-tertiary-container": "#a4acc5", "tertiary-fixed-dim": "#bec6e0", "on-surface-variant": "#444651",
+                    "primary-container": "#1e3a8a", "outline": "#757682", "surface-dim": "#d8dadc",
+                    "surface-bright": "#f7f9fb", "tertiary": [[${accentColor}]], "success-container": "#c8f7d4", "on-success-container": "#0a5c2b"
+            },
+            "borderRadius": {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            "spacing": {"base": "4px", "xl": "32px", "gutter": "24px", "container-max": "1440px", "sidebar-width": "260px", "lg": "24px", "md": "16px", "sm": "8px", "xs": "4px"},
+            "fontFamily": {"headline-lg": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"]},
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<div th:replace="~{fragments/sidebar-admin :: admin('parametres')}"></div>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('parametres')}"></div>
+
+<header class="fixed top-0 left-0 right-0 z-40 bg-surface h-16 border-b border-outline-variant flex items-center ml-0 md:ml-[260px] px-md md:px-gutter">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Acces aux interfaces</span>
+</header>
+
+<main class="ml-0 md:ml-sidebar-width mt-16 p-md md:p-gutter max-w-3xl mx-auto">
+
+<div class="mb-lg">
+<a class="text-primary font-label-sm hover:underline flex items-center gap-xs" th:href="@{/parametres/roles}">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+Retour a la gestion des roles
+</a>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-xs"
+    th:text="'Acces de ' + ${compte.prenom} + ' ' + ${compte.nom}">Acces</h2>
+
+<div th:if="${typeAcces == 'DIRECTEUR'}">
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
+Ce compte porte le role <strong>Directeur</strong> : gestion pedagogique complete, RH (hors salaires),
+communication, archives et journal d'activite par defaut — <strong>aucun acces aux finances, a la tresorerie,
+au budget ou aux salaires</strong>, quels que soient les modules coches ci-dessous.
+</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
+Pour un etablissement ne disposant pas d'assez de personnel, vous pouvez confier ponctuellement a ce Directeur
+un ou plusieurs modules operationnels supplementaires normalement geres par un autre role :
+</p>
+</div>
+
+<div th:if="${typeAcces == 'FINANCE'}">
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
+Ce compte porte le role <strong th:text="${compte.role == 'TRESORIER'} ? 'Tresorier' : 'Comptable'">Role</strong>.
+Cochez les modules financiers auxquels il a droit — caisse (encaissements), depenses, preparation et paiement
+de la paie, budget/plan comptable, rapports. Personnalisez cette repartition pour chaque etablissement selon
+son organisation (un seul agent qui gere tout, ou une separation caisse/comptabilite).
+</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg" th:if="${!modulesPersonnalises}">
+Ce compte utilise actuellement les droits <strong>par defaut</strong> de son role (aucune personnalisation
+enregistree). Cocher puis enregistrer ci-dessous figera un ensemble de modules propre a ce compte.
+</p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg" th:if="${modulesPersonnalises}">
+Ce compte a des acces <strong>personnalises</strong>, differents des droits par defaut de son role.
+</p>
+</div>
+
+<div class="mb-lg" th:if="${!profils.isEmpty()}">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Profils reutilisables</h3>
+<div class="flex flex-wrap gap-sm">
+<form class="flex items-center gap-xs" method="post" th:action="@{/parametres/roles/{id}/acces/appliquer-profil(id=${compte.id})}"
+      th:each="profil : ${profils}">
+<input name="profilId" th:value="${profil.id}" type="hidden"/>
+<button class="px-md py-2 border border-primary text-primary rounded-lg font-label-md text-label-sm hover:bg-primary-container/10 transition-colors flex items-center gap-xs" type="submit">
+<span class="material-symbols-outlined text-[16px]">bookmark</span>
+<span th:text="${profil.nom}">Profil</span>
+</button>
+</form>
+</div>
+<p class="text-label-sm text-secondary mt-xs">Applique instantanement le jeu de modules du profil choisi a ce compte (a enregistrer ensuite si besoin d'ajustements).</p>
+</div>
+
+<form method="post" th:action="@{/parametres/roles/{id}/acces(id=${compte.id})}" class="space-y-md">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+<label class="flex items-start gap-sm p-md border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low"
+       th:each="module : ${modulesOptionnels}">
+<input type="checkbox" name="modules" class="mt-1" th:value="${module.key}"
+       th:checked="${modulesActifs.contains(module.key)}"/>
+<span class="font-body-md text-body-md" th:text="${module.value}">Module</span>
+</label>
+</div>
+<div class="flex justify-end gap-sm pt-md">
+<a class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors"
+   th:href="@{/parametres/roles}">Annuler</a>
+<button class="px-md py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-sm hover:bg-primary/90 transition-colors" type="submit">Enregistrer les acces</button>
+</div>
+</form>
+
+<form method="post" th:if="${typeAcces == 'FINANCE' and modulesPersonnalises}"
+      th:action="@{/parametres/roles/{id}/acces/reinitialiser(id=${compte.id})}" class="pt-md">
+<button class="text-label-sm text-on-surface-variant hover:underline" type="submit">Reinitialiser aux droits par defaut du role</button>
+</form>
+
+<div class="mt-lg pt-lg border-t border-outline-variant">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Enregistrer comme profil reutilisable</h3>
+<p class="text-label-sm text-secondary mb-sm">Sauvegarde les droits actuellement enregistres pour ce compte sous un nom, pour les reappliquer en un clic a d'autres comptes du meme type.</p>
+<form class="flex flex-wrap items-center gap-sm" method="post" th:action="@{/parametres/roles/{id}/acces/enregistrer-profil(id=${compte.id})}">
+<input class="rounded-lg border-outline-variant px-sm py-2 text-body-md flex-1 min-w-48" name="nomProfil" placeholder="Ex: Tresorier junior" required="required" type="text"/>
+<button class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors" type="submit">Enregistrer ce profil</button>
+</form>
+</div>
+</div>
+
+</main>
+</body>
+</html>

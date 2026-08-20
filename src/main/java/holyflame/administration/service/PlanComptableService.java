@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +20,7 @@ public class PlanComptableService {
 
     @Autowired private CategorieComptableRepository categorieComptableRepository;
 
-    private record Poste(String code, String libelle, String sens, String groupe) {}
+    public record Poste(String code, String libelle, String sens, String groupe) {}
 
     private static final String CHARGE = "CHARGE";
     private static final String PRODUIT = "PRODUIT";
@@ -93,7 +94,58 @@ public class PlanComptableService {
         if (etabId == null || !categorieComptableRepository.findByEtablissementIdAndActifTrueOrderByCodeAsc(etabId).isEmpty()) {
             return;
         }
-        for (Poste p : PLAN) {
+        importerPostes(etabId, java.util.Arrays.asList(PLAN));
+    }
+
+    // ── Modele "SYSCOHADA simplifie — etablissement scolaire" ────────────────────────────
+    // Codes alignes sur la nomenclature officielle SYSCOHADA revise (postes a 3-4 chiffres,
+    // niveau usuel pour une petite structure), a la difference du plan par defaut ci-dessus qui
+    // utilise une numerotation maison a 5 chiffres. Propose comme modele optionnel, applicable a
+    // la demande depuis Finances > Parametrage, sans jamais toucher aux categories deja en place —
+    // seuls les codes absents sont ajoutes (voir importerPostes).
+    private static final Poste[] PLAN_SYSCOHADA_SCOLAIRE = {
+        new Poste("604", "Achats stockes — Fournitures scolaires et pedagogiques", CHARGE, FOURNITURES),
+        new Poste("6051", "Fournitures non stockables — Eau", CHARGE, FONCTIONNEMENT),
+        new Poste("6052", "Fournitures non stockables — Electricite", CHARGE, FONCTIONNEMENT),
+        new Poste("6055", "Fournitures d'entretien", CHARGE, ENTRETIEN),
+        new Poste("6081", "Achats de consommables (cantine)", CHARGE, FONCTIONNEMENT),
+        new Poste("6141", "Transport scolaire", CHARGE, FONCTIONNEMENT),
+        new Poste("6224", "Locations de materiel", CHARGE, FONCTIONNEMENT),
+        new Poste("6241", "Entretien et reparations des batiments", CHARGE, ENTRETIEN),
+        new Poste("6242", "Entretien et reparations du materiel", CHARGE, ENTRETIEN),
+        new Poste("6250", "Primes d'assurance", CHARGE, FONCTIONNEMENT),
+        new Poste("6281", "Frais de telephone", CHARGE, FONCTIONNEMENT),
+        new Poste("6282", "Frais internet", CHARGE, FONCTIONNEMENT),
+        new Poste("6311", "Frais bancaires", CHARGE, FONCTIONNEMENT),
+        new Poste("6411", "Impots et taxes directs", CHARGE, FONCTIONNEMENT),
+        new Poste("6611", "Remunerations — personnel enseignant", CHARGE, FONCTIONNEMENT),
+        new Poste("6612", "Remunerations — personnel administratif", CHARGE, FONCTIONNEMENT),
+        new Poste("6641", "Charges sociales (CNPS)", CHARGE, FONCTIONNEMENT),
+        new Poste("6811", "Dotations aux amortissements", CHARGE, INVESTISSEMENT),
+        new Poste("2183", "Acquisitions de materiel informatique/mobilier", CHARGE, INVESTISSEMENT),
+        new Poste("7061", "Prestations de services — Frais de scolarite", PRODUIT, null),
+        new Poste("7062", "Prestations de services — Frais d'inscription", PRODUIT, null),
+        new Poste("7063", "Prestations de services — Frais de cantine", PRODUIT, null),
+        new Poste("7064", "Prestations de services — Frais de transport", PRODUIT, null),
+        new Poste("7071", "Produits accessoires — Vente de tenues/fournitures", PRODUIT, null),
+        new Poste("7581", "Produits divers de gestion courante", PRODUIT, null),
+        new Poste("7582", "Dons et subventions recus", PRODUIT, null),
+        new Poste("7710", "Produits financiers", PRODUIT, null),
+    };
+
+    public List<Poste> postesModeleSyscohadaScolaire() {
+        return java.util.List.of(PLAN_SYSCOHADA_SCOLAIRE);
+    }
+
+    /** Insere chaque poste absent du plan comptable de l'etablissement (par code, insensible a la
+        casse) ; ignore silencieusement ceux deja presents pour ne jamais ecraser une categorie deja
+        utilisee par des depenses/lignes de budget existantes. Renvoie le nombre reellement cree. */
+    public int importerPostes(Long etabId, List<Poste> postes) {
+        int crees = 0;
+        for (Poste p : postes) {
+            if (etabId != null && categorieComptableRepository.findByCodeAndEtablissementId(p.code(), etabId).isPresent()) {
+                continue;
+            }
             CategorieComptable c = new CategorieComptable();
             c.setCode(p.code());
             c.setLibelle(p.libelle());
@@ -101,6 +153,8 @@ public class PlanComptableService {
             c.setGroupe(p.groupe());
             c.setEtablissementId(etabId);
             categorieComptableRepository.save(c);
+            crees++;
         }
+        return crees;
     }
 }

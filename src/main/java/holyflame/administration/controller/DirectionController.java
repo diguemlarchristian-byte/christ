@@ -36,8 +36,9 @@ public class DirectionController {
         Utilisateur currentUser = etablissementService.getCurrentUtilisateur();
         Long etabId = etablissementService.getCurrentEtablissementId();
 
-        // Contrôle d'accès : ADMIN direct, ou délégation active + est directeur
-        boolean isAdmin = currentUser != null && "ADMIN".equals(currentUser.getRole());
+        // Contrôle d'accès : ADMIN ou DIRECTEUR direct, ou délégation active + est directeur
+        boolean isAdmin = currentUser != null
+            && ("ADMIN".equals(currentUser.getRole()) || "DIRECTEUR".equals(currentUser.getRole()));
         if (!isAdmin) {
             boolean delegue = etabId != null && parametreRepository
                 .findByCleAndEtablissementId("DELEGATION_DIRECTION", etabId)

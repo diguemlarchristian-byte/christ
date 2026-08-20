@@ -40,6 +40,7 @@ public class ParametreController {
     @Autowired private FileStorageService fileStorageService;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JournalService journalService;
+    @Autowired private holyflame.administration.repository.ProfilAccesRepository profilAccesRepository;
     @Autowired private JournalActionRepository journalActionRepository;
     @Autowired private SignalementMessagerieRepository signalementMessagerieRepository;
     @Autowired private PeriodeCalendrierRepository periodeCalendrierRepository;
@@ -73,6 +74,17 @@ public class ParametreController {
         List<Classe>  toutesClasses = classeRepository.findByEtablissementId(etabId);
         model.addAttribute("matieres", matieres);
         model.addAttribute("toutesClasses", toutesClasses);
+        // Niveaux reellement utilises par les classes de l'etablissement : sert de liste fermee
+        // pour le "Niveau cible" d'un frais, afin d'eviter qu'une saisie libre (accent/orthographe
+        // differente de Classe.niveau) cree un frais qui ne s'applique jamais a personne — bug
+        // silencieux observe (parametrage "reussi" mais jamais pris en compte a l'inscription).
+        List<String> niveauxDisponibles = toutesClasses.stream()
+            .map(Classe::getNiveau)
+            .filter(n -> n != null && !n.isBlank())
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+        model.addAttribute("niveauxDisponibles", niveauxDisponibles);
 
         List<EnseignantAutorisation> autorisations = autorisationRepository.findByEtablissementId(etabId);
 
@@ -149,15 +161,29 @@ public class ParametreController {
         if (toucheEtablissement) {
             Etablissement etab = etablissementService.getCurrentEtablissement();
             if (etab != null) {
+                Long etabId = etab.getId();
                 if (formParams.containsKey("nomEtablissement") && !formParams.get("nomEtablissement").isBlank()) {
                     etab.setNom(formParams.get("nomEtablissement").trim());
                 }
-                if (formParams.containsKey("anneeScolaire")) etab.setAnneeScolaire(formParams.get("anneeScolaire"));
                 if (formParams.containsKey("adresse")) etab.setAdresse(formParams.get("adresse"));
                 if (formParams.containsKey("langueSysteme")) etab.setLangueSysteme(formParams.get("langueSysteme"));
                 if (formParams.containsKey("fuseauHoraire")) etab.setFuseauHoraire(formParams.get("fuseauHoraire"));
                 if (formParams.containsKey("couleurPrimaire")) etab.setCouleurPrimaire(formParams.get("couleurPrimaire"));
                 etablissementRepository.save(etab);
+
+                // L'annee academique ne doit jamais ecraser Etablissement.anneeScolaire directement :
+                // ce champ doit toujours passer par AnneeScolaireService (creation + activation),
+                // sinon il se desynchronise silencieusement des Classe/AnneeScolaire deja crees —
+                // symptome observe : un nouvel eleve ou le solde en Tresorerie qui "ne voient pas"
+                // le parametrage qu'on vient pourtant de faire.
+                if (formParams.containsKey("anneeScolaire")) {
+                    String nouvelleAnnee = formParams.get("anneeScolaire").trim();
+                    if (!nouvelleAnnee.isBlank() && !nouvelleAnnee.equals(etab.getAnneeScolaire())) {
+                        AnneeScolaire annee = anneeScolaireRepository.findByEtablissementIdAndLibelle(etabId, nouvelleAnnee)
+                            .orElseGet(() -> anneeScolaireService.creer(nouvelleAnnee, etabId, null, false, false, false));
+                        anneeScolaireService.activer(annee.getId(), etabId);
+                    }
+                }
             }
         }
 
@@ -483,8 +509,21 @@ public class ParametreController {
     }
 
     // ── Gestion des roles ────────────────────────────────────────────
-    private static final List<String> ROLES_ASSIGNABLES = List.of("ADMIN", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COORDONNATEUR");
+    private static final List<String> ROLES_ASSIGNABLES = List.of("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "COORDONNATEUR");
     private static final String JOURNAL_MODULE_ROLES = "UTILISATEURS";
+
+    // Modules operationnels que l'ADMIN peut confier ponctuellement a un compte DIRECTEUR,
+    // en plus de son acces pedagogique/RH de base — jamais de module financier ici, le
+    // Directeur ne doit jamais pouvoir se voir attribuer finances/tresorerie/budget/salaires.
+    private static final Map<String, String> MODULES_OPTIONNELS_DIRECTEUR = new LinkedHashMap<>();
+    static {
+        MODULES_OPTIONNELS_DIRECTEUR.put("SECRETARIAT", "Secretariat (eleves, inscriptions, cartes d'identite)");
+        MODULES_OPTIONNELS_DIRECTEUR.put("SURVEILLANCE", "Surveillance & discipline");
+        MODULES_OPTIONNELS_DIRECTEUR.put("INFIRMERIE", "Infirmerie scolaire");
+        MODULES_OPTIONNELS_DIRECTEUR.put("MARKETING", "Site vitrine & communication externe");
+        MODULES_OPTIONNELS_DIRECTEUR.put("INVENTAIRE", "Inventaire / stock");
+        MODULES_OPTIONNELS_DIRECTEUR.put("COORDINATION", "Coordination pedagogique");
+    }
 
     @GetMapping("/roles")
     public String roles(@RequestParam(required = false) String role,
@@ -515,7 +554,7 @@ public class ParametreController {
         double tauxActivite = total > 0 ? Math.round(actifs * 1000.0 / total) / 10.0 : 0;
 
         Map<String, Long> comptesParRole = new LinkedHashMap<>();
-        for (String r : List.of("ADMIN", "ENSEIGNANT", "TRESORIER", "SECRETAIRE", "COORDONNATEUR", "ELEVE")) {
+        for (String r : List.of("ADMIN", "DIRECTEUR", "ENSEIGNANT", "TRESORIER", "COMPTABLE", "SECRETAIRE", "COORDONNATEUR", "ELEVE")) {
             comptesParRole.put(r, tousLesComptes.stream().filter(u -> r.equals(u.getRole())).count());
         }
 
@@ -533,8 +572,156 @@ public class ParametreController {
         model.addAttribute("historique", historique);
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
         model.addAttribute("rolesDisponibles", ROLES_ASSIGNABLES);
-        model.addAttribute("rolesRecherche", List.of("ADMIN", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "SURVEILLANT", "COORDONNATEUR", "ELEVE", "PARENT"));
+        model.addAttribute("rolesRecherche", List.of("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "SURVEILLANT", "COORDONNATEUR", "ELEVE", "PARENT"));
         return "parametres-roles";
+    }
+
+    // ── Acces modulaire des comptes DIRECTEUR (modules operationnels optionnels)
+    // et TRESORIER/COMPTABLE (modules financiers) ──────────────────────────────
+    private static final java.util.Set<String> ROLES_ACCES_MODULAIRE = java.util.Set.of("DIRECTEUR", "TRESORIER", "COMPTABLE");
+
+    @GetMapping("/roles/{id}/acces")
+    public String acces(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur u = utilisateurRepository.findById(id).orElse(null);
+        if (u == null || etabId == null || u.getEtablissement() == null || !etabId.equals(u.getEtablissement().getId())
+                || !ROLES_ACCES_MODULAIRE.contains(u.getRole())) {
+            ra.addFlashAttribute("erreurMsg", "Cette gestion d'acces n'est disponible que pour un compte Directeur, Tresorier ou Comptable.");
+            return "redirect:/parametres/roles";
+        }
+        model.addAttribute("compte", u);
+        String typeAcces;
+        if ("DIRECTEUR".equals(u.getRole())) {
+            typeAcces = "DIRECTEUR";
+            model.addAttribute("modulesOptionnels", MODULES_OPTIONNELS_DIRECTEUR);
+            model.addAttribute("modulesActifs", u.getModulesOptionnelsActifs());
+            model.addAttribute("typeAcces", typeAcces);
+        } else {
+            typeAcces = "FINANCE";
+            model.addAttribute("modulesOptionnels", holyflame.administration.service.FinanceModules.LIBELLES);
+            Set<String> personnalises = u.getModulesFinanceActifs();
+            model.addAttribute("modulesActifs", personnalises != null ? personnalises : holyflame.administration.service.FinanceModules.defautsPourRole(u.getRole()));
+            model.addAttribute("modulesPersonnalises", personnalises != null);
+            model.addAttribute("typeAcces", typeAcces);
+        }
+        model.addAttribute("profils", profilAccesRepository.findByEtablissementIdAndTypeOrderByNomAsc(etabId, typeAcces));
+        return "parametres-acces";
+    }
+
+    @PostMapping("/roles/{id}/acces")
+    public String enregistrerAcces(@PathVariable Long id,
+                                   @RequestParam(required = false) List<String> modules,
+                                   RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur u = utilisateurRepository.findById(id).orElse(null);
+        if (u == null || etabId == null || u.getEtablissement() == null || !etabId.equals(u.getEtablissement().getId())
+                || !ROLES_ACCES_MODULAIRE.contains(u.getRole())) {
+            ra.addFlashAttribute("erreurMsg", "Cette gestion d'acces n'est disponible que pour un compte Directeur, Tresorier ou Comptable.");
+            return "redirect:/parametres/roles";
+        }
+        boolean estDirecteur = "DIRECTEUR".equals(u.getRole());
+        Set<String> valides = estDirecteur ? MODULES_OPTIONNELS_DIRECTEUR.keySet() : holyflame.administration.service.FinanceModules.TOUS;
+        Set<String> selection = modules == null ? Set.of()
+            : modules.stream().filter(valides::contains).collect(Collectors.toCollection(LinkedHashSet::new));
+        if (estDirecteur) {
+            u.setModulesOptionnelsActifs(selection);
+        } else {
+            u.setModulesFinanceActifs(selection);
+        }
+        utilisateurRepository.save(u);
+        journalService.log("ACCES_MODULES_MODIFIÉ", JOURNAL_MODULE_ROLES,
+            u.getPrenom() + " " + u.getNom() + " : "
+                + (selection.isEmpty() ? "aucun module" : String.join(", ", selection)));
+        ra.addFlashAttribute("successMsg", "Acces mis a jour pour " + u.getPrenom() + " " + u.getNom() + ".");
+        return "redirect:/parametres/roles";
+    }
+
+    // ── Revenir aux droits par defaut du role pour un compte TRESORIER/COMPTABLE personnalise ──
+    @PostMapping("/roles/{id}/acces/reinitialiser")
+    public String reinitialiserAcces(@PathVariable Long id, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur u = utilisateurRepository.findById(id).orElse(null);
+        if (u == null || etabId == null || u.getEtablissement() == null || !etabId.equals(u.getEtablissement().getId())
+                || ("TRESORIER".equals(u.getRole()) == false && "COMPTABLE".equals(u.getRole()) == false)) {
+            ra.addFlashAttribute("erreurMsg", "Cette action n'est disponible que pour un compte Tresorier ou Comptable.");
+            return "redirect:/parametres/roles";
+        }
+        u.reinitialiserModulesFinance();
+        utilisateurRepository.save(u);
+        journalService.log("ACCES_MODULES_RÉINITIALISÉ", JOURNAL_MODULE_ROLES,
+            u.getPrenom() + " " + u.getNom() + " : retour aux droits par defaut du role " + u.getRole());
+        ra.addFlashAttribute("successMsg", "Acces de " + u.getPrenom() + " " + u.getNom() + " reinitialise aux droits par defaut du role.");
+        return "redirect:/parametres/roles/" + id + "/acces";
+    }
+
+    // ── Profils d'acces reutilisables (gabarits de modules, applicables en un clic) ──
+    @PostMapping("/roles/{id}/acces/appliquer-profil")
+    public String appliquerProfil(@PathVariable Long id, @RequestParam Long profilId, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur u = utilisateurRepository.findById(id).orElse(null);
+        holyflame.administration.model.ProfilAcces profil = profilAccesRepository.findById(profilId).orElse(null);
+        if (u == null || profil == null || etabId == null || u.getEtablissement() == null
+                || !etabId.equals(u.getEtablissement().getId()) || !etabId.equals(profil.getEtablissementId())
+                || !ROLES_ACCES_MODULAIRE.contains(u.getRole())) {
+            ra.addFlashAttribute("erreurMsg", "Compte ou profil introuvable.");
+            return "redirect:/parametres/roles";
+        }
+        boolean estDirecteur = "DIRECTEUR".equals(u.getRole());
+        String typeAttendu = estDirecteur ? "DIRECTEUR" : "FINANCE";
+        if (!typeAttendu.equals(profil.getType())) {
+            ra.addFlashAttribute("erreurMsg", "Ce profil ne correspond pas au type de compte (" + typeAttendu + ").");
+            return "redirect:/parametres/roles/" + id + "/acces";
+        }
+        Set<String> valides = estDirecteur ? MODULES_OPTIONNELS_DIRECTEUR.keySet() : holyflame.administration.service.FinanceModules.TOUS;
+        Set<String> selection = profil.getModulesActifs().stream().filter(valides::contains).collect(Collectors.toCollection(LinkedHashSet::new));
+        if (estDirecteur) {
+            u.setModulesOptionnelsActifs(selection);
+        } else {
+            u.setModulesFinanceActifs(selection);
+        }
+        utilisateurRepository.save(u);
+        journalService.log("PROFIL_ACCES_APPLIQUÉ", JOURNAL_MODULE_ROLES,
+            u.getPrenom() + " " + u.getNom() + " : profil \"" + profil.getNom() + "\"");
+        ra.addFlashAttribute("successMsg", "Profil \"" + profil.getNom() + "\" applique a " + u.getPrenom() + " " + u.getNom() + ".");
+        return "redirect:/parametres/roles/" + id + "/acces";
+    }
+
+    @PostMapping("/roles/{id}/acces/enregistrer-profil")
+    public String enregistrerProfil(@PathVariable Long id, @RequestParam String nomProfil, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur u = utilisateurRepository.findById(id).orElse(null);
+        if (u == null || etabId == null || u.getEtablissement() == null || !etabId.equals(u.getEtablissement().getId())
+                || !ROLES_ACCES_MODULAIRE.contains(u.getRole()) || nomProfil == null || nomProfil.isBlank()) {
+            ra.addFlashAttribute("erreurMsg", "Impossible d'enregistrer ce profil.");
+            return "redirect:/parametres/roles/" + id + "/acces";
+        }
+        boolean estDirecteur = "DIRECTEUR".equals(u.getRole());
+        String type = estDirecteur ? "DIRECTEUR" : "FINANCE";
+        Set<String> modulesActuels = estDirecteur
+            ? u.getModulesOptionnelsActifs()
+            : holyflame.administration.service.FinanceModules.effectifs(u);
+        holyflame.administration.model.ProfilAcces profil = new holyflame.administration.model.ProfilAcces();
+        profil.setNom(nomProfil.trim());
+        profil.setType(type);
+        profil.setModulesActifs(modulesActuels);
+        profil.setEtablissementId(etabId);
+        profilAccesRepository.save(profil);
+        journalService.log("PROFIL_ACCES_CRÉÉ", JOURNAL_MODULE_ROLES, "Profil \"" + profil.getNom() + "\" (" + type + ")");
+        ra.addFlashAttribute("successMsg", "Profil \"" + profil.getNom() + "\" enregistre — reutilisable pour d'autres comptes.");
+        return "redirect:/parametres/roles/" + id + "/acces";
+    }
+
+    @PostMapping("/profils-acces/{id}/supprimer")
+    public String supprimerProfilAcces(@PathVariable Long id, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        profilAccesRepository.findById(id)
+            .filter(p -> etabId != null && etabId.equals(p.getEtablissementId()))
+            .ifPresent(p -> {
+                journalService.log("PROFIL_ACCES_SUPPRIMÉ", JOURNAL_MODULE_ROLES, "Profil \"" + p.getNom() + "\"");
+                profilAccesRepository.delete(p);
+            });
+        ra.addFlashAttribute("successMsg", "Profil supprime.");
+        return "redirect:/parametres/roles";
     }
 
     // ── Reinitialiser directement le mot de passe d'un compte (depuis la liste des roles) ──
@@ -580,6 +767,15 @@ public class ParametreController {
         }
         String ancien = u.getRole();
         u.setRole(role);
+        // Nettoyage : un compte qui change de famille de role ne doit jamais garder des modules
+        // personnalises devenus sans objet (ex. un ex-Directeur redevenu Enseignant garderait sinon
+        // silencieusement l'acces au module SECRETARIAT — un droit fantome invisible dans l'UI).
+        if (!"DIRECTEUR".equals(role)) {
+            u.setModulesOptionnelsActifs(null);
+        }
+        if (!"TRESORIER".equals(role) && !"COMPTABLE".equals(role)) {
+            u.reinitialiserModulesFinance();
+        }
         utilisateurRepository.save(u);
         journalService.log("ROLE_MODIFIÉ", JOURNAL_MODULE_ROLES,
             u.getPrenom() + " " + u.getNom() + " : " + ancien + " → " + role);
