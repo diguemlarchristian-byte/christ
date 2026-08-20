@@ -399,8 +399,15 @@ public class InscriptionEleveController {
 
         session.removeAttribute(SESSION_KEY);
 
-        ra.addFlashAttribute("successMsg", eleve.getPrenom() + " " + eleve.getNom()
+        StringBuilder message = new StringBuilder(eleve.getPrenom() + " " + eleve.getNom()
             + " a été inscrit(e) avec succès (matricule " + eleve.getMatricule() + ").");
+        if (paiementId != null) {
+            message.append(" Règlement de ").append(String.format("%.0f", donnees.paiementMontant))
+                .append(" F enregistré — reçu disponible ci-dessous.");
+        } else {
+            message.append(" Aucun règlement saisi à l'inscription : le paiement pourra être enregistré depuis le module Finances.");
+        }
+        ra.addFlashAttribute("successMsg", message.toString());
         if (paiementId != null) {
             ra.addFlashAttribute("paiementRecuId", paiementId);
         }
