@@ -44,6 +44,7 @@ public class ParametreController {
     @Autowired private JournalActionRepository journalActionRepository;
     @Autowired private SignalementMessagerieRepository signalementMessagerieRepository;
     @Autowired private PeriodeCalendrierRepository periodeCalendrierRepository;
+    @Autowired private EvenementCalendrierRepository evenementCalendrierRepository;
     @Autowired private holyflame.administration.service.CalendrierScolaireService calendrierScolaireService;
     @Autowired private AnneeScolaireRepository anneeScolaireRepository;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
@@ -954,12 +955,15 @@ public class ParametreController {
 
         List<PeriodeCalendrier> periodes = periodeCalendrierRepository
             .findByEtablissementIdAndAnneeScolaireOrderByDateDebutAsc(etabId, anneeActuelle);
+        List<EvenementCalendrier> evenements = evenementCalendrierRepository
+            .findByEtablissementIdAndAnneeScolaireOrderByDateAsc(etabId, anneeActuelle);
 
         model.addAttribute("periodes", periodes);
+        model.addAttribute("evenements", evenements);
         model.addAttribute("anneeActuelle", anneeActuelle);
         model.addAttribute("anneesExistantes", periodeCalendrierRepository.findDistinctAnneesScolaires(etabId));
         model.addAttribute("typesDisponibles", TYPES_PERIODE_CALENDRIER);
-        model.addAttribute("apercuMensuel", construireApercuMensuel(anneeActuelle, periodes));
+        model.addAttribute("apercuMensuel", construireApercuMensuel(anneeActuelle, periodes, evenements));
         model.addAttribute("suiviTrimestres", construireSuiviTrimestres(periodes, etabId));
         model.addAttribute("suiviAnnee", construireSuiviAnnee(periodes, etabId));
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
@@ -1020,7 +1024,35 @@ public class ParametreController {
         return "redirect:/parametres/calendrier?annee=" + annee;
     }
 
-    private List<Map<String, Object>> construireApercuMensuel(String anneeScolaire, List<PeriodeCalendrier> periodes) {
+    @PostMapping("/calendrier/evenements")
+    public String ajouterEvenement(@RequestParam String nom,
+                                    @RequestParam(required = false) String type,
+                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                    @RequestParam(defaultValue = "#db5e1b") String couleur,
+                                    @RequestParam(required = false) String description,
+                                    @RequestParam String anneeScolaire,
+                                    RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        EvenementCalendrier e = new EvenementCalendrier();
+        e.setNom(nom); e.setType(type); e.setDate(date); e.setCouleur(couleur);
+        e.setDescription(description); e.setAnneeScolaire(anneeScolaire); e.setEtablissementId(etabId);
+        evenementCalendrierRepository.save(e);
+        ra.addFlashAttribute("successMsg", "Evenement ajoute au calendrier.");
+        return "redirect:/parametres/calendrier?annee=" + anneeScolaire;
+    }
+
+    @PostMapping("/calendrier/evenements/{id}/supprimer")
+    public String supprimerEvenement(@PathVariable Long id, @RequestParam String annee, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        evenementCalendrierRepository.findById(id)
+            .filter(e -> etabId != null && etabId.equals(e.getEtablissementId()))
+            .ifPresent(evenementCalendrierRepository::delete);
+        ra.addFlashAttribute("successMsg", "Evenement supprime.");
+        return "redirect:/parametres/calendrier?annee=" + annee;
+    }
+
+    private List<Map<String, Object>> construireApercuMensuel(String anneeScolaire, List<PeriodeCalendrier> periodes,
+                                                                List<EvenementCalendrier> evenements) {
         String[] nomsMois = {"Septembre", "Octobre", "Novembre", "Decembre", "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout"};
 
         List<Map<String, Object>> mois = new ArrayList<>();
@@ -1046,9 +1078,12 @@ public class ParametreController {
                 boolean ouvre = ouvrable && jourSemaine != DayOfWeek.SATURDAY && !exclu;
                 if (ouvrable) joursOuvrablesMois++;
                 if (ouvre) joursOuvresMois++;
+                List<EvenementCalendrier> evenementsDuJour = evenements.stream()
+                    .filter(e -> date.equals(e.getDate())).toList();
                 Map<String, Object> jour = new LinkedHashMap<>();
                 jour.put("numero", d);
                 jour.put("type", type);
+                jour.put("evenements", evenementsDuJour);
                 jours.add(jour);
             }
 
