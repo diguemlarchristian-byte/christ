@@ -108,6 +108,19 @@ public class PortailController {
         double moyenneGenerale = moyennePonderee(toutesNotes);
         List<Note> notesRecentes = toutesNotes.stream().limit(6).toList();
 
+        // ── Rang de classe du trimestre le plus recent ayant des notes : reprend le meme calcul
+        // que le bulletin (poids culturel important, souvent le premier chiffre regarde) plutot
+        // que de le reserver a la seule consultation du bulletin complet. ──
+        Integer trimestreActuel = toutesNotes.stream()
+            .map(Note::getTrimestre).filter(t -> t != null).max(Integer::compareTo).orElse(null);
+        Integer rangClasse = null;
+        Integer effectifClasse = null;
+        if (trimestreActuel != null) {
+            Map<String, Object> donneesBulletin = bulletinService.calculerBulletin(eleve, trimestreActuel, etabId);
+            rangClasse = (Integer) donneesBulletin.get("rang");
+            effectifClasse = (Integer) donneesBulletin.get("effectif");
+        }
+
         // ── Progression mensuelle reelle (moyenne ponderee des notes publiees, par mois) ──
         Map<String, double[]> accumulateurParMois = new LinkedHashMap<>();
         List<Note> notesTrieesParDate = toutesNotes.stream()
@@ -163,6 +176,8 @@ public class PortailController {
 
         model.addAttribute("eleve", eleve);
         model.addAttribute("moyenneGenerale", Math.round(moyenneGenerale * 100.0) / 100.0);
+        model.addAttribute("rangClasse", rangClasse);
+        model.addAttribute("effectifClasse", effectifClasse);
         model.addAttribute("notesRecentes", notesRecentes);
         model.addAttribute("progressionPoints", progressionPoints);
         model.addAttribute("nombreNotesPubliees", toutesNotes.size());

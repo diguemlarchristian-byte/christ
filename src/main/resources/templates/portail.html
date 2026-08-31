@@ -70,6 +70,10 @@
 <span class="material-symbols-outlined mr-md">campaign</span>
 <span class="font-label-md text-label-md">Vie scolaire</span>
 </a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/messages}">
+<span class="material-symbols-outlined mr-md">chat_bubble</span>
+<span class="font-label-md text-label-md">Messagerie</span>
+</a>
 </nav>
 <div class="px-lg mt-auto pt-lg border-t border-tertiary-container">
 <div class="flex items-center space-x-md">
@@ -128,6 +132,10 @@
 <div class="bg-success/10 text-success px-md py-sm rounded-lg flex items-center gap-sm">
 <span class="material-symbols-outlined">check_circle</span>
 <span class="font-label-md text-label-md" th:text="'Assiduite : ' + ${tauxAssiduite} + '%'">Assiduite</span>
+</div>
+<div class="bg-primary-container/10 text-primary px-md py-sm rounded-lg flex items-center gap-sm" th:if="${rangClasse != null}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-label-md text-label-md" th:text="'Rang : ' + ${rangClasse} + 'e / ' + ${effectifClasse}">Rang</span>
 </div>
 </div>
 </section>
