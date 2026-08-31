@@ -44,7 +44,7 @@
     </style>
 </head>
 <body class="bg-background text-on-background">
-<aside class="hidden md:flex w-sidebar-width h-full fixed left-0 top-0 bg-tertiary flex-col py-lg border-r border-outline-variant z-50 no-print">
+<aside class="flex w-sidebar-width h-full fixed left-0 top-0 bg-tertiary flex-col py-lg border-r border-outline-variant z-50 no-print -translate-x-full md:translate-x-0 transition-transform duration-200" id="menu-eleve">
 <div class="px-lg mb-xl">
 <h1 class="font-headline-md text-headline-md font-bold text-on-tertiary">EduSystem Pro</h1>
 <p class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest mt-xs">Portail Eleve</p>
@@ -91,10 +91,12 @@
 </div>
 </div>
 </aside>
+<div class="hidden fixed inset-0 bg-black/40 z-40 md:hidden no-print" id="fond-menu-eleve" onclick="fermerMenuMobileEleve()"></div>
 
 <header class="md:hidden sticky top-0 z-40 flex items-center gap-sm h-14 px-md bg-surface border-b border-outline-variant no-print">
 <a class="text-on-surface-variant" th:href="@{/portail}"><span class="material-symbols-outlined">arrow_back</span></a>
-<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Bulletin</h1>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary flex-1">Bulletin</h1>
+<button class="text-on-surface-variant" onclick="ouvrirMenuMobileEleve()" type="button"><span class="material-symbols-outlined">menu</span></button>
 </header>
 
 <main class="md:ml-sidebar-width min-h-screen p-lg max-w-container-max mx-auto">
@@ -242,5 +244,15 @@
 <p class="font-label-sm text-label-sm">EduSystem Pro — Portail Eleve.</p>
 </footer>
 </main>
+<script>
+    function ouvrirMenuMobileEleve() {
+        document.getElementById('menu-eleve').classList.remove('-translate-x-full');
+        document.getElementById('fond-menu-eleve').classList.remove('hidden');
+    }
+    function fermerMenuMobileEleve() {
+        document.getElementById('menu-eleve').classList.add('-translate-x-full');
+        document.getElementById('fond-menu-eleve').classList.add('hidden');
+    }
+</script>
 </body>
 </html>

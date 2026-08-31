@@ -52,13 +52,62 @@
 
 <div th:if="${pasDeCompte == null or pasDeCompte == false}">
 
+<aside class="flex w-sidebar-width h-full fixed left-0 top-0 bg-tertiary flex-col py-lg border-r border-outline-variant z-50 -translate-x-full md:translate-x-0 transition-transform duration-200" id="menu-eleve">
+<div class="px-lg mb-xl">
+<h1 class="font-headline-md text-headline-md font-bold text-on-tertiary">EduSystem Pro</h1>
+<p class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest mt-xs">Portail Eleve</p>
+</div>
+<nav class="flex-1 space-y-base">
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail}">
+<span class="material-symbols-outlined mr-md">dashboard</span>
+<span class="font-label-md text-label-md">Tableau de bord</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/emploi-du-temps}">
+<span class="material-symbols-outlined mr-md">calendar_month</span>
+<span class="font-label-md text-label-md">Emploi du temps</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/devoirs}">
+<span class="material-symbols-outlined mr-md">assignment</span>
+<span class="font-label-md text-label-md">Devoirs</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/cours}">
+<span class="material-symbols-outlined mr-md">school</span>
+<span class="font-label-md text-label-md">Cours</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/bulletin}">
+<span class="material-symbols-outlined mr-md">analytics</span>
+<span class="font-label-md text-label-md">Bulletin</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/vie-scolaire}">
+<span class="material-symbols-outlined mr-md">campaign</span>
+<span class="font-label-md text-label-md">Vie scolaire</span>
+</a>
+<a class="flex items-center px-lg py-md text-on-primary-container border-l-4 border-primary bg-primary-container/10 transition-colors duration-200" th:href="@{/portail/messages}">
+<span class="material-symbols-outlined mr-md">chat_bubble</span>
+<span class="font-label-md text-label-md">Messagerie</span>
+</a>
+</nav>
+<div class="px-lg mt-auto pt-lg border-t border-tertiary-container">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-tertiary">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-label-md text-label-md text-on-tertiary truncate" th:if="${eleve != null}" th:text="${eleve.prenom} + ' ' + ${eleve.nom}">Eleve</p>
+<p class="font-label-sm text-label-sm text-on-tertiary-container truncate" th:if="${eleve != null and eleve.classe != null}" th:text="${eleve.classe.nom}">Classe</p>
+</div>
+</div>
+</div>
+</aside>
+<div class="hidden fixed inset-0 bg-black/40 z-40 md:hidden" id="fond-menu-eleve" onclick="fermerMenuMobileEleve()"></div>
+
 <!-- ===================== VERSION MOBILE ===================== -->
 <div class="md:hidden bg-background min-h-screen flex flex-col" id="messagerie-mobile-section" style="height:100dvh;">
 
 <!-- Vue liste des conversations -->
 <div class="flex-1 flex flex-col min-h-0" th:if="${correspondantActif == null}">
 <header class="w-full flex items-center gap-sm h-14 px-md bg-surface/80 backdrop-blur-md border-b border-outline-variant shrink-0">
-<a class="text-on-surface-variant" th:href="@{/portail}"><span class="material-symbols-outlined">arrow_back</span></a>
+<button class="text-on-surface-variant" onclick="ouvrirMenuMobileEleve()" type="button"><span class="material-symbols-outlined">menu</span></button>
 <h1 class="font-headline-sm text-headline-sm font-bold text-primary flex-1">Messagerie</h1>
 </header>
 <div class="p-md shrink-0">
@@ -171,54 +220,6 @@
 
 <!-- ===================== VERSION DESKTOP ===================== -->
 <div class="hidden md:contents">
-<aside class="w-sidebar-width h-full fixed left-0 top-0 bg-tertiary flex flex-col py-lg border-r border-outline-variant z-50">
-<div class="px-lg mb-xl">
-<h1 class="font-headline-md text-headline-md font-bold text-on-tertiary">EduSystem Pro</h1>
-<p class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest mt-xs">Portail Eleve</p>
-</div>
-<nav class="flex-1 space-y-base">
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail}">
-<span class="material-symbols-outlined mr-md">dashboard</span>
-<span class="font-label-md text-label-md">Tableau de bord</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/emploi-du-temps}">
-<span class="material-symbols-outlined mr-md">calendar_month</span>
-<span class="font-label-md text-label-md">Emploi du temps</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/devoirs}">
-<span class="material-symbols-outlined mr-md">assignment</span>
-<span class="font-label-md text-label-md">Devoirs</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/cours}">
-<span class="material-symbols-outlined mr-md">school</span>
-<span class="font-label-md text-label-md">Cours</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/bulletin}">
-<span class="material-symbols-outlined mr-md">analytics</span>
-<span class="font-label-md text-label-md">Bulletin</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container transition-colors duration-200" th:href="@{/portail/vie-scolaire}">
-<span class="material-symbols-outlined mr-md">campaign</span>
-<span class="font-label-md text-label-md">Vie scolaire</span>
-</a>
-<a class="flex items-center px-lg py-md text-on-primary-container border-l-4 border-primary bg-primary-container/10 transition-colors duration-200" th:href="@{/portail/messages}">
-<span class="material-symbols-outlined mr-md">chat_bubble</span>
-<span class="font-label-md text-label-md">Messagerie</span>
-</a>
-</nav>
-<div class="px-lg mt-auto pt-lg border-t border-tertiary-container">
-<div class="flex items-center gap-md">
-<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-tertiary">
-<span class="material-symbols-outlined">person</span>
-</div>
-<div class="flex-1 min-w-0">
-<p class="font-label-md text-label-md text-on-tertiary truncate" th:if="${eleve != null}" th:text="${eleve.prenom} + ' ' + ${eleve.nom}">Eleve</p>
-<p class="font-label-sm text-label-sm text-on-tertiary-container truncate" th:if="${eleve != null and eleve.classe != null}" th:text="${eleve.classe.nom}">Classe</p>
-</div>
-</div>
-</div>
-</aside>
-
 <header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-surface-container-lowest flex justify-between items-center px-lg border-b border-outline-variant z-40">
 <div class="flex items-center flex-grow max-w-xl bg-surface-container-low rounded-lg px-md py-xs border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all">
 <span class="material-symbols-outlined text-outline">search</span>
@@ -479,6 +480,16 @@
             });
         }
     })();
+</script>
+<script>
+    function ouvrirMenuMobileEleve() {
+        document.getElementById('menu-eleve').classList.remove('-translate-x-full');
+        document.getElementById('fond-menu-eleve').classList.remove('hidden');
+    }
+    function fermerMenuMobileEleve() {
+        document.getElementById('menu-eleve').classList.add('-translate-x-full');
+        document.getElementById('fond-menu-eleve').classList.add('hidden');
+    }
 </script>
 </div>
 </body>
