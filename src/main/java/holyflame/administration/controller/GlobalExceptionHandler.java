@@ -1,6 +1,7 @@
 package holyflame.administration.controller;
 
 import holyflame.administration.service.AnneeScolaireClotureeException;
+import holyflame.administration.service.MoisClotureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +24,16 @@ public class GlobalExceptionHandler {
         ra.addFlashAttribute("erreurAuth", msg);
         String referer = req.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/dashboard");
+    }
+
+    @ExceptionHandler(MoisClotureException.class)
+    public String handleMoisCloture(MoisClotureException ex, HttpServletRequest req, RedirectAttributes ra) {
+        String msg = "Le mois de " + ex.getMois() + "/" + ex.getAnneeCivile()
+            + " est cloture comptablement : aucune modification n'est possible. Reouvrez-le depuis Finances > Parametrage > Clotures mensuelles si besoin.";
+        ra.addFlashAttribute("erreurMsg", msg);
+        ra.addFlashAttribute("erreur", msg);
+        String referer = req.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/finances");
     }
 
     @ExceptionHandler(NoSuchElementException.class)

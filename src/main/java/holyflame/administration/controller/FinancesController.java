@@ -76,6 +76,7 @@ public class FinancesController {
     @Autowired private EmailService emailService;
     @Autowired private NombreEnLettresService nombreEnLettresService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
+    @Autowired private holyflame.administration.service.ClotureMensuelleService clotureMensuelleService;
 
     // ===== PAGE UNIQUE A ONGLETS =====
     @GetMapping
@@ -153,6 +154,22 @@ public class FinancesController {
         Map<String, String> tauxPaie = parametreRepository.findByCategorieAndEtablissementIdOrderByCleAsc("PAIE", etabId).stream()
             .collect(Collectors.toMap(Parametre::getCle, Parametre::getValeur, (a, b) -> a));
         model.addAttribute("tauxPaie", tauxPaie);
+
+        // Clotures mensuelles : verrouillage comptable mois par mois, independant de la cloture
+        // d'annee scolaire — voir ClotureMensuelleService.
+        List<Map<String, Object>> douzeMois = new ArrayList<>();
+        LocalDate curseurMois = horlogeService.aujourdHui().withDayOfMonth(1);
+        for (int i = 0; i < 12; i++) {
+            boolean cloture = clotureMensuelleService.estCloture(curseurMois.getMonthValue(), curseurMois.getYear(), etabId);
+            Map<String, Object> ligne = new LinkedHashMap<>();
+            ligne.put("mois", curseurMois.getMonthValue());
+            ligne.put("anneeCivile", curseurMois.getYear());
+            ligne.put("libelle", curseurMois.getMonth().getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.FRENCH) + " " + curseurMois.getYear());
+            ligne.put("cloture", cloture);
+            douzeMois.add(ligne);
+            curseurMois = curseurMois.minusMonths(1);
+        }
+        model.addAttribute("moisComptables", douzeMois);
 
         return "finances";
     }
@@ -589,6 +606,23 @@ public class FinancesController {
             parametreRepository.save(p);
         }
         ra.addFlashAttribute("successMsg", "Taux de paie par defaut mis a jour. Ils pre-rempliront desormais chaque nouveau bulletin.");
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    @PostMapping("/parametrage/clotures/cloturer")
+    public String cloturerMois(@RequestParam int mois, @RequestParam int anneeCivile, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Utilisateur moi = etablissementService.getCurrentUtilisateur();
+        clotureMensuelleService.cloturer(mois, anneeCivile, etabId, moi != null ? moi.getId() : null);
+        ra.addFlashAttribute("successMsg", "Mois " + mois + "/" + anneeCivile + " cloture : aucune depense de cette periode ne pourra plus etre modifiee.");
+        return "redirect:/finances?tab=parametrage";
+    }
+
+    @PostMapping("/parametrage/clotures/reouvrir")
+    public String reouvrirMois(@RequestParam int mois, @RequestParam int anneeCivile, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        clotureMensuelleService.reouvrir(mois, anneeCivile, etabId);
+        ra.addFlashAttribute("successMsg", "Mois " + mois + "/" + anneeCivile + " reouvert.");
         return "redirect:/finances?tab=parametrage";
     }
 
@@ -1208,6 +1242,27 @@ public class FinancesController {
                 LinkedHashMap::new,
                 Collectors.summingDouble(d -> d.getMontant() != null ? d.getMontant() : 0)));
         List<Map<String, Object>> repartitionChargesAnnee = calculerRepartition(chargesParPoste, totalChargesAnnee);
+
+        // Balance des comptes : chaque poste du plan comptable ayant eu un mouvement cette annee,
+        // avec son total — la premiere chose qu'un comptable regarde pour verifier la coherence du
+        // classement, distincte de la repartition en pourcentage ci-dessus (pensee pour un graphique).
+        List<CategorieComptable> planComptableActif = categorieComptableRepository.findByEtablissementIdAndActifTrueOrderByCodeAsc(etabId);
+        Map<Long, Double> totalParPosteId = toutesDepenses.stream()
+            .filter(d -> annee.equals(d.getAnneeScolaire()) && d.getCategorieComptable() != null)
+            .collect(Collectors.groupingBy(d -> d.getCategorieComptable().getId(),
+                Collectors.summingDouble(d -> d.getMontant() != null ? d.getMontant() : 0)));
+        List<Map<String, Object>> balanceComptes = new ArrayList<>();
+        for (CategorieComptable c : planComptableActif) {
+            Double total = totalParPosteId.get(c.getId());
+            if (total == null || total == 0) continue;
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("code", c.getCode());
+            row.put("libelle", c.getLibelle());
+            row.put("sens", c.getSens());
+            row.put("montant", total);
+            balanceComptes.add(row);
+        }
+        model.addAttribute("balanceComptes", balanceComptes);
 
         List<Map<String, Object>> evolutionAnnuelle = new ArrayList<>();
         String[] nomsMoisCourt = {"Sep","Oct","Nov","Dec","Jan","Fev","Mar","Avr","Mai","Jun","Jul","Aou"};

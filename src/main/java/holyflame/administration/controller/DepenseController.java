@@ -39,6 +39,7 @@ public class DepenseController {
     @Autowired private CategorieComptableRepository categorieComptableRepository;
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
+    @Autowired private holyflame.administration.service.ClotureMensuelleService clotureMensuelleService;
     @Autowired private JournalService journalService;
     @Autowired private HorlogeService horlogeService;
     @Autowired private FileStorageService fileStorageService;
@@ -206,6 +207,7 @@ public class DepenseController {
 
         Long etabId = etablissementService.getCurrentEtablissementId();
         anneeScolaireService.verifierModifiable(AnneeScolaireUtil.pour(dateDepense), etabId);
+        clotureMensuelleService.verifierModifiable(dateDepense, etabId);
         Depense d = new Depense();
         d.setDesignation(designation);
         String sens = "CHARGE";
@@ -240,6 +242,7 @@ public class DepenseController {
         depenseRepository.findById(id)
             .filter(d -> etabId != null && etabId.equals(d.getEtablissementId()))
             .ifPresent(d -> {
+                clotureMensuelleService.verifierModifiable(d.getDateDepense(), etabId);
                 journalService.log("DEPENSE_SUPPRIMÉE", "FINANCES", d.getDesignation() + " — " + d.getMontant() + " F");
                 if (d.getJustificatifPath() != null) fileStorageService.delete(d.getJustificatifPath());
                 depenseRepository.delete(d);

@@ -1,14 +1,19 @@
 package holyflame.administration.controller;
 
+import holyflame.administration.model.CategorieComptable;
+import holyflame.administration.model.Depense;
 import holyflame.administration.model.Eleve;
 import holyflame.administration.model.Note;
 import holyflame.administration.model.Paiement;
 import holyflame.administration.model.Utilisateur;
+import holyflame.administration.repository.CategorieComptableRepository;
+import holyflame.administration.repository.DepenseRepository;
 import holyflame.administration.repository.EleveRepository;
 import holyflame.administration.repository.EnseignantAutorisationRepository;
 import holyflame.administration.repository.NoteRepository;
 import holyflame.administration.repository.PaiementRepository;
 import holyflame.administration.service.EtablissementService;
+import holyflame.administration.util.AnneeScolaireUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -32,6 +38,8 @@ public class ExportController {
     @Autowired private EleveRepository eleveRepository;
     @Autowired private NoteRepository noteRepository;
     @Autowired private EnseignantAutorisationRepository autorisationRepository;
+    @Autowired private DepenseRepository depenseRepository;
+    @Autowired private CategorieComptableRepository categorieComptableRepository;
     @Autowired private EtablissementService etablissementService;
 
     // ── Styles partagés ──────────────────────────────────────────
@@ -235,5 +243,96 @@ public class ExportController {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"notes-t" + trimestre + ".xlsx\"");
         wb.write(response.getOutputStream()); wb.close();
+    }
+
+    // ── Export des rapports financiers (Comptable/Tresorier) ──────
+    // Le module Finances > Rapports n'offrait que de la consultation a l'ecran : rien a remettre
+    // a une direction, un auditeur ou le fisc sans capture d'ecran. Deux feuilles : le compte de
+    // resultat annuel simplifie, et la balance des comptes (chaque poste du plan comptable
+    // mouvemente cette annee, avec son total) — la premiere chose qu'un comptable verifie.
+    @GetMapping("/rapports/excel")
+    public void exportRapports(@RequestParam String annee, HttpServletResponse response) throws IOException {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        List<Depense> toutesDepenses = etabId != null ? depenseRepository.findByEtablissementIdOrderByDateDepenseDesc(etabId) : List.of();
+        List<Paiement> tousPaiements = etabId != null ? paiementRepository.findByEtablissementId(etabId) : List.of();
+
+        double produitsViaPaiements = tousPaiements.stream()
+            .filter(p -> p.getDatePaiement() != null && annee.equals(AnneeScolaireUtil.pour(p.getDatePaiement().toLocalDate())))
+            .mapToDouble(p -> p.getMontantVerse() != null ? p.getMontantVerse() : 0).sum();
+        double produitsViaDepenses = toutesDepenses.stream()
+            .filter(d -> "PRODUIT".equals(d.getSens()) && annee.equals(d.getAnneeScolaire()))
+            .mapToDouble(d -> d.getMontant() != null ? d.getMontant() : 0).sum();
+        double totalProduits = produitsViaPaiements + produitsViaDepenses;
+        double totalCharges = toutesDepenses.stream()
+            .filter(d -> "CHARGE".equals(d.getSens()) && annee.equals(d.getAnneeScolaire()))
+            .mapToDouble(d -> d.getMontant() != null ? d.getMontant() : 0).sum();
+        double resultatNet = totalProduits - totalCharges;
+
+        List<CategorieComptable> planActif = etabId != null
+            ? categorieComptableRepository.findByEtablissementIdAndActifTrueOrderByCodeAsc(etabId) : List.of();
+        Map<Long, Double> totalParPosteId = toutesDepenses.stream()
+            .filter(d -> annee.equals(d.getAnneeScolaire()) && d.getCategorieComptable() != null)
+            .collect(Collectors.groupingBy(d -> d.getCategorieComptable().getId(),
+                Collectors.summingDouble(d -> d.getMontant() != null ? d.getMontant() : 0)));
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFCellStyle hStyle = makeHeaderStyle(wb, (byte)0, (byte)35, (byte)111);
+        XSSFCellStyle titreStyle = wb.createCellStyle();
+        XSSFFont titreFont = wb.createFont(); titreFont.setBold(true); titreFont.setFontHeightInPoints((short)13);
+        titreStyle.setFont(titreFont);
+        XSSFCellStyle totalStyle = wb.createCellStyle();
+        totalStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte)240,(byte)244,(byte)248}, null));
+        totalStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        XSSFFont totalFont = wb.createFont(); totalFont.setBold(true);
+        totalStyle.setFont(totalFont);
+
+        // Feuille 1 : Compte de resultat
+        XSSFSheet sheetResultat = wb.createSheet("Compte de resultat");
+        Cell titreResultat = sheetResultat.createRow(0).createCell(0);
+        titreResultat.setCellValue("COMPTE DE RÉSULTAT SIMPLIFIÉ — Année " + annee);
+        titreResultat.setCellStyle(titreStyle);
+        sheetResultat.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+        String[][] lignesResultat = {
+            {"Total produits (scolarité, dons, autres recettes)", String.valueOf(totalProduits)},
+            {"Total charges (dépenses, salaires, fonctionnement)", String.valueOf(totalCharges)},
+            {"RÉSULTAT NET", String.valueOf(resultatNet)}
+        };
+        int rowR = 2;
+        for (String[] ligne : lignesResultat) {
+            Row row = sheetResultat.createRow(rowR++);
+            row.createCell(0).setCellValue(ligne[0]);
+            Cell cVal = row.createCell(1);
+            cVal.setCellValue(Double.parseDouble(ligne[1]));
+            if (ligne[0].equals("RÉSULTAT NET")) { row.getCell(0).setCellStyle(totalStyle); cVal.setCellStyle(totalStyle); }
+        }
+        sheetResultat.autoSizeColumn(0); sheetResultat.autoSizeColumn(1);
+
+        // Feuille 2 : Balance des comptes
+        XSSFSheet sheetBalance = wb.createSheet("Balance des comptes");
+        Cell titreBalance = sheetBalance.createRow(0).createCell(0);
+        titreBalance.setCellValue("BALANCE DES COMPTES — Année " + annee);
+        titreBalance.setCellStyle(titreStyle);
+        sheetBalance.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
+        String[] headersBalance = {"Code", "Libellé", "Sens", "Montant (FCFA)"};
+        Row hRowBalance = sheetBalance.createRow(2);
+        for (int i = 0; i < headersBalance.length; i++) {
+            Cell c = hRowBalance.createCell(i); c.setCellValue(headersBalance[i]); c.setCellStyle(hStyle);
+        }
+        int rowB = 3;
+        for (CategorieComptable cat : planActif) {
+            Double total = totalParPosteId.get(cat.getId());
+            if (total == null || total == 0) continue;
+            Row row = sheetBalance.createRow(rowB++);
+            row.createCell(0).setCellValue(cat.getCode() != null ? cat.getCode() : "");
+            row.createCell(1).setCellValue(cat.getLibelle() != null ? cat.getLibelle() : "");
+            row.createCell(2).setCellValue(cat.getSens() != null ? cat.getSens() : "");
+            row.createCell(3).setCellValue(total);
+        }
+        for (int i = 0; i < headersBalance.length; i++) sheetBalance.autoSizeColumn(i);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"rapports-financiers-" + annee + ".xlsx\"");
+        wb.write(response.getOutputStream());
+        wb.close();
     }
 }

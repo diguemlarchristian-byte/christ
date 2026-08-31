@@ -820,6 +820,39 @@ Rapport detaille
 </div>
 </div>
 
+<!-- Balance des comptes : total par poste du plan comptable pour l'annee, avec export -->
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg">
+<div class="flex flex-wrap justify-between items-center gap-md mb-md no-print">
+<h4 class="font-headline-sm text-on-surface">Balance des comptes — <span th:text="${annee}"></span></h4>
+<a class="flex items-center gap-xs px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-all" th:href="@{/export/rapports/excel(annee=${annee})}">
+<span class="material-symbols-outlined text-[18px]">download</span> Exporter (Excel)
+</a>
+</div>
+<p class="text-body-md text-secondary text-center py-lg" th:if="${balanceComptes.isEmpty()}">Aucun mouvement classe par poste comptable pour cette annee.</p>
+<div class="overflow-x-auto" th:if="${!balanceComptes.isEmpty()}">
+<table class="w-full text-left text-body-md">
+<thead>
+<tr class="text-label-sm text-on-surface-variant uppercase border-b border-outline-variant">
+<th class="py-2 pr-md">Code</th>
+<th class="py-2 pr-md">Libelle</th>
+<th class="py-2 pr-md">Sens</th>
+<th class="py-2 pr-md text-right">Montant</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<tr th:each="b : ${balanceComptes}">
+<td class="py-2 pr-md font-mono" th:text="${b.code}"></td>
+<td class="py-2 pr-md" th:text="${b.libelle}"></td>
+<td class="py-2 pr-md">
+<span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase" th:classappend="${b.sens == 'PRODUIT'} ? 'bg-success/10 text-success' : 'bg-error/10 text-error'" th:text="${b.sens}"></span>
+</td>
+<td class="py-2 pr-md text-right font-bold" th:text="${#numbers.formatDecimal(b.montant, 0, 'COMMA', 0, 'POINT')} + ' F'"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
 <!-- Rapport trimestriel econome (calque du rapport papier remis par l'econome) -->
 <div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg">
 <div class="no-print flex flex-wrap justify-between items-center gap-md mb-md">
@@ -1194,6 +1227,25 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 <button class="col-span-1 sm:col-span-2 lg:col-span-3 px-lg py-2 bg-primary text-on-primary rounded-lg font-label-md w-fit" type="submit">Enregistrer les taux</button>
 </form>
+</div>
+
+<!-- Clotures mensuelles : verrouillage comptable independant de la cloture d'annee scolaire -->
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<h4 class="font-headline-sm text-on-surface mb-xs">Clotures mensuelles</h4>
+<p class="text-label-sm text-secondary mb-md">Un mois cloture verrouille toutes les depenses datees dans ce mois (creation, modification, suppression) — evite qu'une ecriture deja verifiee soit modifiee apres coup.</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+<div class="border border-outline-variant rounded-lg p-md flex items-center justify-between gap-md" th:each="m : ${moisComptables}">
+<div>
+<p class="font-label-md text-label-md text-on-surface" th:text="${#strings.capitalize(m.libelle)}">Mois</p>
+<span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full" th:classappend="${m.cloture} ? 'bg-error/10 text-error' : 'bg-success/10 text-success'" th:text="${m.cloture} ? 'Cloture' : 'Ouvert'">Statut</span>
+</div>
+<form method="post" th:action="${m.cloture} ? @{/finances/parametrage/clotures/reouvrir} : @{/finances/parametrage/clotures/cloturer}">
+<input name="mois" th:value="${m.mois}" type="hidden"/>
+<input name="anneeCivile" th:value="${m.anneeCivile}" type="hidden"/>
+<button class="px-md py-1.5 rounded-lg font-label-sm text-label-sm border" th:classappend="${m.cloture} ? 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low' : 'border-error/30 text-error hover:bg-error-container/20'" type="submit" th:text="${m.cloture} ? 'Reouvrir' : 'Cloturer'">Action</button>
+</form>
+</div>
+</div>
 </div>
 
 </div>

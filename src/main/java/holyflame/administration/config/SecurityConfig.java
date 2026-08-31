@@ -170,6 +170,7 @@ public class SecurityConfig {
                 // ce que l'ADMIN leur a confie), notes/eleves sont aussi utilises depuis les pages
                 // Examens (enseignant) et Secretariat (secretaire).
                 .requestMatchers("/export/paiements/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
+                .requestMatchers("/export/rapports/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
                 .requestMatchers("/export/eleves/excel").hasAnyRole("ADMIN", "DIRECTEUR", "TRESORIER", "COMPTABLE", "SECRETAIRE")
                 .requestMatchers("/export/notes/excel").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
                 .requestMatchers("/export/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
