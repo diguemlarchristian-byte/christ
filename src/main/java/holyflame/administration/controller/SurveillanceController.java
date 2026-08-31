@@ -47,6 +47,7 @@ public class SurveillanceController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
+    @Autowired private holyflame.administration.service.SmsService smsService;
 
     @GetMapping
     public String index(Model model) {
@@ -141,8 +142,25 @@ public class SurveillanceController {
             }
         }
         absenceRepository.save(absence);
+        if (!estJustifiee) alerterAbsenceParSms(eleve, date);
         ra.addFlashAttribute("successMsg", "Absence enregistree pour " + eleve.getPrenom() + " " + eleve.getNom() + ".");
         return "redirect:/surveillance";
+    }
+
+    // Voir SecretariatController.alerterAbsenceParSms — meme logique, dupliquee car ce controleur
+    // a son propre point d'entree de saisie d'absence (double guichet secretariat/surveillance).
+    private void alerterAbsenceParSms(Eleve eleve, LocalDate date) {
+        try {
+            String telephone = eleve.getPereTelephone() != null && !eleve.getPereTelephone().isBlank() ? eleve.getPereTelephone()
+                : eleve.getMereTelephone() != null && !eleve.getMereTelephone().isBlank() ? eleve.getMereTelephone()
+                : eleve.getTelephoneParent();
+            if (telephone == null || telephone.isBlank()) return;
+            String message = "Absence non justifiee de " + eleve.getPrenom() + " " + eleve.getNom()
+                + " le " + date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                + ". Contactez le secretariat pour la justifier.";
+            smsService.envoyer(telephone, message);
+        } catch (Exception ignored) {
+        }
     }
 
     @PostMapping("/absences/{id}/supprimer")

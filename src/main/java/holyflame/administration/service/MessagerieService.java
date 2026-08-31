@@ -37,6 +37,7 @@ public class MessagerieService {
     @Autowired private UtilisateurRepository utilisateurRepository;
     @Autowired private EleveRepository eleveRepository;
     @Autowired private HorlogeService horlogeService;
+    @Autowired private EmailService emailService;
 
     public Map<String, Object> creerContact(String email, String nom, String role) {
         Map<String, Object> c = new LinkedHashMap<>();
@@ -246,5 +247,29 @@ public class MessagerieService {
             m.setPieceJointeTaille(pieceJointe.getSize());
         }
         messagePriveRepository.save(m);
+        notifierDestinataire(expediteur, destinataire, m);
+    }
+
+    // Le destinataire (parent ou personnel) n'avait aucun moyen d'apprendre qu'on lui avait
+    // ecrit sans se reconnecter par hasard sur la messagerie — cause frequente de "vous ne
+    // repondez jamais" alors que le message attendait, non lu. Notification best-effort : un
+    // envoi qui echoue (service non configure, etc.) ne doit jamais faire echouer le message.
+    private void notifierDestinataire(String expediteur, String destinataire, MessagePrive m) {
+        try {
+            String nomExpediteur = utilisateurRepository.findByEmail(expediteur)
+                .map(u -> (u.getPrenom() != null ? u.getPrenom() + " " : "") + (u.getNom() != null ? u.getNom() : ""))
+                .filter(n -> !n.isBlank())
+                .orElse(expediteur);
+            String apercu = m.getContenu() != null && !m.getContenu().isBlank()
+                ? (m.getContenu().length() > 140 ? m.getContenu().substring(0, 140) + "..." : m.getContenu())
+                : "(pièce jointe)";
+            String sujet = "Nouveau message de " + nomExpediteur;
+            String corps = "<p>Bonjour,</p>"
+                + "<p><strong>" + nomExpediteur + "</strong> vous a envoyé un nouveau message :</p>"
+                + "<blockquote style=\"margin:12px 0;padding:8px 12px;border-left:3px solid #ccc;color:#444;\">" + apercu + "</blockquote>"
+                + "<p>Connectez-vous à votre messagerie pour répondre.</p>";
+            emailService.envoyer(destinataire, sujet, corps);
+        } catch (Exception ignored) {
+        }
     }
 }

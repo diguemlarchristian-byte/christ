@@ -50,6 +50,7 @@ public class InscriptionEleveController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private JournalService journalService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
+    @Autowired private holyflame.administration.service.EmailService emailService;
 
     public static class DonneesInscriptionEleve implements Serializable {
         // Etape 1 : Informations Personnelles
@@ -369,6 +370,7 @@ public class InscriptionEleveController {
         journalService.log("ÉLÈVE_AJOUTÉ", "ELEVES", eleve.getNom() + " " + eleve.getPrenom() + " — " + eleve.getMatricule());
 
         Long paiementId = null;
+        boolean recuEnvoyeParEmail = false;
         if (donnees.paiementMontant != null && donnees.paiementMontant > 0) {
             Paiement paiement = new Paiement();
             paiement.setEleve(eleve);
@@ -386,6 +388,7 @@ public class InscriptionEleveController {
             paiementId = paiement.getId();
             journalService.log("PAIEMENT_ENREGISTRÉ", "FINANCES",
                 eleve.getNom() + " " + eleve.getPrenom() + " — " + donnees.paiementMontant + " F (INSCRIPTION)");
+            recuEnvoyeParEmail = envoyerRecuParEmail(paiement);
         }
 
         enregistrerDocument(eleve, acteNaissance, "ACTE_NAISSANCE");
@@ -403,7 +406,10 @@ public class InscriptionEleveController {
             + " a été inscrit(e) avec succès (matricule " + eleve.getMatricule() + ").");
         if (paiementId != null) {
             message.append(" Règlement de ").append(String.format("%.0f", donnees.paiementMontant))
-                .append(" F enregistré — reçu disponible ci-dessous.");
+                .append(" F enregistré");
+            message.append(recuEnvoyeParEmail
+                ? " — une copie du reçu a été envoyée par email au parent."
+                : " — reçu disponible ci-dessous.");
         } else {
             message.append(" Aucun règlement saisi à l'inscription : le paiement pourra être enregistré depuis le module Finances.");
         }
@@ -435,5 +441,29 @@ public class InscriptionEleveController {
             documentEleveRepository.save(doc);
         } catch (IOException ignored) {
         }
+    }
+
+    private String adresseParent(Eleve eleve) {
+        if (eleve.getPereEmail() != null && !eleve.getPereEmail().isBlank()) return eleve.getPereEmail();
+        if (eleve.getMereEmail() != null && !eleve.getMereEmail().isBlank()) return eleve.getMereEmail();
+        return eleve.getEmailParent();
+    }
+
+    // Meme contenu que le recu envoye pour un paiement fait plus tard via Finances (voir
+    // FinancesController.envoyerRecuParEmail) : un versement saisi au guichet le jour de
+    // l'inscription doit donner la meme confirmation par email qu'un versement ulterieur.
+    private boolean envoyerRecuParEmail(Paiement p) {
+        String destinataire = adresseParent(p.getEleve());
+        if (destinataire == null || destinataire.isBlank()) return false;
+        String corps = "<p>Bonjour,</p>"
+            + "<p>Nous confirmons la reception d'un paiement pour <strong>" + p.getEleve().getPrenom() + " " + p.getEleve().getNom() + "</strong>.</p>"
+            + "<table style=\"border-collapse:collapse;margin:16px 0;\">"
+            + "<tr><td style=\"padding:4px 12px 4px 0;color:#555;\">Reçu n°</td><td><strong>" + p.getRecuNumero() + "</strong></td></tr>"
+            + "<tr><td style=\"padding:4px 12px 4px 0;color:#555;\">Type</td><td>Frais d'inscription</td></tr>"
+            + "<tr><td style=\"padding:4px 12px 4px 0;color:#555;\">Date</td><td>" + p.getDatePaiement().toLocalDate() + "</td></tr>"
+            + "<tr><td style=\"padding:4px 12px 4px 0;color:#555;\">Montant versé</td><td><strong>" + Math.round(p.getMontantVerse()) + " F</strong></td></tr>"
+            + "</table>"
+            + "<p>Merci de conserver cet email comme justificatif. Pour toute question, contactez le secrétariat.</p>";
+        return emailService.envoyer(destinataire, "Reçu de paiement " + p.getRecuNumero(), corps);
     }
 }

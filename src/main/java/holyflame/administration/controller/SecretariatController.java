@@ -60,6 +60,7 @@ public class SecretariatController {
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
     @Autowired private JournalService journalService;
+    @Autowired private holyflame.administration.service.SmsService smsService;
 
     @GetMapping
     public String index(@RequestParam(defaultValue = "false") boolean toutesAnnees, Model model) {
@@ -281,7 +282,25 @@ public class SecretariatController {
         absenceRepository.save(absence);
         journalService.log("ABSENCE_SAISIE", "ABSENCES",
             eleve.getNom() + " " + eleve.getPrenom() + " — " + date);
+        if (!estJustifiee) alerterAbsenceParSms(eleve, date);
         return "redirect:/secretariat";
+    }
+
+    // Une absence non justifiee n'etait visible que si le parent pensait a se reconnecter au
+    // portail — parfois des semaines plus tard. Le SMS (canal lu quasi immediatement, contrairement
+    // a l'email) alerte le jour meme. Best-effort : ne doit jamais faire echouer la saisie.
+    private void alerterAbsenceParSms(Eleve eleve, LocalDate date) {
+        try {
+            String telephone = eleve.getPereTelephone() != null && !eleve.getPereTelephone().isBlank() ? eleve.getPereTelephone()
+                : eleve.getMereTelephone() != null && !eleve.getMereTelephone().isBlank() ? eleve.getMereTelephone()
+                : eleve.getTelephoneParent();
+            if (telephone == null || telephone.isBlank()) return;
+            String message = "Absence non justifiee de " + eleve.getPrenom() + " " + eleve.getNom()
+                + " le " + date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                + ". Contactez le secretariat pour la justifier.";
+            smsService.envoyer(telephone, message);
+        } catch (Exception ignored) {
+        }
     }
 
     @PostMapping("/absences/{id}/supprimer")

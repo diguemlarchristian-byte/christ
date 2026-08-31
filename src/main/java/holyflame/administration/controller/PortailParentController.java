@@ -6,6 +6,7 @@ import holyflame.administration.model.Classe;
 import holyflame.administration.model.Conduite;
 import holyflame.administration.model.Eleve;
 import holyflame.administration.model.Etablissement;
+import holyflame.administration.model.EvenementCalendrier;
 import holyflame.administration.model.EvenementEcole;
 import holyflame.administration.model.Examen;
 import holyflame.administration.model.Note;
@@ -15,6 +16,7 @@ import holyflame.administration.repository.AbsenceRepository;
 import holyflame.administration.repository.AvisParentRepository;
 import holyflame.administration.repository.ConduiteRepository;
 import holyflame.administration.repository.EleveRepository;
+import holyflame.administration.repository.EvenementCalendrierRepository;
 import holyflame.administration.repository.EvenementEcoleRepository;
 import holyflame.administration.repository.ExamenRepository;
 import holyflame.administration.repository.NoteRepository;
@@ -61,6 +63,8 @@ public class PortailParentController {
     private ExamenRepository examenRepository;
     @Autowired
     private EvenementEcoleRepository evenementEcoleRepository;
+    @Autowired
+    private EvenementCalendrierRepository evenementCalendrierRepository;
     @Autowired
     private RappelParentRepository rappelParentRepository;
     @Autowired
@@ -367,6 +371,27 @@ public class PortailParentController {
                 evt.put("enfantId", null);
                 evt.put("enfantNom", ev.getClasse() != null ? ev.getClasse().getNom() : "Tout l'etablissement");
                 evt.put("couleur", "primary");
+                tousLesEvenements.add(evt);
+            }
+        }
+
+        // Evenements personnalises declares par l'etablissement (echeances de devoir, jours
+        // exceptionnels...) — visibles cote admin depuis peu, mais jamais remontes jusqu'ici : le
+        // parent n'avait aucun moyen de les voir sur son propre calendrier.
+        if (etabId != null) {
+            String anneeScolaireVue = holyflame.administration.util.AnneeScolaireUtil.pour(ancre);
+            for (EvenementCalendrier ec : evenementCalendrierRepository
+                    .findByEtablissementIdAndAnneeScolaireOrderByDateAsc(etabId, anneeScolaireVue)) {
+                if (ec.getDate() == null) continue;
+                Map<String, Object> evt = new LinkedHashMap<>();
+                evt.put("date", ec.getDate());
+                evt.put("titre", ec.getNom());
+                evt.put("heure", null);
+                evt.put("lieu", null);
+                evt.put("categorie", "PERSONNALISE");
+                evt.put("enfantId", null);
+                evt.put("enfantNom", null);
+                evt.put("couleur", null);
                 tousLesEvenements.add(evt);
             }
         }
