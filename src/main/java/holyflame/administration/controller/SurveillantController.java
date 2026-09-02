@@ -55,12 +55,28 @@ public class SurveillantController {
             .stream().limit(8).toList();
         List<Incident> incidentsRecents = incidentRepository.findByEtablissementIdOrderByDateHeureDesc(etabId)
             .stream().limit(5).toList();
+        // Les retenues d'aujourd'hui ont leur propre bloc : "a venir" ne garde que les jours suivants.
         List<Retenue> retenuesAVenir = retenueRepository.findAVenir(etabId, horlogeService.aujourdHui())
-            .stream().limit(5).toList();
+            .stream()
+            .filter(r -> r.getDateRetenue() != null && r.getDateRetenue().isAfter(horlogeService.aujourdHui()))
+            .limit(5).toList();
         List<Zone> zones = zoneRepository.findByEtablissementIdOrderByNomAsc(etabId);
 
         long pointagesAujourdHui = pointageRepository.countByEtablissementIdDepuis(etabId, debutJournee);
         long incidentsAujourdHui = incidentRepository.countByEtablissementIdDepuis(etabId, debutJournee);
+
+        // Les retards sont saisis par le surveillant chaque matin, mais n'apparaissaient nulle part
+        // sur son tableau de bord : il devait ouvrir /surveillant/retards pour savoir ou il en etait.
+        List<Retard> retardsDuJour = retardRepository
+            .findByEtablissementIdAndDate(etabId, horlogeService.aujourdHui());
+        model.addAttribute("retardsAujourdHui", retardsDuJour.size());
+        model.addAttribute("retardsDuJour", retardsDuJour.stream().limit(6).toList());
+
+        // Une retenue a surveiller ce soir se perdait au milieu des retenues "a venir".
+        model.addAttribute("retenuesDuJour", retenueRepository
+            .findAVenir(etabId, horlogeService.aujourdHui()).stream()
+            .filter(r -> horlogeService.aujourdHui().equals(r.getDateRetenue()))
+            .toList());
 
         model.addAttribute("pointagesRecents", pointagesRecents);
         model.addAttribute("incidentsRecents", incidentsRecents);

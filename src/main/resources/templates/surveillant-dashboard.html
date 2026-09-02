@@ -57,22 +57,27 @@
 <div th:if="${alerteMsg}" class="p-md rounded-lg bg-error-container text-on-error-container text-sm" th:text="${alerteMsg}"></div>
 <div th:if="${erreurMsg}" class="p-md rounded-lg bg-error-container text-on-error-container text-sm" th:text="${erreurMsg}"></div>
 
-<div class="grid grid-cols-3 gap-sm">
-<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl">
+<div class="grid grid-cols-2 gap-sm">
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/surveillant/presences}">
 <span class="material-symbols-outlined text-primary text-[20px]">groups</span>
 <p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${pointagesAujourdHui}">0</p>
 <p class="text-[10px] text-on-surface-variant uppercase">Pointages</p>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl">
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/surveillant/retards}">
+<span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+<p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${retardsAujourdHui}">0</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Retards</p>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/surveillant/incidents}">
 <span class="material-symbols-outlined text-error text-[20px]">warning</span>
 <p class="font-headline-sm text-headline-sm text-error mt-xs" th:text="${incidentsAujourdHui}">0</p>
 <p class="text-[10px] text-on-surface-variant uppercase">Incidents</p>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl">
-<span class="material-symbols-outlined text-primary text-[20px]">map</span>
-<p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${#lists.size(zones)}">0</p>
-<p class="text-[10px] text-on-surface-variant uppercase">Zones</p>
-</div>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/surveillant/retenues}">
+<span class="material-symbols-outlined text-primary text-[20px]">event_seat</span>
+<p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${#lists.size(retenuesDuJour)}">0</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Retenues ce jour</p>
+</a>
 </div>
 
 <div class="flex flex-col gap-sm">
@@ -88,7 +93,43 @@
 <a th:href="@{/surveillant/presences}" class="w-full bg-surface-container-lowest border border-primary text-primary py-3 rounded-xl flex items-center justify-center gap-sm font-label-md">
 <span class="material-symbols-outlined">how_to_reg</span> Enregistrer un Pointage
 </a>
+<a th:href="@{/surveillant/retards}" class="w-full bg-surface-container-lowest border border-primary text-primary py-3 rounded-xl flex items-center justify-center gap-sm font-label-md">
+<span class="material-symbols-outlined">schedule</span> Noter un Retard
+</a>
 </div>
+
+<!-- Retenues du jour : le surveillant les encadre lui-meme, il doit les voir sur mobile. -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden" th:unless="${#lists.isEmpty(retenuesDuJour)}">
+<div class="px-md py-sm border-b border-outline-variant">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm"><span class="material-symbols-outlined text-primary text-[18px]">event_seat</span>A encadrer aujourd'hui</h3>
+</div>
+<div class="divide-y divide-outline-variant">
+<div class="px-md py-sm flex justify-between items-center gap-sm" th:each="r : ${retenuesDuJour}">
+<div class="min-w-0">
+<p class="font-label-md text-sm truncate" th:text="${r.eleve.prenom + ' ' + r.eleve.nom}">Élève</p>
+<p class="text-xs text-on-surface-variant truncate" th:text="${r.motif}">Motif</p>
+</div>
+<span class="text-xs font-label-md text-primary shrink-0" th:text="${r.heureRetenue} + ' • ' + ${r.salle}">Heure</span>
+</div>
+</div>
+</section>
+
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm"><span class="material-symbols-outlined text-primary text-[18px]">schedule</span>Retards du jour</h3>
+<a class="text-primary font-label-md text-sm" th:href="@{/surveillant/retards}">Voir tout</a>
+</div>
+<div class="divide-y divide-outline-variant">
+<div class="px-md py-sm flex justify-between items-center gap-sm" th:each="r : ${retardsDuJour}">
+<div class="min-w-0">
+<p class="font-label-md text-sm truncate" th:text="${r.eleve.prenom + ' ' + r.eleve.nom}">Élève</p>
+<p class="text-xs text-on-surface-variant truncate" th:text="${r.eleve.classe != null ? r.eleve.classe.nom : ''}">Classe</p>
+</div>
+<span class="text-xs font-label-md text-primary shrink-0" th:text="${r.heureArrivee != null ? #temporals.format(r.heureArrivee, 'HH:mm') : '--'}">08:15</span>
+</div>
+<p class="p-md text-center text-outline text-sm" th:if="${#lists.isEmpty(retardsDuJour)}">Aucun retard note aujourd'hui.</p>
+</div>
+</section>
 
 <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
 <div class="px-md py-sm border-b border-outline-variant flex justify-between items-center">
@@ -264,26 +305,57 @@
 <div th:if="${alerteMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${alerteMsg}"></div>
 <div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
-<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
+<!-- Chaque compteur ouvre la page ou l'on agit dessus : un chiffre seul ne sert a rien au surveillant. -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-lg mb-xl">
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/surveillant/presences}">
 <span class="p-2 bg-secondary-container rounded-lg text-primary w-fit"><span class="material-symbols-outlined">groups</span></span>
 <div>
 <p class="font-label-md text-label-md text-on-surface-variant">Pointages aujourd'hui</p>
 <h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${pointagesAujourdHui}">0</h2>
 </div>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/surveillant/retards}">
+<span class="p-2 bg-primary-fixed rounded-lg text-primary w-fit"><span class="material-symbols-outlined">schedule</span></span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Retards du jour</p>
+<h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${retardsAujourdHui}">0</h2>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/surveillant/incidents}">
 <span class="p-2 bg-error-container rounded-lg text-error w-fit"><span class="material-symbols-outlined">warning</span></span>
 <div>
 <p class="font-label-md text-label-md text-on-surface-variant">Incidents du jour</p>
 <h2 class="font-headline-lg text-headline-lg text-error mt-xs" th:text="${incidentsAujourdHui}">0</h2>
 </div>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
-<span class="p-2 bg-primary-fixed rounded-lg text-primary w-fit"><span class="material-symbols-outlined">map</span></span>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/surveillant/retenues}">
+<span class="p-2 bg-secondary-container rounded-lg text-primary w-fit"><span class="material-symbols-outlined">event_seat</span></span>
 <div>
-<p class="font-label-md text-label-md text-on-surface-variant">Zones enregistrées</p>
-<h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${#lists.size(zones)}">0</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Retenues ce jour</p>
+<h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${#lists.size(retenuesDuJour)}">0</h2>
+</div>
+</a>
+</div>
+
+<!-- Retenues d'aujourd'hui : c'est ce que le surveillant doit encadrer dans la journee meme. -->
+<div class="mb-xl bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden" th:unless="${#lists.isEmpty(retenuesDuJour)}">
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">event_seat</span>
+A encadrer aujourd'hui
+</h3>
+<a class="text-primary font-label-md text-label-md hover:underline" th:href="@{/surveillant/retenues}">Gerer les retenues</a>
+</div>
+<div class="divide-y divide-outline-variant/30">
+<div class="px-lg py-md flex items-center justify-between gap-md flex-wrap" th:each="r : ${retenuesDuJour}">
+<div>
+<p class="font-label-md text-label-md" th:text="${r.eleve.prenom + ' ' + r.eleve.nom + (r.eleve.classe != null ? ' — ' + r.eleve.classe.nom : '')}">Eleve</p>
+<p class="text-body-md text-on-surface-variant" th:text="${r.motif}">Motif</p>
+</div>
+<div class="text-right">
+<p class="font-label-md text-label-md text-primary" th:text="${r.heureRetenue} + ' — ' + ${r.salle}">Heure</p>
+<span class="text-label-sm font-label-sm text-on-surface-variant" th:text="${r.statutPresence != null ? r.statutPresence : 'A pointer'}">Statut</span>
+</div>
 </div>
 </div>
 </div>
@@ -360,6 +432,28 @@ Signaler un Incident
 <span class="material-symbols-outlined">how_to_reg</span>
 Enregistrer un Pointage
 </a>
+<a th:href="@{/surveillant/retards}" class="w-full bg-surface-container-lowest border border-primary text-primary py-4 rounded-xl flex items-center justify-center gap-md font-headline-sm hover:bg-primary-fixed transition-all">
+<span class="material-symbols-outlined">schedule</span>
+Noter un Retard
+</a>
+</div>
+
+<!-- Retards du jour : saisis chaque matin, ils n'etaient visibles que sur leur propre page. -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+<h3 class="font-label-md text-label-md">Retards du jour</h3>
+<a class="text-primary text-label-sm hover:underline" th:href="@{/surveillant/retards}">Voir tout</a>
+</div>
+<div class="divide-y divide-outline-variant">
+<div th:each="r : ${retardsDuJour}" class="px-lg py-md flex justify-between items-center gap-md">
+<div class="min-w-0">
+<p class="text-body-md font-semibold truncate" th:text="${r.eleve.prenom + ' ' + r.eleve.nom}">Élève</p>
+<p class="text-[11px] text-outline truncate" th:text="${r.eleve.classe != null ? r.eleve.classe.nom : ''} + ${r.motif != null and !r.motif.isBlank() ? ' — ' + r.motif : ''}">Classe</p>
+</div>
+<span class="font-label-md text-label-md text-primary shrink-0" th:text="${r.heureArrivee != null ? #temporals.format(r.heureArrivee, 'HH:mm') : '--'}">08:15</span>
+</div>
+<p th:if="${#lists.isEmpty(retardsDuJour)}" class="p-lg text-center text-outline">Aucun retard note aujourd'hui.</p>
+</div>
 </div>
 
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">

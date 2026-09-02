@@ -115,7 +115,7 @@
 <div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
 <div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-lg">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg mb-lg">
 <div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
 <span class="p-2 bg-secondary-container rounded-lg text-primary w-fit"><span class="material-symbols-outlined">groups</span></span>
 <div>
@@ -137,6 +137,14 @@
 <h2 class="font-headline-lg text-headline-lg text-error mt-xs" th:text="${#lists.size(alertesActives)}">0</h2>
 </div>
 </div>
+<!-- Un article epuise doit se voir des l'ouverture, pas apres avoir fait defiler la page. -->
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:classappend="${stocksCritiques > 0} ? 'ring-2 ring-error' : ''" th:href="@{/infirmerie/stock}">
+<span class="p-2 rounded-lg w-fit" th:classappend="${stocksCritiques > 0} ? 'bg-error-container text-error' : 'bg-secondary-container text-primary'"><span class="material-symbols-outlined">inventory_2</span></span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Stock a reapprovisionner</p>
+<h2 class="font-headline-lg text-headline-lg mt-xs" th:classappend="${stocksCritiques > 0} ? 'text-error' : 'text-primary'" th:text="${stocksCritiques}">0</h2>
+</div>
+</a>
 </div>
 
 <div th:each="alerte : ${alertesActives}" class="mb-lg p-lg rounded-xl bg-error-container border border-error flex items-start gap-md relative">

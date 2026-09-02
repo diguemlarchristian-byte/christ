@@ -50,6 +50,9 @@ public class InfirmerieController {
 
     private static final String[] JOURS_COURTS = {"Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"};
 
+    /** En dessous de ce niveau de remplissage, l'article est signale comme a reapprovisionner. */
+    private static final int SEUIL_STOCK_CRITIQUE = 20;
+
     @GetMapping
     public String dashboard(Model model) {
         Long etabId = etablissementService.getCurrentEtablissementId();
@@ -85,7 +88,13 @@ public class InfirmerieController {
         }
         long maxFrequence = Math.max(1, frequence.stream().mapToLong(p -> (long) p.get("total")).max().orElse(1));
 
-        List<ArticleInfirmerie> stocks = articleInfirmerieRepository.findByEtablissementIdOrderByDesignationAsc(etabId);
+        // Trie du plus critique au mieux approvisionne : un article epuise ne doit pas se perdre
+        // au milieu d'une liste alphabetique, l'infirmier doit le voir avant de recevoir un eleve.
+        List<ArticleInfirmerie> stocks = articleInfirmerieRepository.findByEtablissementIdOrderByDesignationAsc(etabId)
+            .stream()
+            .sorted(java.util.Comparator.comparingInt(ArticleInfirmerie::getPourcentage))
+            .toList();
+        model.addAttribute("stocksCritiques", stocks.stream().filter(s -> s.getPourcentage() <= SEUIL_STOCK_CRITIQUE).count());
 
         Map<String, Long> paiCounts = conditionsActives.stream()
             .collect(Collectors.groupingBy(ConditionMedicale::getLibelle, LinkedHashMap::new, Collectors.counting()));
