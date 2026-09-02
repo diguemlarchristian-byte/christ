@@ -17,4 +17,7 @@ public interface MessagePriveRepository extends JpaRepository<MessagePrive, Long
     List<MessagePrive> findConversation(@Param("email1") String email1, @Param("email2") String email2);
 
     long countByDestinataireEmailAndExpediteurEmailAndLuFalse(String destinataireEmail, String expediteurEmail);
+
+    /** Total des messages recus non lus, tous correspondants confondus (badge d'accueil). */
+    long countByDestinataireEmailAndLuFalse(String destinataireEmail);
 }

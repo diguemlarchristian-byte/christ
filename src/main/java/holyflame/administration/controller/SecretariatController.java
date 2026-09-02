@@ -55,6 +55,7 @@ public class SecretariatController {
     @Autowired private PaiementRepository paiementRepository;
     @Autowired private ClasseRepository classeRepository;
     @Autowired private UtilisateurRepository utilisateurRepository;
+    @Autowired private holyflame.administration.repository.MessagePriveRepository messagePriveRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
@@ -100,6 +101,21 @@ public class SecretariatController {
             .collect(java.util.stream.Collectors.toSet());
         model.addAttribute("eleveIdsAbsentsAujourdHui", eleveIdsAbsentsAujourdHui);
         model.addAttribute("eleveIdsRetardAujourdHui", eleveIdsRetardAujourdHui);
+
+        // Bandeau "A traiter aujourd'hui" : ce que la secretaire doit voir sans avoir a chercher.
+        java.util.Set<Long> idsAffiches = eleves.stream().map(Eleve::getId).collect(java.util.stream.Collectors.toSet());
+        long absencesAJustifier = absences.stream()
+            .filter(a -> a.getEleve() != null && idsAffiches.contains(a.getEleve().getId()))
+            .filter(a -> !a.isEstJustifiee())
+            .filter(a -> horlogeService.aujourdHui().equals(a.getDate()))
+            .count();
+        model.addAttribute("absencesAJustifier", absencesAJustifier);
+        model.addAttribute("dateAujourdHui", horlogeService.aujourdHui());
+        model.addAttribute("retardsAujourdHui", eleveIdsRetardAujourdHui.size());
+        model.addAttribute("totalSansCompte", eleves.stream().filter(e -> e.getCompteEmail() == null).count());
+        Utilisateur moi = etablissementService.getCurrentUtilisateur();
+        model.addAttribute("messagesNonLus",
+            moi != null ? messagePriveRepository.countByDestinataireEmailAndLuFalse(moi.getEmail()) : 0L);
         return "secretariat";
     }
 
@@ -265,7 +281,8 @@ public class SecretariatController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) String periode,
             @RequestParam(required = false) boolean estJustifiee,
-            @RequestParam(required = false) String motif) {
+            @RequestParam(required = false) String motif,
+            @RequestParam(required = false) String retour) {
 
         Long etabId = etablissementService.getCurrentEtablissementId();
         Eleve eleve = eleveRepository.findById(eleveId).orElseThrow();
@@ -283,7 +300,7 @@ public class SecretariatController {
         journalService.log("ABSENCE_SAISIE", "ABSENCES",
             eleve.getNom() + " " + eleve.getPrenom() + " — " + date);
         if (!estJustifiee) alerterAbsenceParSms(eleve, date);
-        return "redirect:/secretariat";
+        return "absences".equals(retour) ? "redirect:/secretariat/absences" : "redirect:/secretariat";
     }
 
     // Une absence non justifiee n'etait visible que si le parent pensait a se reconnecter au
@@ -303,14 +320,73 @@ public class SecretariatController {
         }
     }
 
+    // Le secretariat recoit les appels et les mots des parents : c'est lui qui justifie une absence.
+    // Le POST de saisie existait deja, mais aucun ecran ne permettait ni de saisir, ni de justifier.
+    @GetMapping("/absences")
+    public String absences(@RequestParam(required = false) Long classeId, Model model) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
+        String anneeActive = etablissementService.getAnneeScolaireActive();
+
+        var classes = classeRepository.findByEtablissementId(etabId).stream()
+            .filter(c -> anneeActive.equals(c.getAnneeScolaire()))
+            .toList();
+        model.addAttribute("classes", classes);
+        model.addAttribute("classeId", classeId);
+
+        var toutes = absenceRepository.findByEtablissementId(etabId).stream()
+            .filter(a -> a.getEleve() != null)
+            .filter(a -> classeId == null
+                || (a.getEleve().getClasse() != null && classeId.equals(a.getEleve().getClasse().getId())))
+            .toList();
+
+        LocalDate aujourdHui = horlogeService.aujourdHui();
+        model.addAttribute("dateAujourdHui", aujourdHui);
+        model.addAttribute("absencesDuJour", toutes.stream()
+            .filter(a -> aujourdHui.equals(a.getDate()))
+            .sorted(java.util.Comparator.comparing(a -> a.getEleve().getNom()))
+            .toList());
+        // Les absences anciennes restent justifiables : un parent apporte souvent le mot plusieurs jours apres.
+        model.addAttribute("absencesEnAttente", toutes.stream()
+            .filter(a -> !a.isEstJustifiee() && a.getDate() != null && a.getDate().isBefore(aujourdHui))
+            .sorted(java.util.Comparator.comparing(Absence::getDate).reversed())
+            .limit(50)
+            .toList());
+
+        var eleves = eleveRepository.findByEtablissementIdOrderByNomAscPrenomAsc(etabId).stream()
+            .filter(e -> e.getClasse() == null || anneeActive.equals(e.getClasse().getAnneeScolaire()))
+            .toList();
+        model.addAttribute("eleves", eleves);
+        return "secretariat-absences";
+    }
+
+    @PostMapping("/absences/{id}/justifier")
+    public String justifierAbsence(@PathVariable Long id,
+                                   @RequestParam(required = false) String motif,
+                                   RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Absence absence = absenceRepository.findById(id).orElseThrow();
+        if (absence.getEleve() != null) verifierProprietaire(absence.getEleve(), etabId);
+        anneeScolaireService.verifierModifiable(absence.getAnneeScolaire(), etabId);
+        absence.setEstJustifiee(true);
+        if (motif != null && !motif.isBlank()) absence.setMotif(motif.trim());
+        absenceRepository.save(absence);
+        journalService.log("ABSENCE_JUSTIFIEE", "ABSENCES",
+            absence.getEleve().getNom() + " " + absence.getEleve().getPrenom() + " — " + absence.getDate());
+        ra.addFlashAttribute("successMsg", "Absence justifiee pour "
+            + absence.getEleve().getPrenom() + " " + absence.getEleve().getNom() + ".");
+        return "redirect:/secretariat/absences";
+    }
+
     @PostMapping("/absences/{id}/supprimer")
-    public String supprimerAbsence(@PathVariable Long id) {
+    public String supprimerAbsence(@PathVariable Long id,
+                                   @RequestParam(required = false) String retour) {
         Long etabId = etablissementService.getCurrentEtablissementId();
         Absence absence = absenceRepository.findById(id).orElseThrow();
         if (absence.getEleve() != null) verifierProprietaire(absence.getEleve(), etabId);
         anneeScolaireService.verifierModifiable(absence.getAnneeScolaire(), etabId);
         absenceRepository.deleteById(id);
-        return "redirect:/secretariat";
+        return "absences".equals(retour) ? "redirect:/secretariat/absences" : "redirect:/secretariat";
     }
 
     // ──────────────────────────────────────────────────────────────
