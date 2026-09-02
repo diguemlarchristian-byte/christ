@@ -3,82 +3,199 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EduSystem Pro - Suivi Pedagogique (Direction)</title>
+<title>Suivi pedagogique | EduSystem Pro</title>
 <link rel="stylesheet" href="/css/fonts.css">
 <script src="/js/tailwind.js"></script>
 <style>
     body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
+<script id="tailwind-config" th:inline="javascript">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f7f9fb", "background": "#f7f9fb", "on-primary": "#ffffff",
+            "error": "#ba1a1a", "tertiary-container": "#384055", "on-tertiary-container": "#a4acc5",
+            "error-container": "#ffdad6", "primary-fixed": "#dce1ff", "on-surface": "#191c1e",
+            "outline": "#757682", "primary-fixed-dim": "#b6c4ff", "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c5c5d3", "primary": "#00236f", "secondary-fixed-dim": "#b7c8e1",
+            "on-error": "#ffffff", "on-error-container": "#93000a", "on-secondary-container": "#54647a",
+            "surface-container": "#eceef0", "on-background": "#191c1e", "on-primary-container": "#90a8ff",
+            "on-surface-variant": "#444651", "secondary-container": "#d0e1fb", "primary-container": "#1e3a8a",
+            "surface-container-high": "#e6e8ea", "tertiary": [[${accentColor}]], "surface": "#f7f9fb",
+            "secondary": "#505f76", "secondary-fixed": "#d3e4fe", "surface-container-low": "#f2f4f6",
+            "surface-dim": "#d8dadc"
+          },
+          "borderRadius": {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          "spacing": {"xs": "4px", "gutter": "24px", "xl": "32px", "lg": "24px", "sm": "8px", "md": "16px", "base": "4px", "sidebar-width": "260px", "container-max": "1440px"},
+          "fontFamily": {"headline-md": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "headline-sm": ["Inter"], "code": ["Inter"], "label-sm": ["Inter"], "body-md": ["Inter"]},
+          "fontSize": {
+            "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "code": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+</script>
 </head>
-<body class="bg-background text-gray-900">
-<header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
+<body class="bg-background text-on-background antialiased">
+
+<!-- ===================== VERSION MOBILE ===================== -->
+<div class="md:hidden min-h-screen bg-background pb-20">
+<header class="w-full top-0 sticky flex items-center gap-sm h-14 px-md z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary">fact_check</span>
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold">Suivi des saisies</h1>
+</header>
+<section class="px-md pt-4 space-y-3">
+<p class="text-on-surface-variant font-body-md" th:if="${suiviRows.isEmpty()}">
+Aucune autorisation d'enseignement trouvee.
+</p>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md" th:each="row : ${suiviRows}">
+<div class="flex items-start justify-between gap-sm">
 <div>
-<h1 class="text-xl font-bold text-blue-900">Suivi Pedagogique</h1>
-<p class="text-gray-500 text-sm">Vue Direction — progression de la saisie des notes par enseignant.</p>
+<p class="font-label-md text-label-md text-on-surface" th:text="${row.enseignantNom}">Nom</p>
+<p class="text-on-surface-variant font-label-sm" th:text="${row.matiereNom} + ' — ' + ${row.classeNom}">Matiere</p>
 </div>
-<a class="flex items-center gap-2 text-blue-900 font-medium text-sm" href="/dashboard">
-<span class="material-symbols-outlined">arrow_back</span> Retour au tableau de bord
-</a>
+<span class="px-md py-1 rounded-full font-label-sm shrink-0"
+      th:classappend="${row.statut == 'COMPLET'} ? 'bg-secondary-container text-on-secondary-container' : (${row.statut == 'EN_COURS'} ? 'bg-primary-fixed text-primary' : 'bg-error-container text-on-error-container')"
+      th:text="${row.statut == 'COMPLET'} ? 'Complet' : (${row.statut == 'EN_COURS'} ? 'En cours' : 'Non rempli')">Statut</span>
+</div>
+<p class="mt-sm text-on-surface-variant font-body-md" th:text="${row.nbElevesSaisies} + ' / ' + ${row.totalEleves} + ' eleve(s) notes'">0 / 0</p>
+</div>
+</section>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('direction-suivi')}"></div>
+</div>
+
+<!-- ===================== VERSION DESKTOP ===================== -->
+<div class="hidden md:contents">
+<div th:replace="~{fragments/sidebar-admin :: admin('direction-suivi')}"></div>
+
+<header class="h-16 fixed top-0 right-0 left-sidebar-width bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-lg w-full z-40">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Suivi pedagogique</h2>
+<div class="flex items-center gap-sm">
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface" th:if="${utilisateurConnecte != null}" th:text="${utilisateurConnecte.prenom} + ' ' + ${utilisateurConnecte.nom}">Directeur</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-tight" th:text="${utilisateurConnecte != null ? utilisateurConnecte.role : ''}">DIRECTEUR</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold border border-outline-variant" th:text="${utilisateurConnecte != null ? (#strings.isEmpty(utilisateurConnecte.prenom) ? '' : #strings.substring(utilisateurConnecte.prenom,0,1)) + (#strings.isEmpty(utilisateurConnecte.nom) ? '' : #strings.substring(utilisateurConnecte.nom,0,1)) : 'D'}">D</div>
+</div>
 </header>
 
-<main class="max-w-7xl mx-auto px-8 py-8">
+<main class="ml-sidebar-width pt-16 min-h-screen">
+<div class="max-w-container-max mx-auto p-lg">
 
-<form class="bg-white border border-gray-200 rounded-xl p-lg mb-lg flex flex-wrap gap-md items-end" method="get">
-<div>
-<label class="text-xs text-gray-500 block mb-1">Enseignant</label>
-<input class="p-2 border border-gray-300 rounded-lg" name="filtreEnseignant" placeholder="Nom..." th:value="${filtreEnseignant}" type="text"/>
+<div class="mb-xl">
+<nav class="flex items-center gap-xs text-on-surface-variant font-label-sm mb-xs">
+<a class="hover:text-primary hover:underline" href="/dashboard">Tableau de bord</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Suivi des saisies</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Suivi pedagogique</h2>
+<p class="text-on-surface-variant font-body-md">Progression de la saisie des notes, par enseignant, matiere et classe.</p>
+</div>
+
+<!-- Synthese : la question du directeur est "qui n'a pas encore saisi ?", pas "voici 80 lignes" -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex items-center gap-lg">
+<div class="w-12 h-12 bg-error-container text-on-error-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">pending_actions</span>
 </div>
 <div>
-<label class="text-xs text-gray-500 block mb-1">Matiere</label>
-<select class="p-2 border border-gray-300 rounded-lg" name="filtreMatiere">
+<p class="text-on-surface-variant font-label-sm uppercase">Aucune note saisie</p>
+<p class="text-headline-md font-headline-md" th:text="${nbNonRempli}">0</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex items-center gap-lg">
+<div class="w-12 h-12 bg-primary-fixed text-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">hourglass_top</span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-sm uppercase">Saisie en cours</p>
+<p class="text-headline-md font-headline-md" th:text="${nbEnCours}">0</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex items-center gap-lg">
+<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">task_alt</span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-sm uppercase">Complet</p>
+<p class="text-headline-md font-headline-md" th:text="${nbComplet}">0</p>
+</div>
+</div>
+</div>
+
+<form class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mb-lg flex flex-wrap gap-md items-end" method="get">
+<label class="block">
+<span class="block text-on-surface-variant font-label-sm mb-xs">Enseignant</span>
+<input class="bg-surface-container-low border border-outline-variant rounded-lg px-md py-2.5 font-body-md" name="filtreEnseignant" placeholder="Nom..." th:value="${filtreEnseignant}" type="text"/>
+</label>
+<label class="block">
+<span class="block text-on-surface-variant font-label-sm mb-xs">Matiere</span>
+<select class="bg-surface-container-low border border-outline-variant rounded-lg px-md py-2.5 font-body-md text-on-surface" name="filtreMatiere">
 <option value="">Toutes</option>
 <option th:each="m : ${matieres}" th:selected="${filtreMatiere != null and filtreMatiere == m.id}" th:text="${m.nom}" th:value="${m.id}"></option>
 </select>
-</div>
-<div>
-<label class="text-xs text-gray-500 block mb-1">Classe</label>
-<select class="p-2 border border-gray-300 rounded-lg" name="filtreClasse">
+</label>
+<label class="block">
+<span class="block text-on-surface-variant font-label-sm mb-xs">Classe</span>
+<select class="bg-surface-container-low border border-outline-variant rounded-lg px-md py-2.5 font-body-md text-on-surface" name="filtreClasse">
 <option value="">Toutes</option>
 <option th:each="c : ${classes}" th:selected="${filtreClasse != null and filtreClasse == c.id}" th:text="${c.nom}" th:value="${c.id}"></option>
 </select>
-</div>
-<button class="bg-blue-900 text-white px-lg py-2 rounded-lg font-medium" type="submit">Filtrer</button>
-<a class="text-gray-500 text-sm" href="/direction/suivi">Reinitialiser</a>
+</label>
+<button class="bg-primary text-on-primary px-lg py-2.5 rounded-lg font-label-md hover:opacity-90 transition-all" type="submit">Filtrer</button>
+<a class="text-on-surface-variant font-label-md hover:text-primary hover:underline py-2.5" href="/direction/suivi">Reinitialiser</a>
 </form>
 
-<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-<table class="w-full text-left text-sm">
-<thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-left">
+<thead class="bg-surface-container-low border-b border-outline-variant">
 <tr>
-<th class="px-5 py-3">Enseignant</th>
-<th class="px-5 py-3">Matiere</th>
-<th class="px-5 py-3">Classe</th>
-<th class="px-5 py-3">Derniere saisie</th>
-<th class="px-5 py-3">Eleves notes</th>
-<th class="px-5 py-3">Statut</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Enseignant</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Matiere</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Classe</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Derniere saisie</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Eleves notes</th>
+<th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Statut</th>
 </tr>
 </thead>
-<tbody class="divide-y divide-gray-100">
+<tbody class="divide-y divide-outline-variant/30">
 <tr th:if="${suiviRows.isEmpty()}">
-<td class="px-5 py-8 text-center text-gray-500" colspan="6">Aucune autorisation d'enseignement trouvee pour ces filtres.</td>
+<td class="px-lg py-xl text-center text-on-surface-variant font-body-md" colspan="6">Aucune autorisation d'enseignement trouvee pour ces filtres.</td>
 </tr>
 <tr th:each="row : ${suiviRows}">
-<td class="px-5 py-3 font-medium" th:text="${row.enseignantNom}">Nom</td>
-<td class="px-5 py-3" th:text="${row.matiereNom}">Matiere</td>
-<td class="px-5 py-3" th:text="${row.classeNom}">Classe</td>
-<td class="px-5 py-3 text-gray-500" th:text="${row.derniereSaisie != null} ? ${#temporals.format(row.derniereSaisie, 'dd/MM/yyyy HH:mm')} : '--'">--</td>
-<td class="px-5 py-3" th:text="${row.nbElevesSaisies} + ' / ' + ${row.totalEleves}">0 / 0</td>
-<td class="px-5 py-3">
-<span class="px-2 py-0.5 rounded-full text-xs font-medium"
-      th:classappend="${row.statut == 'COMPLET'} ? 'bg-green-100 text-green-800' : (${row.statut == 'EN_COURS'} ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')"
+<td class="px-lg py-md font-label-md text-on-surface" th:text="${row.enseignantNom}">Nom</td>
+<td class="px-lg py-md text-on-surface font-body-md" th:text="${row.matiereNom}">Matiere</td>
+<td class="px-lg py-md text-on-surface font-body-md" th:text="${row.classeNom}">Classe</td>
+<td class="px-lg py-md text-on-surface-variant font-body-md" th:text="${row.derniereSaisie != null} ? ${#temporals.format(row.derniereSaisie, 'dd/MM/yyyy HH:mm')} : '--'">--</td>
+<td class="px-lg py-md text-on-surface font-body-md" th:text="${row.nbElevesSaisies} + ' / ' + ${row.totalEleves}">0 / 0</td>
+<td class="px-lg py-md">
+<span class="px-md py-1 rounded-full font-label-sm"
+      th:classappend="${row.statut == 'COMPLET'} ? 'bg-secondary-container text-on-secondary-container' : (${row.statut == 'EN_COURS'} ? 'bg-primary-fixed text-primary' : 'bg-error-container text-on-error-container')"
       th:text="${row.statut == 'COMPLET'} ? 'Complet' : (${row.statut == 'EN_COURS'} ? 'En cours' : 'Non rempli')">Statut</span>
 </td>
 </tr>
 </tbody>
 </table>
 </div>
+</div>
 
+</div>
 </main>
+</div>
 </body>
 </html>

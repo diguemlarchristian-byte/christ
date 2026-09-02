@@ -21,6 +21,10 @@
 <span class="material-symbols-outlined">school</span>
 <span class="font-label-md text-label-md">Gestion Academique</span>
 </a>
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'direction-suivi'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/direction/suivi">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-md text-label-md">Suivi des saisies</span>
+</a>
 <a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'emploi-du-temps'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte == null or (utilisateurConnecte.role != 'ADMIN' and utilisateurConnecte.role != 'DIRECTEUR')}" href="/emploi-du-temps">
 <span class="material-symbols-outlined">calendar_month</span>
 <span class="font-label-md text-label-md">Emploi du temps</span>

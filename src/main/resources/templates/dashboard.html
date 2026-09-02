@@ -204,9 +204,13 @@
 <span class="material-symbols-outlined text-primary">calendar_add_on</span>
 <span class="font-label-sm text-label-sm text-center px-xs">Emploi du temps</span>
 </a>
-<a class="flex-none w-24 aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col items-center justify-center gap-xs" href="/messagerie" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'ENSEIGNANT' or utilisateurConnecte.role == 'SECRETAIRE')}">
+<a class="flex-none w-24 aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col items-center justify-center gap-xs" href="/messagerie" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR' or utilisateurConnecte.role == 'ENSEIGNANT' or utilisateurConnecte.role == 'SECRETAIRE')}">
 <span class="material-symbols-outlined text-primary">mail</span>
 <span class="font-label-sm text-label-sm text-center px-xs">Message</span>
+</a>
+<a class="flex-none w-24 aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col items-center justify-center gap-xs" href="/direction/suivi" th:if="${utilisateurConnecte != null and utilisateurConnecte.role == 'DIRECTEUR'}">
+<span class="material-symbols-outlined text-primary">fact_check</span>
+<span class="font-label-sm text-label-sm text-center px-xs">Suivi saisies</span>
 </a>
 </div>
 </section>
@@ -343,6 +347,27 @@
 </div>
 <!-- Repartition des notes et resume budgetaire -->
 <div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg grid grid-cols-1 md:grid-cols-4 gap-lg">
+<!-- Le directeur n'a pas acces au budget : plutot qu'une colonne vide, il retrouve ici son
+     suivi pedagogique, la seule page qui lui est propre et qui n'etait liee nulle part. -->
+<div class="md:col-span-1 border-r border-outline-variant pr-lg" th:if="${utilisateurConnecte != null and utilisateurConnecte.role == 'DIRECTEUR'}">
+<h4 class="font-headline-sm text-headline-sm mb-md">Suivi des saisies</h4>
+<div class="bg-surface-container-low rounded-lg p-md space-y-md">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cours sans aucune note</p>
+<p class="font-headline-md text-headline-md" th:classappend="${saisiesNonRemplies > 0} ? 'text-error' : 'text-primary'" th:text="${saisiesNonRemplies}">0</p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant" th:if="${saisiesNonRemplies == 0}">
+Tous les enseignants ont commence leur saisie.
+</p>
+<p class="font-body-md text-body-md text-on-surface-variant" th:if="${saisiesNonRemplies > 0}">
+Autant de couples enseignant / matiere / classe encore vides.
+</p>
+<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-xs" href="/direction/suivi">
+Voir le detail
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
 <div class="md:col-span-1 border-r border-outline-variant pr-lg" th:if="${utilisateurConnecte != null and utilisateurConnecte.role != 'DIRECTEUR'}">
 <h4 class="font-headline-sm text-headline-sm mb-md">Resume budgetaire</h4>
 <div class="bg-surface-container-low rounded-lg p-md space-y-md">

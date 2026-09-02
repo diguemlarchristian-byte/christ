@@ -19,12 +19,9 @@ public class DirectionController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private ParametreRepository parametreRepository;
     @Autowired private PersonnelRepository personnelRepository;
-    @Autowired private EnseignantAutorisationRepository autorisationRepository;
-    @Autowired private UtilisateurRepository utilisateurRepository;
     @Autowired private MatiereRepository matiereRepository;
     @Autowired private ClasseRepository classeRepository;
-    @Autowired private NoteRepository noteRepository;
-    @Autowired private EleveRepository eleveRepository;
+    @Autowired private holyflame.administration.service.SuiviSaisieService suiviSaisieService;
 
     @GetMapping("/suivi")
     public String suivi(
@@ -54,61 +51,31 @@ public class DirectionController {
             }
         }
 
-        List<Matiere> matieres = matiereRepository.findByEtablissementIdOrderByNomAsc(etabId);
-        List<Classe>  classes  = classeRepository.findByEtablissementId(etabId);
-        Map<Long, Matiere> matiereMap = matieres.stream().collect(Collectors.toMap(Matiere::getId, m -> m));
-        Map<Long, Classe>  classeMap  = classes.stream().collect(Collectors.toMap(Classe::getId, c -> c));
+        model.addAttribute("matieres", matiereRepository.findByEtablissementIdOrderByNomAsc(etabId));
+        model.addAttribute("classes", classeRepository.findByEtablissementId(etabId));
 
-        model.addAttribute("matieres", matieres);
-        model.addAttribute("classes", classes);
-
-        List<EnseignantAutorisation> autorisations = autorisationRepository.findByEtablissementId(etabId);
-        List<Map<String, Object>> suiviRows = new ArrayList<>();
-
-        for (EnseignantAutorisation auth : autorisations) {
-            Utilisateur enseignant = utilisateurRepository.findById(auth.getEnseignantId()).orElse(null);
-            Matiere matiere = matiereMap.get(auth.getMatiereId());
-            Classe  classe  = classeMap.get(auth.getClasseId());
-            if (matiere == null || classe == null) continue;
-
-            String nomEnseignant = enseignant != null
-                ? enseignant.getNom() + " " + enseignant.getPrenom()
-                : "(compte supprimé)";
-
-            if (filtreEnseignant != null && !filtreEnseignant.isBlank()
-                    && !nomEnseignant.toLowerCase().contains(filtreEnseignant.toLowerCase())) continue;
-            if (filtreMatiere != null && !auth.getMatiereId().equals(filtreMatiere)) continue;
-            if (filtreClasse  != null && !auth.getClasseId().equals(filtreClasse))   continue;
-
-            List<Note> notes = noteRepository.findTopByMatiereAndClasse(auth.getMatiereId(), auth.getClasseId());
-            long nbElevesSaisies = notes.stream()
-                .map(n -> n.getEleve() != null ? n.getEleve().getId() : null)
-                .filter(Objects::nonNull).distinct().count();
-            long totalEleves = eleveRepository.countByClasseId(auth.getClasseId());
-            LocalDateTime derniereSaisie = notes.isEmpty() ? null : notes.get(0).getSaisieAt();
-
-            String statut;
-            if (notes.isEmpty())                                          statut = "NON_REMPLI";
-            else if (totalEleves > 0 && nbElevesSaisies >= totalEleves)  statut = "COMPLET";
-            else                                                          statut = "EN_COURS";
-
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("enseignantNom",   nomEnseignant);
-            row.put("matiereNom",      matiere.getNom());
-            row.put("classeNom",       classe.getNom());
-            row.put("derniereSaisie",  derniereSaisie);
-            row.put("nbNotes",         notes.size());
-            row.put("nbElevesSaisies", nbElevesSaisies);
-            row.put("totalEleves",     totalEleves);
-            row.put("statut",          statut);
-            suiviRows.add(row);
-        }
-
+        List<Map<String, Object>> suiviRows =
+            suiviSaisieService.lignes(etabId, filtreEnseignant, filtreMatiere, filtreClasse);
         model.addAttribute("suiviRows", suiviRows);
         model.addAttribute("filtreEnseignant", filtreEnseignant);
         model.addAttribute("filtreMatiere", filtreMatiere);
         model.addAttribute("filtreClasse", filtreClasse);
 
+        // Synthese : ce que le directeur cherche en arrivant, avant meme de lire le tableau.
+        model.addAttribute("nbNonRempli", compter(suiviRows, holyflame.administration.service.SuiviSaisieService.NON_REMPLI));
+        model.addAttribute("nbEnCours",   compter(suiviRows, holyflame.administration.service.SuiviSaisieService.EN_COURS));
+        model.addAttribute("nbComplet",   compter(suiviRows, holyflame.administration.service.SuiviSaisieService.COMPLET));
+
+        // Necessaires a la barre laterale partagee, sinon la page s'affiche sans navigation.
+        model.addAttribute("utilisateurConnecte", currentUser);
+        model.addAttribute("nomEtablissement",
+            etablissementService.getCurrentEtablissement() != null
+                ? etablissementService.getCurrentEtablissement().getNom() : "EduSystem Pro");
+
         return "direction/suivi";
+    }
+
+    private long compter(List<Map<String, Object>> lignes, String statut) {
+        return lignes.stream().filter(l -> statut.equals(l.get("statut"))).count();
     }
 }

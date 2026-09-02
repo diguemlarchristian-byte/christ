@@ -29,6 +29,7 @@ public class DashboardController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private AlerteService alerteService;
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
+    @Autowired private holyflame.administration.service.SuiviSaisieService suiviSaisieService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -42,6 +43,12 @@ public class DashboardController {
 
         // Alertes automatiques
         model.addAttribute("alertes", alerteService.getAlertes(etabId));
+
+        // Le directeur pilote la saisie des notes : ce compteur remplace pour lui le resume
+        // budgetaire, auquel son role n'a pas acces. Calcule uniquement dans ce cas.
+        boolean estDirecteur = utilisateurConnecte != null && "DIRECTEUR".equals(utilisateurConnecte.getRole());
+        model.addAttribute("saisiesNonRemplies",
+            estDirecteur && etabId != null ? suiviSaisieService.nbSansAucuneNote(etabId) : 0L);
 
         // KPIs — filtrés par établissement
         model.addAttribute("totalEleves",     etabId != null ? eleveRepository.countByEtablissementId(etabId)     : 0L);
