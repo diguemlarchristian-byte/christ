@@ -71,6 +71,14 @@ public class SuperAdminController {
         model.addAttribute("totalActifs", etablissements.stream().filter(e -> "ACTIF".equals(e.getStatut())).count());
         model.addAttribute("totalUtilisateurs", tousUtilisateurs.size());
         model.addAttribute("tousUtilisateurs", tousUtilisateurs);
+
+        // Un etablissement sans compte ADMIN est inutilisable : personne ne peut s'y connecter
+        // pour l'administrer. La colonne "Admin" du tableau se contentait d'afficher "--", ce qui
+        // ne distingue pas une panne bloquante d'une donnee manquante anodine.
+        List<Etablissement> sansAdmin = etablissements.stream()
+            .filter(e -> !adminParEtab.containsKey(e.getId()))
+            .toList();
+        model.addAttribute("etablissementsSansAdmin", sansAdmin);
         return "super-admin/dashboard";
     }
 

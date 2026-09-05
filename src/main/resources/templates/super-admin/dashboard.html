@@ -60,6 +60,20 @@
 </div>
 </div>
 
+<!-- Panne bloquante : sans compte ADMIN, personne ne peut administrer l'etablissement.
+     La colonne "Admin" du tableau ci-dessous n'affichait qu'un discret "--". -->
+<div class="mb-8 rounded-xl border border-red-300 bg-red-50 p-5" th:unless="${#lists.isEmpty(etablissementsSansAdmin)}">
+<p class="flex items-center gap-2 font-semibold text-red-800">
+<span class="material-symbols-outlined text-[20px]">error</span>
+<span th:text="${#lists.size(etablissementsSansAdmin)} + ' etablissement(s) sans compte administrateur'">0 etablissement</span>
+</p>
+<p class="mt-1 text-sm text-red-700">Personne ne peut s'y connecter pour l'administrer. Creez un compte ADMIN depuis la ligne concernee.</p>
+<div class="mt-3 flex flex-wrap gap-2">
+<span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-red-800 border border-red-200"
+      th:each="e : ${etablissementsSansAdmin}" th:text="${e.nom}">Etablissement</span>
+</div>
+</div>
+
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
 <table class="w-full text-left text-sm">
 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
@@ -81,7 +95,12 @@
 <tr th:each="e : ${etablissements}">
 <td class="px-5 py-3 font-medium" th:text="${e.nom}">Nom</td>
 <td class="px-5 py-3 font-mono text-xs" th:text="${e.codeAcces}">CODE</td>
-<td class="px-5 py-3 text-gray-600" th:text="${adminParEtab.get(e.id) != null ? adminParEtab.get(e.id).prenom + ' ' + adminParEtab.get(e.id).nom : '--'}">Admin</td>
+<td class="px-5 py-3">
+<span class="text-gray-600" th:if="${adminParEtab.get(e.id) != null}" th:text="${adminParEtab.get(e.id).prenom} + ' ' + ${adminParEtab.get(e.id).nom}">Admin</span>
+<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800" th:if="${adminParEtab.get(e.id) == null}">
+<span class="material-symbols-outlined text-[14px]">error</span> Aucun admin
+</span>
+</td>
 <td class="px-5 py-3" th:text="${nbElevesParEtab.get(e.id)}">0</td>
 <td class="px-5 py-3" th:text="${nbPersonnelsParEtab.get(e.id)}">0</td>
 <td class="px-5 py-3">
