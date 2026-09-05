@@ -55,17 +55,22 @@
 <div th:if="${successMsg}" class="p-md rounded-lg bg-success-container text-on-success-container text-sm" th:text="${successMsg}"></div>
 <div th:if="${erreurMsg}" class="p-md rounded-lg bg-error-container text-on-error-container text-sm" th:text="${erreurMsg}"></div>
 
-<div class="grid grid-cols-2 gap-sm">
-<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl">
+<div class="grid grid-cols-3 gap-sm">
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/marketing/galerie}">
 <span class="material-symbols-outlined text-primary text-[20px]">photo_library</span>
 <p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${nbPhotos}">0</p>
 <p class="text-[10px] text-on-surface-variant uppercase">Photos</p>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl">
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl" th:href="@{/marketing/evenements}">
 <span class="material-symbols-outlined text-primary text-[20px]">event</span>
 <p class="font-headline-sm text-headline-sm text-primary mt-xs" th:text="${nbEvenements}">0</p>
-<p class="text-[10px] text-on-surface-variant uppercase">Événements</p>
-</div>
+<p class="text-[10px] text-on-surface-variant uppercase">Ev. a venir</p>
+</a>
+<a class="bg-surface-container-lowest border p-md rounded-xl" th:classappend="${nbBrouillons > 0} ? 'border-amber-500' : 'border-outline-variant'" th:href="@{/marketing/actualites}">
+<span class="material-symbols-outlined text-[20px]" th:classappend="${nbBrouillons > 0} ? 'text-amber-700' : 'text-primary'">edit_note</span>
+<p class="font-headline-sm text-headline-sm mt-xs" th:classappend="${nbBrouillons > 0} ? 'text-amber-700' : 'text-primary'" th:text="${nbBrouillons}">0</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Brouillons</p>
+</a>
 </div>
 
 <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
@@ -249,21 +254,32 @@ Site public activé
 <div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
 <div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl">
-<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/marketing/galerie}">
 <span class="p-2 bg-secondary-container rounded-lg text-primary w-fit"><span class="material-symbols-outlined">photo_library</span></span>
 <div>
 <p class="font-label-md text-label-md text-on-surface-variant">Photos dans la galerie</p>
 <h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${nbPhotos}">0</h2>
 </div>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm">
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors" th:href="@{/marketing/evenements}">
 <span class="p-2 bg-primary-fixed rounded-lg text-primary w-fit"><span class="material-symbols-outlined">event</span></span>
 <div>
 <p class="font-label-md text-label-md text-on-surface-variant">Événements à venir</p>
 <h2 class="font-headline-lg text-headline-lg text-primary mt-xs" th:text="${nbEvenements}">0</h2>
+<p class="text-label-sm text-on-surface-variant" th:if="${nbEvenementsPasses > 0}" th:text="${nbEvenementsPasses} + ' evenement(s) passe(s), plus visible(s) du public'">0 passés</p>
 </div>
+</a>
+<!-- Une actualite laissee en brouillon n'apparait pas sur le site : elle doit se voir ici. -->
+<a class="bg-surface-container-lowest border p-lg rounded-xl flex flex-col gap-sm hover:border-primary transition-colors"
+   th:classappend="${nbBrouillons > 0} ? 'border-amber-500' : 'border-outline-variant'" th:href="@{/marketing/actualites}">
+<span class="p-2 rounded-lg w-fit" th:classappend="${nbBrouillons > 0} ? 'bg-amber-100 text-amber-700' : 'bg-secondary-container text-primary'"><span class="material-symbols-outlined">edit_note</span></span>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Actualités en brouillon</p>
+<h2 class="font-headline-lg text-headline-lg mt-xs" th:classappend="${nbBrouillons > 0} ? 'text-amber-700' : 'text-primary'" th:text="${nbBrouillons}">0</h2>
+<p class="text-label-sm text-on-surface-variant" th:if="${nbBrouillons > 0}">Redigees mais pas encore en ligne.</p>
 </div>
+</a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">

@@ -49,6 +49,7 @@ public class MarketingController {
     @Autowired private EtablissementService etablissementService;
     @Autowired private FileStorageService fileStorageService;
     @Autowired private JournalService journalService;
+    @Autowired private holyflame.administration.service.HorlogeService horlogeService;
 
     private static final java.util.Set<String> POLICES_VALIDES = java.util.Set.of("CLASSIQUE", "MODERNE", "ELEGANTE");
 
@@ -60,10 +61,25 @@ public class MarketingController {
 
         model.addAttribute("site", site);
         model.addAttribute("nomEtablissement", etab != null ? etab.getNom() : "");
-        model.addAttribute("actualitesRecentes", actualiteSiteRepository
-            .findByEtablissementIdOrderByDateCreationDesc(etabId).stream().limit(5).toList());
+        var toutesActualites = actualiteSiteRepository.findByEtablissementIdOrderByDateCreationDesc(etabId);
+        model.addAttribute("actualitesRecentes", toutesActualites.stream().limit(5).toList());
         model.addAttribute("nbPhotos", photoGalerieRepository.findByEtablissementIdOrderByDateAjoutDesc(etabId).size());
-        model.addAttribute("nbEvenements", evenementPublicRepository.findByEtablissementIdOrderByDateEvenementAsc(etabId).size());
+
+        // Une actualite redigee puis laissee en brouillon n'etait signalee nulle part : il fallait
+        // parcourir la liste et reperer les badges un a un pour s'apercevoir qu'elle n'est pas en ligne.
+        model.addAttribute("nbBrouillons", toutesActualites.stream()
+            .filter(a -> !"PUBLIE".equals(a.getStatut())).count());
+
+        // Le compteur d'evenements incluait les evenements passes, que le site public masque deja :
+        // il pouvait annoncer "12 evenements" quand les visiteurs n'en voyaient aucun.
+        var tousEvenements = evenementPublicRepository.findByEtablissementIdOrderByDateEvenementAsc(etabId);
+        LocalDate aujourdHui = horlogeService.aujourdHui();
+        model.addAttribute("nbEvenements", tousEvenements.stream()
+            .filter(e -> e.getDateEvenement() != null && !e.getDateEvenement().isBefore(aujourdHui))
+            .count());
+        model.addAttribute("nbEvenementsPasses", tousEvenements.stream()
+            .filter(e -> e.getDateEvenement() != null && e.getDateEvenement().isBefore(aujourdHui))
+            .count());
         return "marketing-dashboard";
     }
 
