@@ -1,1528 +1,419 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html class="scroll-smooth" lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Holy Flame N'Djamena — École Bilingue Franco-Anglaise (Primaire &amp; Secondaire)</title>
-<meta name="description" content="Collège Polyvalent Franco-Anglais Holy Flame à N'Djamena (Paris Congo) : école bilingue français-anglais, du primaire au secondaire, enseignement général et technique. Cadre sécurisé. Assiduité · Travail · Réussite. Pré-inscriptions ouvertes — Tél. 66 36 17 37.">
-<meta name="robots" content="index, follow">
-<meta name="author" content="Collège Polyvalent Franco-Anglais Holy Flame">
-<meta name="keywords" content="école bilingue N'Djamena, Holy Flame, collège franco-anglais Tchad, école primaire N'Djamena, enseignement général et technique, inscription école N'Djamena, Paris Congo, école Tchad">
-<meta name="theme-color" content="#1B3A8B">
-<meta name="geo.region" content="TD-ND">
-<meta name="geo.placename" content="N'Djamena, Tchad">
-<!-- SEO : REMPLACEZ "https://www.holyflameschool.td" par votre vrai domaine une fois le site en ligne (les 6 lignes ci-dessous + les données structurées) -->
-<link rel="canonical" href="https://www.holyflameschool.td/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Collège Holy Flame">
-<meta property="og:title" content="Holy Flame — École bilingue franco-anglaise à N'Djamena">
-<meta property="og:description" content="École bilingue (français-anglais), du primaire au secondaire, général et technique. Cadre sécurisé. Assiduité · Travail · Réussite. Pré-inscriptions ouvertes.">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:url" content="https://www.holyflameschool.td/">
-<meta property="og:image" content="https://www.holyflameschool.td/assets/facade.jpg">
-<meta property="og:image:alt" content="Façade du Collège Holy Flame à N'Djamena">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Holy Flame — École bilingue franco-anglaise à N'Djamena">
-<meta name="twitter:description" content="École bilingue, primaire au secondaire, général et technique. Pré-inscriptions ouvertes.">
-<meta name="twitter:image" content="https://www.holyflameschool.td/assets/facade.jpg">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "School",
-  "name": "Collège Polyvalent Franco-Anglais Holy Flame",
-  "alternateName": "Holy Flame",
-  "description": "École bilingue franco-anglaise, du primaire au secondaire, enseignement général et technique, à N'Djamena.",
-  "url": "https://www.holyflameschool.td/",
-  "logo": "https://www.holyflameschool.td/assets/facade.jpg",
-  "image": "https://www.holyflameschool.td/assets/facade.jpg",
-  "telephone": "+235 66 36 17 37",
-  "email": "holyflameschool@yahoo.fr",
-  "slogan": "Assiduité · Travail · Réussite",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "BP 1238, Paris Congo",
-    "addressLocality": "N'Djamena",
-    "addressCountry": "TD"
-  },
-  "areaServed": "N'Djamena, Tchad"
-}
-</script>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='22' fill='%231B3A8B'/%3E%3Cg fill='%23ffffff'%3E%3Cellipse transform='rotate(-22 22 27)' cx='22' cy='27' rx='10.5' ry='4.6'/%3E%3Cpath d='M20 25C22 15 28 11 36 10 28 15 25 20 24 28Z'/%3E%3Ccircle cx='31.5' cy='19.5' r='3.2'/%3E%3Cpath d='M34 18.5l4.5-1.2-3.2 3.4z'/%3E%3Cpath d='M13 30l-7.5 2.2 4.3-6.2z'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="stylesheet" href="/css/fonts-landing.css">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>EduSystem Pro | La gestion scolaire simple et moderne</title>
+<meta name="description" content="EduSystem Pro : creez l'espace de votre ecole en une minute. Eleves, enseignants, emplois du temps, notes, bulletins et finances sur une interface unique.">
+<!--
+  Ressources auto-hebergees (Tailwind, Inter, Material Symbols) : ce projet a
+  volontairement supprime ses dependances CDN pour rester utilisable hors ligne
+  et ne pas dependre d'un tiers. Ne pas reintroduire de <script src="https://...">.
+-->
+<link href="/css/fonts.css" rel="stylesheet">
+<script src="/js/tailwind.js"></script>
 <style>
-/* ============================================================
-   HOLYFLAME — Design system "la flamme du savoir"
-   Futurisme lumineux & rassurant. CSS léger (laptop sans GPU).
-   ============================================================ */
-:root{
-  /* Marque / primaire */
-  --color-primary:#1B3A8B; --color-primary-600:#2B4FB0; --color-primary-400:#5B78D6; --color-primary-050:#EAF0FF;
-  /* Secondaire */
-  --color-secondary:#12B5C9; --color-secondary-300:#6FE0EC;
-  /* Accent flamme */
-  /* Accent chaud (flamme doree) RESERVE au logo + boutons d'action (CTA) */
-  --gold:#F5A623; --gold-soft:#FFD27A; --gold-deep:#E0891C;
-  --grad-gold:linear-gradient(135deg,#FFD27A 0%,#F5A623 55%,#E0891C 100%);
-  /* "flame*" repointes en BLEU / turquoise pour respecter la charte bleu+blanc */
-  --color-flame:#2B4FB0; --color-flame-deep:#1B3A8B; --color-flame-gold:#12B5C9; --color-flame-050:#EAF0FF;
-  /* Fonds */
-  --bg-base:#FFFFFF; --bg-soft:#F5F8FF; --bg-tint:#EEF3FF;
-  --bg-dark:#0C1330; --text-on-dark:#EAF0FF; --text-on-dark-muted:#A9B6E0;
-  /* Textes */
-  --text-strong:#0E1B3D; --text-body:#35406B; --text-muted:#55607D; --text-inverse:#FFFFFF;
-  /* Bordures */
-  --border:#E1E8F5; --border-strong:#C8D3EC; --border-glass:rgba(255,255,255,0.55);
-  /* États */
-  --state-success:#1E9E6A; --state-error:#D64545; --state-focus-ring:#5B78D6;
-  /* Dégradés */
-  --grad-flame:linear-gradient(135deg,var(--color-secondary) 0%,var(--color-primary-400) 55%,var(--color-primary) 100%);
-  --grad-cool:linear-gradient(135deg,var(--color-primary-400) 0%,var(--color-secondary) 100%);
-  /* Typo */
-  --font-title:'Sora',system-ui,sans-serif; --font-body:'Inter',system-ui,-apple-system,sans-serif;
-  --font-display:'Fraunces','Georgia',serif;
-  --fs-h1:clamp(2.25rem,6vw,3.5rem); --fs-h2:clamp(1.75rem,4vw,2.5rem); --fs-h3:1.5rem;
-  --fs-h4:1.125rem; --fs-lead:1.25rem; --fs-body:1rem; --fs-small:.875rem; --fs-overline:.75rem;
-  /* Espacement */
-  --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.5rem;
-  --space-6:2rem; --space-7:3rem; --space-8:4rem; --space-9:6rem;
-  --section-y:clamp(3.5rem,8vw,6rem);
-  /* Rayons */
-  --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --radius-xl:32px; --radius-pill:999px;
-  --container-max:1200px; --container-pad:clamp(1rem,4vw,2rem);
-  /* Ombres */
-  --shadow-sm:0 2px 8px rgba(27,58,139,.06); --shadow-md:0 10px 30px rgba(27,58,139,.10);
-  --shadow-lg:0 24px 60px rgba(27,58,139,.14); --shadow-flame:0 12px 40px rgba(245,166,35,.32);
-  /* Motion */
-  --ease-out:cubic-bezier(0.22,1,0.36,1); --ease-in-out:cubic-bezier(0.65,0,0.35,1);
-  --dur-fast:160ms; --dur-base:240ms; --dur-slow:600ms; --dur-mid:280ms;
-}
-*{box-sizing:border-box;} html{scroll-behavior:smooth;}
-body{margin:0;font-family:var(--font-body);font-size:var(--fs-body);line-height:1.65;color:var(--text-body);background:var(--bg-base);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-h1,h2,h3,h4{font-family:var(--font-title);color:var(--text-strong);margin:0 0 .5em;}
-h1{font-size:var(--fs-h1);font-weight:800;line-height:1.08;letter-spacing:-.02em;}
-h2{font-size:var(--fs-h2);font-weight:700;line-height:1.15;letter-spacing:-.01em;}
-h3{font-size:var(--fs-h3);font-weight:600;line-height:1.25;}
-p{margin:0 0 1rem;} img{max-width:100%;display:block;}
-a{color:var(--color-primary);text-decoration:none;}
-button{font:inherit;cursor:pointer;}
-:focus-visible{outline:3px solid var(--state-focus-ring);outline-offset:2px;border-radius:4px;}
-.container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:var(--container-pad);}
-section{padding-block:var(--section-y);position:relative;}
-.eyebrow{display:inline-block;font-size:var(--fs-overline);font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--color-flame-deep);margin-bottom:var(--space-3);}
-.lead{font-size:var(--fs-lead);color:var(--text-body);}
-.section-head{max-width:720px;margin:0 auto var(--space-7);text-align:center;}
-.text-flame{background:linear-gradient(120deg,var(--color-primary) 0%,#0E7C8B 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-
-/* ---------- Boutons ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);font-weight:600;font-size:1rem;
-  padding:.85rem 1.6rem;border-radius:var(--radius-md);border:1px solid transparent;text-decoration:none;
-  transition:transform var(--dur-fast) ease,box-shadow var(--dur-base) ease,background var(--dur-base) ease,border-color var(--dur-base) ease;will-change:transform;}
-.btn--primary{background:var(--grad-gold);color:#3A2A05;box-shadow:var(--shadow-flame);}
-.btn--primary:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(245,166,35,.42);}
-.btn--primary:active{transform:translateY(0);}
-.btn--secondary{background:rgba(255,255,255,.7);color:var(--color-primary);border-color:var(--border-strong);backdrop-filter:blur(6px);}
-.btn--secondary:hover{border-color:var(--color-primary-400);background:var(--color-primary-050);transform:translateY(-2px);}
-.btn--ghost{background:transparent;color:var(--color-primary);}
-.btn--ghost:hover{background:var(--color-primary-050);}
-.btn--lg{padding:1.05rem 2rem;font-size:1.0625rem;}
-.btn--block{width:100%;}
-
-/* ---------- Badges ---------- */
-.badge{display:inline-flex;align-items:center;gap:var(--space-1);font-size:var(--fs-small);font-weight:600;padding:.35rem .8rem;border-radius:var(--radius-pill);}
-.badge--blue{background:var(--color-primary-050);color:var(--color-primary);}
-.badge--flame{background:#E2F7FA;color:#0A6470;}
-
-/* ---------- Progress bar ---------- */
-.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--grad-flame);z-index:300;}
-
-/* ---------- Navbar ---------- */
-.navbar{position:fixed;inset:0 0 auto 0;z-index:200;display:flex;align-items:center;justify-content:space-between;
-  padding:1.1rem clamp(1rem,4vw,2rem);background:transparent;
-  transition:background .3s ease,box-shadow .3s ease,padding .3s ease,border-color .3s ease;border-bottom:1px solid transparent;}
-.navbar.is-scrolled{background:rgba(255,255,255,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-sm);padding-block:.7rem;border-bottom:1px solid var(--border);}
-.brand{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--font-title);font-weight:700;font-size:1.25rem;color:var(--color-primary);}
-.brand .brand-name b{color:var(--color-flame-deep);font-weight:700;}
-.nav-links{display:flex;align-items:center;gap:1.6rem;list-style:none;margin:0;padding:0;}
-.nav-links a{color:var(--color-primary);font-weight:500;position:relative;}
-.nav-links a:hover{color:var(--color-flame-deep);}
-.nav-actions{display:flex;align-items:center;gap:.8rem;}
-.nav-toggle{display:none;background:none;border:none;padding:.4rem;color:var(--color-primary);}
-.nav-toggle svg{width:28px;height:28px;}
-@media(max-width:960px){
-  .nav-links{position:fixed;inset:0 0 0 auto;width:min(80vw,320px);flex-direction:column;align-items:flex-start;justify-content:center;gap:1.4rem;
-    background:rgba(255,255,255,.97);backdrop-filter:blur(16px);padding:2rem;box-shadow:var(--shadow-lg);
-    transform:translateX(100%);transition:transform var(--dur-mid) var(--ease-out);}
-  .nav-links.open{transform:translateX(0);}
-  .nav-links a{font-size:1.15rem;}
-  .nav-toggle{display:inline-flex;z-index:210;}
-  .nav-actions .btn--nav-cta{display:none;}
-  .nav-login-link{display:none;}
-}
-
-/* ---------- Flame logo glow ---------- */
-.flame-glow{position:relative;display:inline-flex;}
-.flame-glow::after{content:"";position:absolute;inset:-30%;background:radial-gradient(circle,rgba(255,180,84,.55),transparent 65%);filter:blur(18px);z-index:-1;animation:breathe 4s ease-in-out infinite;}
-@keyframes breathe{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:.9;transform:scale(1.08);}}
-
-/* ---------- Aurora background ---------- */
-.aurora{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none;}
-.aurora::before,.aurora::after{content:"";position:absolute;width:55vw;height:55vw;border-radius:50%;filter:blur(90px);opacity:.5;will-change:transform;}
-.aurora::before{background:radial-gradient(circle,var(--color-flame-gold),transparent 60%);top:-12%;left:-8%;animation:drift 26s ease-in-out infinite alternate;}
-.aurora::after{background:radial-gradient(circle,var(--color-secondary-300),transparent 60%);bottom:-18%;right:-8%;animation:drift 32s ease-in-out infinite alternate-reverse;}
-@keyframes drift{from{transform:translate3d(0,0,0) scale(1);}to{transform:translate3d(4%,3%,0) scale(1.12);}}
-
-/* ---------- Hero ---------- */
-.hero{padding-top:clamp(7rem,14vw,10rem);background:linear-gradient(160deg,#FFFFFF 0%,#F0F5FF 45%,#EAF0FF 100%);}
-.hero .container{position:relative;z-index:1;display:grid;gap:var(--space-6);align-items:center;}
-.hero-badges{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:var(--space-5);}
-.hero h1{margin-bottom:var(--space-4);}
-.hero .lead{max-width:600px;margin-bottom:var(--space-6);}
-.hero-cta{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-bottom:var(--space-6);}
-.hero-trust{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fit,minmax(190px,1fr));max-width:640px;}
-.trust-item{display:flex;gap:.7rem;align-items:flex-start;font-size:var(--fs-small);color:var(--text-body);}
-.trust-item svg{flex:0 0 auto;width:22px;height:22px;color:var(--color-primary);}
-.trust-item b{color:var(--text-strong);display:block;font-family:var(--font-title);}
-.hero-visual{position:relative;}
-.hero-card{background:rgba(255,255,255,.6);border:1px solid var(--border-glass);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);
-  border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);padding:var(--space-7);text-align:center;}
-@supports not (backdrop-filter:blur(1px)){.hero-card{background:rgba(255,255,255,.9);}}
-.hero-card .big-flame{margin-bottom:var(--space-4);}
-.hero-card h3{color:var(--color-primary);}
-.hero-card .mini-stats{display:flex;justify-content:center;gap:var(--space-6);margin-top:var(--space-5);flex-wrap:wrap;}
-.hero-card .mini-stats div{text-align:center;}
-.hero-card .mini-stats b{display:block;font-family:var(--font-title);font-size:1.6rem;color:var(--color-flame-deep);line-height:1;}
-.hero-card .mini-stats span{font-size:var(--fs-small);color:var(--text-muted);}
-.hero-photo{position:relative;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);aspect-ratio:16/11;}
-.hero-photo>img{width:100%;height:100%;object-fit:cover;display:block;}
-.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,19,48,.55),transparent 45%);}
-.hero-photo-badge{position:absolute;top:var(--space-4);left:var(--space-4);z-index:2;}
-.hero-photo-chip{position:absolute;left:var(--space-4);right:var(--space-4);bottom:var(--space-4);z-index:2;display:flex;align-items:center;gap:var(--space-5);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow-md);}
-@supports not (backdrop-filter:blur(1px)){.hero-photo-chip{background:#fff;}}
-.hero-photo-chip .mini-stats{display:flex;gap:var(--space-5);flex-wrap:wrap;}
-.hero-photo-chip .mini-stats div{text-align:center;}
-.hero-photo-chip .mini-stats b{display:block;font-family:var(--font-title);font-weight:800;font-size:1.5rem;color:var(--color-primary);line-height:1;}
-.hero-photo-chip .mini-stats span{font-size:var(--fs-small);color:var(--text-muted);}
-@media(min-width:1024px){.hero .container{grid-template-columns:1fr 1.15fr;}}
-/* ---------- Vidéo ---------- */
-.video-wrap{max-width:920px;margin:0 auto;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);position:relative;background:#0C1330;aspect-ratio:16/9;}
-.video-wrap video{width:100%;height:100%;display:block;object-fit:cover;background:#0C1330;}
-
-/* ---------- Notre établissement ---------- */
-.etab-grid{display:grid;gap:var(--space-5);grid-template-columns:1fr;}
-@media(min-width:800px){.etab-grid{grid-template-columns:1fr 1fr;}}
-.etab-photo{position:relative;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-md);aspect-ratio:16/10;margin:0;}
-.etab-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform var(--dur-base) var(--ease-out);}
-.etab-photo:hover img{transform:scale(1.04);}
-.etab-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,19,48,.4),transparent 50%);}
-.etab-photo figcaption{position:absolute;left:var(--space-4);bottom:var(--space-4);z-index:1;color:#fff;font-family:var(--font-title);font-weight:600;background:rgba(12,19,48,.55);padding:.4rem .9rem;border-radius:var(--radius-pill);font-size:var(--fs-small);}
-
-/* ---------- Stats band (premium dark) ---------- */
-.section--premium{background:radial-gradient(60% 80% at 50% 0%,rgba(18,181,201,.18),transparent 60%),var(--bg-dark);color:var(--text-on-dark);}
-.section--premium h2,.section--premium h3{color:var(--text-on-dark);}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-6);text-align:center;}
-.stat b{display:block;font-family:var(--font-title);font-weight:800;font-size:clamp(2.2rem,5vw,3rem);
-  background:var(--grad-flame);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
-.stat span{display:block;margin-top:var(--space-2);color:var(--text-on-dark-muted);font-size:var(--fs-small);}
-
-/* ---------- Cartes ---------- */
-.grid{display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
-.card{background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);
-  transition:transform var(--dur-base) ease,box-shadow var(--dur-base) ease,border-color var(--dur-base) ease;height:100%;}
-.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--border-strong);}
-.card-icon{width:52px;height:52px;border-radius:var(--radius-md);display:inline-flex;align-items:center;justify-content:center;
-  background:var(--color-primary-050);color:var(--color-primary);margin-bottom:var(--space-4);}
-.card-icon svg{width:28px;height:28px;}
-.card--flame{position:relative;overflow:hidden;}
-.card--flame::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--grad-flame);}
-.card--flame .card-icon{background:var(--color-flame-050);color:var(--color-flame-deep);}
-.card h3{margin-bottom:var(--space-2);}
-.card p{margin:0;color:var(--text-body);}
-
-/* ---------- Cycles ---------- */
-.cycle-card{position:relative;overflow:hidden;}
-.cycle-card .tag{margin-bottom:var(--space-3);}
-.cycle-num{font-family:var(--font-title);font-weight:800;font-size:2.4rem;color:var(--bg-tint);position:absolute;top:var(--space-4);right:var(--space-5);line-height:1;}
-
-/* ---------- Pédagogie ---------- */
-.peda-item{display:flex;gap:var(--space-4);align-items:flex-start;}
-.peda-item .peda-icon{flex:0 0 auto;width:48px;height:48px;border-radius:var(--radius-md);display:inline-flex;align-items:center;justify-content:center;background:var(--grad-cool);color:#fff;}
-.peda-item .peda-icon svg{width:26px;height:26px;}
-.peda-item h3{font-size:1.25rem;margin-bottom:var(--space-1);}
-.peda-item p{margin:0;}
-
-/* ---------- Témoignages ---------- */
-.quote-card{position:relative;}
-.quote-card .quote-mark{font-family:var(--font-title);font-size:3.5rem;line-height:.6;color:var(--color-flame);opacity:.35;}
-.quote-card p.quote{font-size:1.05rem;color:var(--text-strong);margin:var(--space-2) 0 var(--space-5);}
-.quote-author{display:flex;align-items:center;gap:.8rem;}
-.quote-avatar{width:44px;height:44px;border-radius:var(--radius-pill);background:var(--grad-flame);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-title);font-weight:700;}
-.quote-author b{color:var(--text-strong);font-family:var(--font-title);display:block;}
-.quote-author span{font-size:var(--fs-small);color:var(--text-muted);}
-
-/* ---------- Journée type ---------- */
-.timeline{max-width:820px;margin:0 auto;display:grid;gap:var(--space-4);}
-.tl-item{display:grid;grid-template-columns:auto 1fr;gap:var(--space-4);align-items:start;}
-.tl-time{font-family:var(--font-title);font-weight:700;color:var(--color-flame-deep);white-space:nowrap;padding-top:.15rem;}
-.tl-body{border-left:2px solid var(--border);padding-left:var(--space-5);padding-bottom:var(--space-2);position:relative;}
-.tl-body::before{content:"";position:absolute;left:-7px;top:.4rem;width:12px;height:12px;border-radius:50%;background:var(--color-flame);box-shadow:0 0 0 4px var(--color-flame-050);}
-.tl-body b{color:var(--text-strong);font-family:var(--font-title);}
-
-/* ---------- FAQ accordion ---------- */
-.faq-list{max-width:820px;margin:0 auto;display:grid;gap:var(--space-3);}
-.acc{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-base);overflow:hidden;transition:border-color var(--dur-base) ease,box-shadow var(--dur-base) ease;}
-.acc.open{border-color:var(--border-strong);box-shadow:var(--shadow-sm);}
-.acc-head{width:100%;display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);text-align:left;
-  background:none;border:none;padding:1.15rem 1.3rem;font-family:var(--font-title);font-weight:600;font-size:1.05rem;color:var(--text-strong);}
-.acc-head .chev{flex:0 0 auto;width:22px;height:22px;color:var(--color-flame-deep);transition:transform var(--dur-base) var(--ease-out);}
-.acc.open .acc-head .chev{transform:rotate(180deg);}
-.acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--dur-mid) var(--ease-in-out);}
-.acc-body>div{overflow:hidden;}
-.acc.open .acc-body{grid-template-rows:1fr;}
-.acc-body p{margin:0;padding:0 1.3rem 1.25rem;color:var(--text-body);}
-
-/* ---------- CTA final ---------- */
-.cta-final{text-align:center;}
-.cta-final .container{position:relative;z-index:1;}
-.cta-final h2{color:var(--text-on-dark);}
-.cta-final .lead{color:var(--text-on-dark-muted);max-width:620px;margin:0 auto var(--space-6);}
-.cta-final .phone-note{margin-top:var(--space-5);color:var(--text-on-dark-muted);font-size:var(--fs-small);}
-.cta-final .phone-note a{color:var(--color-flame-gold);font-weight:600;}
-
-/* ---------- Formulaire / Wizard ---------- */
-.enroll{background:var(--bg-soft);}
-.enroll-grid{display:grid;gap:var(--space-8);align-items:start;}
-@media(min-width:900px){.enroll-grid{grid-template-columns:.85fr 1.15fr;}}
-.enroll-side ul{list-style:none;padding:0;margin:var(--space-5) 0 0;display:grid;gap:var(--space-3);}
-.enroll-side li{display:flex;gap:.7rem;align-items:flex-start;color:var(--text-body);}
-.enroll-side li svg{flex:0 0 auto;width:22px;height:22px;color:var(--state-success);margin-top:.15rem;}
-.wizard{background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);padding:clamp(1.5rem,4vw,2.5rem);}
-.stepper{display:flex;list-style:none;padding:0;margin:0 0 var(--space-7);gap:0;}
-.stepper li{flex:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;position:relative;font-size:var(--fs-small);color:var(--text-muted);text-align:center;}
-.stepper li::before{content:"";position:absolute;top:19px;right:50%;width:100%;height:2px;background:var(--border);z-index:0;}
-.stepper li:first-child::before{display:none;}
-.stepper li .step-num{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-weight:700;font-size:1.05rem;background:var(--bg-base);color:var(--text-muted);border:2px solid var(--border);transition:all .35s var(--ease-out);}
-.stepper li.active{color:var(--color-primary);font-weight:600;}
-.stepper li.active .step-num{background:var(--grad-gold);color:#3A2A05;border-color:transparent;box-shadow:var(--shadow-flame);transform:scale(1.06);}
-.stepper li.done{color:var(--color-primary);}
-.stepper li.done::before{background:var(--color-primary);}
-.stepper li.done .step-num{background:var(--color-primary);color:transparent;border-color:transparent;}
-.stepper li.done .step-num::after{content:"✓";color:#fff;font-size:1.15rem;font-weight:700;}
-.stage{position:relative;}
-.step{transition:transform var(--dur-mid) var(--ease-out),opacity var(--dur-mid) var(--ease-out);}
-.step[hidden]{display:none;}
-.enter-right{transform:translateX(40px);opacity:0;}
-.enter-left{transform:translateX(-40px);opacity:0;}
-.enter-active{transform:translateX(0);opacity:1;}
-.exit-left{transform:translateX(-40px);opacity:0;position:absolute;inset:0;}
-.exit-right{transform:translateX(40px);opacity:0;position:absolute;inset:0;}
-.step h3{margin-bottom:var(--space-1);}
-.step .step-sub{color:var(--text-muted);font-size:var(--fs-small);margin-bottom:var(--space-5);}
-.field{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-4);}
-.field label{font-size:var(--fs-small);font-weight:600;color:var(--text-strong);}
-.input,.textarea,.select{font-family:var(--font-body);font-size:1rem;padding:.85rem 1rem;background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-strong);width:100%;transition:border-color .2s ease,box-shadow .2s ease;}
-.input:focus,.textarea:focus,.select:focus{outline:none;border-color:var(--color-primary-400);box-shadow:0 0 0 4px rgba(91,120,214,.18);}
-.input[aria-invalid="true"],.select[aria-invalid="true"]{border-color:var(--state-error);}
-.textarea{resize:vertical;min-height:96px;}
-.cycle-choice{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;}
-.cc-opt{position:relative;display:flex;align-items:center;gap:.65rem;padding:.9rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;font-weight:500;color:var(--text-strong);transition:border-color .2s,background .2s,box-shadow .2s;}
-.cc-opt input{position:absolute;opacity:0;width:0;height:0;}
-.cc-opt .cc-ic{font-size:1.25rem;line-height:1;}
-.cc-opt:hover{border-color:var(--color-primary-400);background:var(--color-primary-050);}
-.cc-opt:focus-within{box-shadow:0 0 0 3px rgba(91,120,214,.35);border-color:var(--color-primary-400);}
-.cc-opt:has(input:checked){border-color:var(--color-primary);background:var(--color-primary-050);box-shadow:0 0 0 2px var(--color-primary);}
-.cc-opt:has(input:checked) .cc-txt{color:var(--color-primary);font-weight:700;}
-.consent{display:flex;gap:.6rem;align-items:flex-start;font-size:var(--fs-small);color:var(--text-body);}
-.consent input{margin-top:.2rem;accent-color:var(--color-flame);}
-.field-error{font-size:var(--fs-small);color:var(--state-error);min-height:1em;margin-top:-.25rem;}
-.wizard-nav{display:flex;justify-content:space-between;gap:var(--space-3);margin-top:var(--space-5);}
-.rgpd{font-size:var(--fs-small);color:var(--text-muted);margin-top:var(--space-4);}
-.success{text-align:center;padding:var(--space-4) 0;}
-.success .check{width:72px;height:72px;margin:0 auto var(--space-4);border-radius:50%;background:var(--color-flame-050);display:flex;align-items:center;justify-content:center;}
-.success .check svg{width:38px;height:38px;color:var(--state-success);}
-.check-anim{stroke-dasharray:48;stroke-dashoffset:48;animation:draw .6s var(--ease-out) forwards .1s;}
-@keyframes draw{to{stroke-dashoffset:0;}}
-
-/* ---------- Footer ---------- */
-.footer{background:var(--bg-dark);color:var(--text-on-dark-muted);padding-block:var(--space-8) var(--space-5);}
-.footer-grid{display:grid;gap:var(--space-6);grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:var(--space-7);}
-.footer h4{color:var(--text-on-dark);font-size:1rem;margin-bottom:var(--space-4);}
-.footer a{color:var(--text-on-dark-muted);}
-.footer a:hover{color:var(--color-flame-gold);}
-.footer ul{list-style:none;padding:0;margin:0;display:grid;gap:.6rem;}
-.footer .brand{color:var(--text-on-dark);margin-bottom:var(--space-3);}
-.footer .brand .brand-name b{color:var(--color-flame-gold);}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:var(--space-5);display:flex;flex-wrap:wrap;gap:var(--space-3);justify-content:space-between;font-size:var(--fs-small);}
-.footer-bottom a{margin-left:var(--space-4);}
-.footer-social{display:flex;gap:.7rem;}
-.footer-social a{width:44px;height:44px;border-radius:var(--radius-pill);border:1px solid rgba(255,255,255,.15);display:inline-flex;align-items:center;justify-content:center;transition:border-color .2s ease,background .2s ease;}
-.footer-social a:hover{border-color:var(--color-flame-gold);background:rgba(255,180,84,.1);}
-.footer-social svg{width:18px;height:18px;}
-
-/* ---------- Tarifs ---------- */
-.price-grid{display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:stretch;}
-.price-card{display:flex;flex-direction:column;text-align:center;position:relative;}
-.price-card.featured{border:2px solid var(--color-primary-400);box-shadow:var(--shadow-md);}
-.price-card .tag{align-self:center;margin-bottom:var(--space-3);}
-.price-card .price{font-family:var(--font-title);font-weight:800;font-size:2.2rem;color:var(--color-primary);line-height:1;margin:var(--space-2) 0;}
-.price-card .price small{display:block;font-size:.9rem;color:var(--text-muted);font-weight:500;margin-top:.3rem;}
-.price-card ul{list-style:none;padding:0;margin:var(--space-4) 0 var(--space-5);text-align:left;display:grid;gap:.6rem;flex:1;}
-.price-card li{display:flex;gap:.5rem;font-size:var(--fs-small);color:var(--text-body);}
-.price-card li svg{width:18px;height:18px;color:var(--state-success);flex:none;margin-top:.15rem;}
-.price-featured-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);white-space:nowrap;}
-.price-note{text-align:center;margin-top:var(--space-6);color:var(--text-muted);font-size:var(--fs-small);}
-
-/* ---------- Équipe ---------- */
-.team-grid{display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(210px,1fr));}
-.team-card{text-align:center;}
-.team-avatar{width:96px;height:96px;border-radius:50%;margin:0 auto var(--space-4);background:var(--grad-cool);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-title);font-weight:700;font-size:2rem;box-shadow:var(--shadow-sm);overflow:hidden;}
-.team-avatar svg{width:100%;height:100%;display:block;}
-.team-card:hover .team-avatar{box-shadow:0 0 0 4px var(--color-primary-050),var(--shadow-md);}
-.team-card h3{margin-bottom:2px;font-size:1.2rem;}
-.team-role{color:var(--color-flame-deep);font-weight:600;font-size:var(--fs-small);}
-.team-card p{font-size:var(--fs-small);margin-top:var(--space-2);margin-bottom:0;}
-
-/* ---------- Galerie ---------- */
-.gallery-grid{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
-@media(max-width:767px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
-.gallery-item{position:relative;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3;display:flex;align-items:flex-end;padding:var(--space-4);color:#fff;box-shadow:var(--shadow-sm);transition:transform var(--dur-base) ease,box-shadow var(--dur-base) ease;background:linear-gradient(135deg,#1B3A8B,#12B5C9);}
-.gallery-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform var(--dur-base) var(--ease-out);}
-.gallery-item:hover img{transform:scale(1.06);}
-.gallery-item::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(12,19,48,.78),rgba(12,19,48,.05) 55%);}
-.gallery-item .g-label{position:relative;z-index:2;font-family:var(--font-title);font-weight:600;font-size:var(--fs-small);display:flex;align-items:center;gap:.4rem;}
-.gallery-item .g-illus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;transition:transform var(--dur-base) var(--ease-out);}
-.gallery-item:hover .g-illus{transform:scale(1.06);}
-.gallery-item .g-illus svg{width:42%;height:42%;color:rgba(255,255,255,.92);filter:drop-shadow(0 4px 10px rgba(0,0,0,.15));}
-.gallery-item:hover{transform:scale(1.02);box-shadow:var(--shadow-md);}
-.g1{background:linear-gradient(135deg,#1B3A8B,#2B4FB0);}
-.g2{background:linear-gradient(135deg,#12B5C9,#5B78D6);}
-.g3{background:linear-gradient(135deg,#2B4FB0,#12B5C9);}
-.g4{background:linear-gradient(135deg,#5B78D6,#1B3A8B);}
-.g5{background:linear-gradient(135deg,#12B5C9,#1B3A8B);}
-.g6{background:linear-gradient(135deg,#1B3A8B,#12B5C9);}
-
-/* ---------- Valeurs (mission) ---------- */
-.value-card{text-align:center;}
-.value-card .card-icon{margin-inline:auto;}
-
-/* ---------- Accès / infos pratiques ---------- */
-.acces-grid{display:grid;gap:var(--space-6);align-items:start;}
-@media(min-width:900px){.acces-grid{grid-template-columns:0.72fr 1.55fr;}}
-.info-list{display:grid;gap:var(--space-5);align-content:start;}
-.info-row{display:flex;gap:var(--space-4);align-items:flex-start;}
-.info-row .info-ic{flex:none;width:46px;height:46px;border-radius:var(--radius-md);background:var(--color-primary-050);color:var(--color-primary);display:flex;align-items:center;justify-content:center;}
-.info-row .info-ic svg{width:24px;height:24px;}
-.info-row b{color:var(--text-strong);font-family:var(--font-title);display:block;}
-.info-row p{margin:.2rem 0 0;font-size:var(--fs-small);}
-.map-card{position:relative;min-height:300px;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-md);background:linear-gradient(135deg,#1B3A8B,#12B5C9);display:flex;align-items:center;justify-content:center;color:#fff;padding:var(--space-6);}
-.map-card .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:34px 34px;}
-.map-card .map-pin{position:relative;z-index:1;text-align:center;}
-.map-card .map-pin svg{width:56px;height:56px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.3));animation:pinFloat 3s ease-in-out infinite;}
-@keyframes pinFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-.map-card .map-pin span{display:block;margin-top:.5rem;font-family:var(--font-title);font-weight:600;font-size:1.1rem;}
-.map-card .map-btn{position:absolute;bottom:var(--space-5);left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap;}
-.map-wrap{position:relative;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-md);min-height:320px;background:linear-gradient(135deg,#1B3A8B,#12B5C9);}
-.map-wrap iframe{width:100%;height:100%;min-height:320px;border:0;display:block;}
-.map-wrap .map-btn{position:absolute;bottom:var(--space-4);left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.25);}
-.acces-media{display:grid;gap:var(--space-4);}
-.acces-photo{position:relative;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-md);aspect-ratio:16/7;margin:0;}
-@media(max-width:899px){.acces-photo{aspect-ratio:16/9;}}
-.acces-photo img{width:100%;height:100%;object-fit:cover;display:block;}
-.acces-photo figcaption{position:absolute;left:var(--space-3);bottom:var(--space-3);z-index:1;color:#fff;font-family:var(--font-title);font-weight:600;font-size:var(--fs-small);background:rgba(12,19,48,.6);padding:.35rem .8rem;border-radius:var(--radius-pill);}
-
-/* ---------- Bouton WhatsApp flottant ---------- */
-.fab-wa{position:fixed;right:20px;bottom:20px;z-index:250;width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.45);color:#fff;transition:transform var(--dur-base) ease;}
-.fab-wa:hover{transform:scale(1.08);}
-.fab-wa svg{width:32px;height:32px;}
-.fab-wa .wa-pulse{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 0 rgba(37,211,102,.5);animation:waPulse 2.6s ease-out infinite;}
-@keyframes waPulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.5);}70%,100%{box-shadow:0 0 0 16px rgba(37,211,102,0);}}
-.btn--wa{background:#25D366;color:#fff;box-shadow:0 8px 24px rgba(37,211,102,.35);}
-.btn--wa:hover{background:#1ebe5a;transform:translateY(-2px);}
-.success-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);justify-content:center;margin-top:var(--space-5);}
-
-/* ---------- Reveal ---------- */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out);}
-.reveal.is-visible{opacity:1;transform:none;}
-.reveal[style*="--i"]{transition-delay:calc(var(--i) * 80ms);}
-
-/* ---------- Toast ---------- */
-.toast{position:fixed;bottom:24px;left:50%;translate:-50% 12px;opacity:0;padding:.9rem 1.3rem;border-radius:var(--radius-md);background:var(--bg-dark);color:#fff;box-shadow:var(--shadow-lg);z-index:400;font-size:var(--fs-small);transition:opacity var(--dur-mid) var(--ease-out),translate var(--dur-mid) var(--ease-out);}
-.toast.in{opacity:1;translate:-50% 0;}
-
-/* ---------- Reduced motion ---------- */
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
-  .reveal{opacity:1;transform:none;}
-}
-@media(max-width:767px){
-  .aurora::before,.aurora::after{filter:blur(60px);opacity:.4;}
-  .cycle-choice{grid-template-columns:1fr;}
-}
-
-/* ============ PREMIUM — titrage serif ============ */
-h1,h2{font-family:var(--font-display);letter-spacing:-.015em;}
-h2{font-weight:600;}
-
-/* ============ HERO PLEIN ÉCRAN (façade de l'école en fond) ============ */
-.hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;background:var(--bg-dark);padding-top:0;}
-.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;}
-.hero-bg-img{position:absolute;top:-6%;left:-6%;width:112%;height:112%;object-fit:cover;transform:scale(1.06);will-change:transform;transition:transform .5s var(--ease-out);}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(115deg,rgba(9,15,36,.94) 0%,rgba(9,15,36,.78) 42%,rgba(12,19,48,.5) 100%);}
-.hero-spotlight{position:absolute;inset:0;background:radial-gradient(650px circle at var(--mx,30%) var(--my,35%),rgba(111,224,236,.16),transparent 62%);}
-.hero-inner{position:relative;z-index:1;width:100%;max-width:1000px;margin-inline:auto;padding-inline:var(--container-pad);padding-block:clamp(9rem,18vh,13rem) clamp(4rem,8vh,7rem);}
-.hero .hero-badges{margin-bottom:var(--space-5);}
-.badge--glass{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-.hero-title{font-family:var(--font-display);font-weight:600;font-size:clamp(2.6rem,6.4vw,5.2rem);line-height:1.03;letter-spacing:-.02em;color:#fff;margin:0 0 1.3rem;}
-.hero-title em{font-style:italic;font-weight:500;background:linear-gradient(120deg,#9BE0EC 0%,#ffffff 70%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.hero-lead{font-family:var(--font-body);font-size:clamp(1.05rem,1.5vw,1.3rem);line-height:1.65;color:rgba(234,240,255,.88);max-width:64ch;margin:0 0 2.2rem;}
-.hero-devise{display:inline-block;font-family:var(--font-display);font-style:italic;font-weight:600;color:#FFD27A;}
-.hero .btn--glass{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.45);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
-.hero .btn--glass:hover{background:rgba(255,255,255,.2);transform:translateY(-2px);}
-.hero-stats{display:flex;flex-wrap:wrap;gap:clamp(1.6rem,4vw,3.6rem);margin-top:2.6rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.14);}
-.hstat b{display:block;font-family:var(--font-display);font-weight:600;font-size:clamp(2.1rem,4vw,3.1rem);color:#fff;line-height:1;}
-.hstat span{font-size:.92rem;color:rgba(234,240,255,.68);}
-.hero-scroll{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:1;width:26px;height:44px;border:2px solid rgba(255,255,255,.5);border-radius:20px;display:flex;justify-content:center;padding-top:8px;}
-.hero-scroll-dot{width:5px;height:9px;border-radius:3px;background:#fff;animation:scrollDot 1.8s ease-in-out infinite;}
-@keyframes scrollDot{0%{opacity:0;transform:translateY(-4px);}40%{opacity:1;}80%,100%{opacity:0;transform:translateY(12px);}}
-
-/* Navbar au-dessus du hero sombre : texte clair tant qu'on n'a pas défilé */
-.navbar:not(.is-scrolled) .brand-name{color:#fff;}
-.navbar:not(.is-scrolled) .brand-name b{color:#9BE0EC;}
-.navbar:not(.is-scrolled) .nav-links a{color:rgba(255,255,255,.92);}
-.navbar:not(.is-scrolled) .nav-links a:hover{color:#fff;}
-.navbar:not(.is-scrolled) .nav-toggle{color:#fff;}
-@media(max-width:960px){.navbar:not(.is-scrolled) .nav-links a{color:var(--color-primary);}}
-
-/* ============ INTERACTIVITÉ CURSEUR : relief 3D + halo + magnétisme ============ */
-.card.tilt{position:relative;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--lift,0px));transform-style:preserve-3d;transition:transform .18s var(--ease-out),box-shadow .28s ease,border-color .22s ease;}
-.card.tilt:hover{--lift:-6px;box-shadow:var(--shadow-lg);border-color:var(--border-strong);}
-.card.tilt::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(240px circle at var(--gx,50%) var(--gy,50%),rgba(18,181,201,.14),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;}
-.card.tilt:hover::after{opacity:1;}
-.etab-photo.tilt{transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s var(--ease-out),box-shadow .28s ease;}
-.btn--primary{will-change:transform;}
-
-@media(max-width:767px){
-  .hero{min-height:auto;padding-top:5.5rem;}
-  .hero-inner{padding-block:3rem 3.5rem;}
-  .card.tilt,.etab-photo.tilt{transform:none;}
-}
-@media(prefers-reduced-motion:reduce){
-  .hero-bg-img{transform:scale(1.04) !important;}
-  .card.tilt,.etab-photo.tilt{transform:none !important;}
-  .hero-scroll-dot{animation:none;}
-  .cf-slide{transition:none !important;}
-}
-
-/* ============ GALERIE 3D — COVERFLOW ============ */
-.cf{position:relative;max-width:1120px;margin:0 auto 3rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
-.cf-stage{position:relative;flex:1;height:clamp(260px,42vw,480px);perspective:1700px;}
-.cf-slide{position:absolute;top:50%;left:50%;width:min(58%,540px);aspect-ratio:16/10;margin:0;border-radius:var(--radius-lg);overflow:hidden;
-  box-shadow:0 30px 70px rgba(9,15,36,.45);transform:translate(-50%,-50%);transition:transform .55s var(--ease-out),opacity .55s var(--ease-out);
-  cursor:pointer;will-change:transform,opacity;background:var(--bg-dark);}
-.cf-slide img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none;user-select:none;}
-.cf-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,15,36,.6),transparent 45%);opacity:.55;transition:opacity .4s;}
-.cf-slide.is-active::after{opacity:.18;}
-.cf-slide figcaption{position:absolute;left:0;right:0;bottom:0;padding:1.1rem 1.3rem;color:#fff;font-family:var(--font-title);font-weight:600;font-size:1.05rem;
-  z-index:1;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;}
-.cf-slide.is-active figcaption{opacity:1;transform:none;}
-.cf-nav{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:1px solid var(--border);background:var(--bg-base);color:var(--color-primary);
-  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);z-index:5;transition:transform .2s,background .2s,color .2s;}
-.cf-nav svg{width:24px;height:24px;}
-.cf-nav:hover{background:var(--color-primary);color:#fff;transform:scale(1.08);}
-.cf-dots{position:absolute;bottom:-2.3rem;left:50%;transform:translateX(-50%);display:flex;gap:8px;}
-.cf-dots button{width:9px;height:9px;border-radius:50%;border:none;background:var(--border-strong);cursor:pointer;padding:0;transition:width .25s,background .25s;}
-.cf-dots button.on{width:26px;border-radius:6px;background:var(--grad-flame);}
-@media(max-width:640px){ .cf-slide{width:76%;} .cf-nav{width:44px;height:44px;} }
-
-/* ============ FORMULAIRE PREMIUM ============ */
-.wizard{position:relative;overflow:hidden;}
-.wizard::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:var(--grad-cool);}
-.input-wrap{position:relative;}
-.input-wrap .fi-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--text-muted);pointer-events:none;transition:color .2s;}
-.input-wrap .input{padding-left:44px;}
-.input-wrap:focus-within .fi-ic{color:var(--color-primary-400);}
-
-/* ============ SÉLECTEUR DE SECTION (Maternelle · Primaire · Collège) ============ */
-.branch-switch{display:inline-flex;gap:2px;padding:3px;border-radius:var(--radius-pill);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
-.branch-switch a{padding:.36rem .8rem;border-radius:var(--radius-pill);font-size:.82rem;font-weight:600;color:rgba(255,255,255,.85);text-decoration:none;transition:background .2s,color .2s;white-space:nowrap;}
-.branch-switch a.on{background:#fff;color:var(--color-primary);}
-.branch-switch a:not(.on):hover{color:#fff;background:rgba(255,255,255,.14);}
-.navbar.is-scrolled .branch-switch{background:var(--bg-tint);border-color:var(--border);}
-.navbar.is-scrolled .branch-switch a{color:var(--color-primary);}
-.navbar.is-scrolled .branch-switch a.on{background:var(--color-primary);color:#fff;}
-@media(max-width:600px){ .branch-switch a{padding:.3rem .55rem;font-size:.72rem;} .brand-name{display:none;} }
-</style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#b6c4ff", "on-primary-fixed-variant": "#264191",
+                        "error-container": "#ffdad6", "on-background": "#191c1e",
+                        "primary-fixed": "#dce1ff", "on-error": "#ffffff",
+                        "surface-tint": "#4059aa", "surface-container-highest": "#e0e3e5",
+                        "surface-dim": "#d8dadc", "on-secondary-fixed-variant": "#38485d",
+                        "outline-variant": "#c5c5d3", "on-tertiary-fixed-variant": "#3f465c",
+                        "surface-container-high": "#e6e8ea", "error": "#ba1a1a",
+                        "tertiary-fixed": "#dae2fd", "surface": "#f7f9fb",
+                        "secondary": "#505f76", "primary": "#00236f",
+                        "surface-bright": "#f7f9fb", "inverse-surface": "#2d3133",
+                        "outline": "#757682", "on-secondary-fixed": "#0b1c30",
+                        "tertiary-container": "#384055", "on-tertiary": "#ffffff",
+                        "background": "#f7f9fb", "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eff1f3", "on-tertiary-fixed": "#131b2e",
+                        "secondary-container": "#d0e1fb", "tertiary": "#222a3e",
+                        "inverse-primary": "#b6c4ff", "secondary-fixed-dim": "#b7c8e1",
+                        "on-primary-fixed": "#00164e", "on-secondary-container": "#54647a",
+                        "secondary-fixed": "#d3e4fe", "on-tertiary-container": "#a4acc5",
+                        "on-secondary": "#ffffff", "surface-variant": "#e0e3e5",
+                        "tertiary-fixed-dim": "#bec6e0", "on-primary": "#ffffff",
+                        "on-primary-container": "#90a8ff", "on-error-container": "#93000a",
+                        "on-surface-variant": "#444651", "surface-container": "#eceef0",
+                        "on-surface": "#191c1e", "surface-container-low": "#f2f4f6",
+                        "primary-container": "#1e3a8a",
+                        "success": "#1b7f4c"
+                    },
+                    "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    "spacing": {
+                        "sidebar-width": "260px", "lg": "24px", "xs": "4px", "md": "16px",
+                        "base": "4px", "sm": "8px", "xl": "32px", "gutter": "24px", "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"],
+                        "code": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"],
+                        "body-md": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "code": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
 </head>
-<body>
+<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
 
-<!-- Barre de progression de lecture -->
-<div class="progress" aria-hidden="true"></div>
+<!-- Barre de navigation -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-lg py-sm max-w-full mx-auto h-16">
+<div class="flex items-center gap-xl">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">school</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">EduSystem Pro</span>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-primary border-b-2 border-primary font-bold pb-1 font-body-md text-body-md transition-all duration-200" href="#comment-ca-marche">Comment ça marche</a>
+<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#avantages">Avantages</a>
+<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#tarifs">Tarifs &amp; Essai</a>
+<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#temoignages">Témoignages</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<a class="hidden sm:block text-secondary font-label-md text-label-md hover:text-primary transition-colors px-md py-sm" href="/login">Connexion</a>
+<a class="bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:opacity-90 active:opacity-80 transition-all inline-flex items-center gap-xs" href="/demarrer">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>Inscrire mon école
+</a>
+</div>
+</nav>
 
-<!-- ============ NAVBAR ============ -->
-<header class="navbar" id="navbar">
-  <a href="#accueil" class="brand" aria-label="Holyflame, accueil">
-    <span class="flame-glow">
-      <svg width="34" height="34" viewBox="0 0 48 48" role="img" aria-label="Logo colombe Holy Flame">
-        <defs><linearGradient id="doveNav" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#1B3A8B"/><stop offset="100%" stop-color="#12B5C9"/>
-        </linearGradient></defs>
-        <circle cx="24" cy="24" r="22" fill="url(#doveNav)"/>
-        <g fill="#ffffff">
-          <ellipse transform="rotate(-22 22 27)" cx="22" cy="27" rx="10.5" ry="4.6"/>
-          <path d="M20 25C22 15 28 11 36 10 28 15 25 20 24 28Z"/>
-          <circle cx="31.5" cy="19.5" r="3.2"/>
-          <path d="M34 18.5l4.5-1.2-3.2 3.4z"/>
-          <path d="M13 30l-7.5 2.2 4.3-6.2z"/>
-        </g>
-        <circle cx="32.4" cy="18.8" r="0.85" fill="#12B5C9"/>
-      </svg>
-    </span>
-    <span class="brand-name">Holy<b>flame</b></span>
-  </a>
-  <nav class="branch-switch" aria-label="Section de l'école">
-    <a href="maternelle.html">Maternelle</a>
-    <a href="primaire.html">Primaire</a>
-    <a href="index.html" class="on" aria-current="page">Collège</a>
-  </nav>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#apropos">L'école</a></li>
-    <li><a href="#cycles">Cycles</a></li>
-    <li><a href="#tarifs">Tarifs</a></li>
-    <li><a href="#activites">Activités</a></li>
-    <li><a href="#galerie">Galerie</a></li>
-    <li><a href="#acces">Accès</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <div class="nav-actions">
-    <a href="/login" class="nav-login-link" style="font-size:.85rem;font-weight:600;color:var(--text-muted);margin-right:.4rem;">Espace parents &amp; personnel</a>
-    <a href="#contact" class="btn btn--primary btn--nav-cta">Pré-inscription</a>
-    <button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    </button>
-  </div>
-</header>
+<main class="pt-16">
 
-<main id="contenu">
-<!-- ============ HERO ============ -->
-<section class="hero" id="accueil">
-  <div class="hero-bg" aria-hidden="true">
-    <img class="hero-bg-img" src="/assets/facade.jpg" alt="" decoding="async" fetchpriority="high">
-    <div class="hero-overlay"></div>
-    <div class="hero-spotlight"></div>
-  </div>
-  <div class="hero-inner">
-    <div class="hero-badges reveal">
-      <span class="badge badge--glass">🎓 Section Collège</span>
-      <span class="badge badge--glass">🕊️ Bilingue · N'Djamena</span>
-    </div>
-    <h1 class="hero-title reveal" style="--i:1">Offrez à votre enfant <em>l'école qui prépare son avenir.</em></h1>
-    <p class="hero-lead reveal" style="--i:2">Collège Polyvalent Franco-Anglais <strong>Holy Flame</strong> — école bilingue français-anglais, du primaire au secondaire, en enseignement général et technique. <span class="hero-devise">Assiduité · Travail · Réussite.</span></p>
-    <div class="hero-cta reveal" style="--i:3">
-      <a href="#contact" class="btn btn--primary btn--lg" data-magnetic>Réserver une place pour mon enfant</a>
-      <a href="#video" class="btn btn--glass btn--lg">▶ Voir la vidéo</a>
-    </div>
-    <div class="hero-stats reveal" style="--i:4">
-      <div class="hstat"><b data-count="850" data-suffix="+">0</b><span>élèves accompagnés</span></div>
-      <div class="hstat"><b data-count="97" data-suffix="%">0</b><span>de réussite</span></div>
-      <div class="hstat"><b data-count="15" data-suffix="+">0</b><span>ans d'expérience</span></div>
-    </div>
-  </div>
-  <a href="#etablissement" class="hero-scroll" aria-label="Découvrir plus bas"><span class="hero-scroll-dot"></span></a>
+<!-- Hero -->
+<section class="relative pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-b from-surface-container-low via-background to-background">
+<div class="container mx-auto px-lg max-w-container-max relative z-10">
+<div class="grid lg:grid-cols-2 gap-xl items-center">
+<div class="space-y-md">
+<div class="inline-flex items-center gap-sm bg-primary-fixed text-on-primary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
+<span>Une interface pensée pour les équipes scolaires</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg md:text-[50px] md:leading-[58px] text-primary font-bold">
+          La gestion scolaire simple, moderne et tout-en-un pour votre établissement.
+        </h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-lg leading-relaxed">
+          Configurez votre école en <strong>3 étapes simples</strong> : gérez aisément vos élèves, enseignants, emplois du temps, notes et finances sur une interface fluide et intuitive conçue pour tous.
+        </p>
+
+<div class="pt-sm space-y-sm">
+<div class="flex flex-wrap items-center gap-md">
+<a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm" href="/demarrer">
+<span>Créer l'espace de mon école</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+<a class="border border-outline-variant text-primary bg-white font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:bg-surface-container-low transition-colors inline-flex items-center gap-sm shadow-sm" href="#comment-ca-marche">
+<span class="material-symbols-outlined text-primary text-[20px]">play_circle</span>
+<span>Voir comment ça marche</span>
+</a>
+</div>
+<div class="flex flex-wrap items-center gap-md text-secondary font-label-sm text-label-sm pt-xs">
+<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">check_circle</span> Sans carte bancaire</span>
+<span class="text-outline-variant">•</span>
+<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">schedule</span> Prêt en 2 minutes</span>
+<span class="text-outline-variant">•</span>
+<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">support_agent</span> Accompagnement offert</span>
+</div>
+</div>
+</div>
+
+<!-- Apercu du tableau de bord : maquette en HTML, aucune image distante a charger -->
+<div class="relative">
+<div class="bg-white p-md md:p-lg rounded-2xl shadow-xl border border-outline-variant relative z-10">
+<div class="flex items-center justify-between pb-md border-b border-outline-variant mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-3 h-3 rounded-full bg-red-400"></div>
+<div class="w-3 h-3 rounded-full bg-amber-400"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+<span class="text-secondary font-label-sm ml-2">Tableau de bord de rentrée</span>
+</div>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm px-sm py-xs rounded-full">Année en cours</span>
+</div>
+
+<div class="rounded-xl bg-surface-container-low p-md space-y-md">
+<div class="flex items-end justify-between gap-xs h-32">
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/25 rounded-t" style="height:42%"></div><span class="text-[10px] text-secondary">Sep</span></div>
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/35 rounded-t" style="height:58%"></div><span class="text-[10px] text-secondary">Oct</span></div>
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/50 rounded-t" style="height:71%"></div><span class="text-[10px] text-secondary">Nov</span></div>
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/65 rounded-t" style="height:63%"></div><span class="text-[10px] text-secondary">Déc</span></div>
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/80 rounded-t" style="height:86%"></div><span class="text-[10px] text-secondary">Jan</span></div>
+<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary rounded-t" style="height:100%"></div><span class="text-[10px] text-primary font-bold">Fév</span></div>
+</div>
+<div class="space-y-xs">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">groups</span>
+<div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary rounded-full" style="width:92%"></div></div>
+<span class="font-label-sm text-secondary w-20 text-right">Scolarité 92%</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">event_available</span>
+<div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-success rounded-full" style="width:96%"></div></div>
+<span class="font-label-sm text-secondary w-20 text-right">Présence 96%</span>
+</div>
+</div>
+</div>
+
+<div class="grid grid-cols-3 gap-sm mt-md pt-sm text-center">
+<div class="p-sm bg-surface-container rounded-lg">
+<p class="font-label-sm text-secondary">Élèves inscrits</p>
+<p class="font-headline-sm text-primary font-bold">1 482</p>
+</div>
+<div class="p-sm bg-surface-container rounded-lg">
+<p class="font-label-sm text-secondary">Taux de présence</p>
+<p class="font-headline-sm text-success font-bold">96.5%</p>
+</div>
+<div class="p-sm bg-surface-container rounded-lg">
+<p class="font-label-sm text-secondary">Frais scolarité</p>
+<p class="font-headline-sm text-primary font-bold">92% réglés</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 
-<!-- ============ NOTRE ÉTABLISSEMENT ============ -->
-<section id="etablissement">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Nos infrastructures</span>
-      <h2>Un cadre moderne et sécurisé</h2>
-      <p class="lead">Des bâtiments neufs, lumineux et sécurisés, pensés pour le confort et la réussite de nos élèves — au cœur de Paris Congo, à N'Djamena.</p>
-    </div>
-    <div class="etab-grid">
-      <figure class="etab-photo reveal" style="--i:0"><img src="/assets/etablissement-1.jpg" alt="Bâtiment de classes de Holy Flame vu de la cour" loading="lazy"><figcaption>Nos bâtiments de classe</figcaption></figure>
-      <figure class="etab-photo reveal" style="--i:1"><img src="/assets/etablissement-2.jpg" alt="Cour intérieure sécurisée de Holy Flame" loading="lazy"><figcaption>Espaces sécurisés &amp; aérés</figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<!-- ============ VIDÉO DE DÉCOUVERTE ============ -->
-<section id="video" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Visite en vidéo</span>
-      <h2>Découvrez Holy Flame en images</h2>
-      <p class="lead">Prenez quelques minutes pour explorer notre école, son cadre et son ambiance — comme si vous y étiez.</p>
-    </div>
-    <div class="video-wrap reveal">
-      <video controls preload="none" playsinline poster="assets/facade.jpg">
-        <source src="/assets/video/decouverte-holyflame.mp4" type="video/mp4">
-        Votre navigateur ne peut pas lire la vidéo. <a href="/assets/video/decouverte-holyflame.mp4">Télécharger la vidéo</a>.
-      </video>
-    </div>
-  </div>
-</section>
-
-<!-- ============ CHIFFRES CLÉS ============ -->
-<section class="section--premium" id="chiffres">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow" style="color:var(--color-flame-gold)">Holyflame en quelques chiffres</span>
-      <h2>Une école de confiance, année après année</h2>
-    </div>
-    <div class="stats-grid">
-      <div class="stat reveal" style="--i:0"><b data-count="2009">0</b><span>Année de fondation — l'expérience au service de vos enfants</span></div>
-      <div class="stat reveal" style="--i:1"><b data-count="850" data-suffix="+">0</b><span>Élèves accompagnés chaque année</span></div>
-      <div class="stat reveal" style="--i:2"><b data-count="97" data-suffix="%">0</b><span>De réussite aux examens officiels</span></div>
-      <div class="stat reveal" style="--i:3"><b data-count="60" data-suffix="+">0</b><span>Enseignants qualifiés et passionnés</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ NOTRE MISSION ============ -->
-<section id="apropos" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Notre mission</span>
-      <h2>Faire grandir chaque enfant, en confiance</h2>
-      <p class="lead">Holyflame porte une conviction simple : chaque enfant possède une flamme unique. Notre rôle est de la protéger, de la nourrir et de la faire rayonner — sur le plan scolaire comme sur le plan humain.</p>
-    </div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-      <article class="card value-card reveal" style="--i:0">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7-.2L12 6.9l-1.8-1.5a5 5 0 0 0-7 7.2L12 21l8.8-8.4a5 5 0 0 0 0-7z"/></svg></span>
-        <h3>Bienveillance</h3>
-        <p>Un climat de respect et d'écoute où chaque enfant se sent en sécurité et valorisé.</p>
-      </article>
-      <article class="card value-card reveal" style="--i:1">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 21l1.1-6.5L2.6 10.8l6.5-.9z"/></svg></span>
-        <h3>Excellence</h3>
-        <p>Une exigence positive qui pousse chacun à donner le meilleur de lui-même, à son rythme.</p>
-      </article>
-      <article class="card value-card reveal" style="--i:2">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></span>
-        <h3>Ouverture</h3>
-        <p>Langues, numérique et curiosité pour préparer votre enfant à un monde en mouvement.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ POURQUOI HOLYFLAME ============ -->
-<section id="pourquoi">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Pourquoi nous choisir</span>
-      <h2>Pourquoi les parents choisissent Holyflame</h2>
-      <p class="lead">Bien plus qu'une école : un environnement pensé pour la réussite et l'épanouissement de votre enfant.</p>
-    </div>
-    <div class="grid">
-      <article class="card card--flame reveal" style="--i:0">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
-        <h3>Un cadre sécurisé</h3>
-        <p>Accès contrôlé, personnel présent et surveillance continue : votre enfant est entre de bonnes mains, toute la journée.</p>
-      </article>
-      <article class="card reveal" style="--i:1">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></span>
-        <h3>Un enseignement d'excellence</h3>
-        <p>Des programmes solides et des enseignants qualifiés qui tirent chaque élève vers le haut, à son rythme.</p>
-      </article>
-      <article class="card reveal" style="--i:2">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
-        <h3>Un suivi individualisé</h3>
-        <p>Chaque enfant est unique : nous suivons ses progrès de près et vous tenons informés régulièrement.</p>
-      </article>
-      <article class="card reveal" style="--i:0">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5L3 21l4.5-1.5M14 4s4 1 6 3-1 6-1 6l-6-6s3-3 1-3zM9 15l-3-3 6.5-6.5a5 5 0 0 1 3 3L9 15z"/></svg></span>
-        <h3>Une école tournée vers l'avenir</h3>
-        <p>Enseignement général et technique, bilinguisme et outils numériques pour préparer votre enfant au monde de demain.</p>
-      </article>
-      <article class="card reveal" style="--i:1">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7-.2L12 6.9l-1.8-1.5a5 5 0 0 0-7 7.2L12 21l8.8-8.4a5 5 0 0 0 0-7z"/></svg></span>
-        <h3>Des valeurs humaines fortes</h3>
-        <p>Respect, discipline positive, entraide et confiance en soi au cœur de chaque journée.</p>
-      </article>
-      <article class="card reveal" style="--i:2">
-        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        <h3>Une communication ouverte</h3>
-        <p>Vous n'êtes jamais seul : bulletins clairs, rencontres régulières et une équipe à votre écoute.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ CYCLES ============ -->
-<section id="cycles" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Un parcours complet</span>
-      <h2>De la maternelle au lycée</h2>
-      <p class="lead">Un accompagnement continu et cohérent, à chaque étape de la vie de votre enfant.</p>
-    </div>
-    <div class="grid">
-      <article class="card cycle-card reveal" style="--i:0"><span class="cycle-num">01</span><span class="badge badge--flame tag">Maternelle</span><h3>Les premiers pas</h3><p>Éveil, motricité, langage et socialisation dans un environnement doux et sécurisant, où l'on apprend dans la joie et la confiance.</p></article>
-      <article class="card cycle-card reveal" style="--i:1"><span class="cycle-num">02</span><span class="badge badge--flame tag">Primaire</span><h3>Les fondations solides</h3><p>Lecture, écriture, calcul et curiosité : on construit les bases de la réussite en cultivant le plaisir d'apprendre.</p></article>
-      <article class="card cycle-card reveal" style="--i:2"><span class="cycle-num">03</span><span class="badge badge--flame tag">Collège</span><h3>Le cap de l'autonomie</h3><p>On approfondit les savoirs, on renforce les méthodes de travail et on accompagne l'adolescent dans ses choix.</p></article>
-      <article class="card cycle-card reveal" style="--i:3"><span class="cycle-num">04</span><span class="badge badge--flame tag">Lycée</span><h3>La préparation de l'avenir</h3><p>Exigence, orientation et accompagnement vers les examens et les études supérieures.</p></article>
-    </div>
-    <div style="text-align:center;margin-top:var(--space-7)" class="reveal">
-      <a href="#contact" class="btn btn--primary btn--lg">Découvrir le cycle de mon enfant</a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ TARIFS ============ -->
-<section id="tarifs">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Nos tarifs</span>
-      <h2>Un investissement clair pour l'avenir de votre enfant</h2>
-      <p class="lead">Des frais de scolarité transparents, avec des facilités de paiement adaptées à chaque famille.</p>
-    </div>
-    <div class="price-grid">
-      <article class="card price-card reveal" style="--i:0">
-        <span class="badge badge--blue tag">Maternelle</span>
-        <div class="price">[Tarif]<small>par an — [devise]</small></div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Éveil &amp; motricité</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Cadre doux &amp; sécurisé</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Petits effectifs</li>
-        </ul>
-        <a href="#contact" class="btn btn--secondary btn--block">Demander le détail</a>
-      </article>
-      <article class="card price-card featured reveal" style="--i:1">
-        <span class="badge badge--flame price-featured-tag">⭐ Le plus demandé</span>
-        <span class="badge badge--blue tag">Primaire</span>
-        <div class="price">[Tarif]<small>par an — [devise]</small></div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Fondamentaux solides</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Numérique &amp; langues</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Suivi individualisé</li>
-        </ul>
-        <a href="#contact" class="btn btn--primary btn--block">Réserver une place</a>
-      </article>
-      <article class="card price-card reveal" style="--i:2">
-        <span class="badge badge--blue tag">Collège</span>
-        <div class="price">[Tarif]<small>par an — [devise]</small></div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Autonomie &amp; méthode</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Accompagnement aux choix</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Bulletins réguliers</li>
-        </ul>
-        <a href="#contact" class="btn btn--secondary btn--block">Demander le détail</a>
-      </article>
-      <article class="card price-card reveal" style="--i:3">
-        <span class="badge badge--blue tag">Lycée</span>
-        <div class="price">[Tarif]<small>par an — [devise]</small></div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Préparation aux examens</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Orientation supérieure</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Exigence &amp; réussite</li>
-        </ul>
-        <a href="#contact" class="btn btn--secondary btn--block">Demander le détail</a>
-      </article>
-    </div>
-    <p class="price-note">💡 Facilités de paiement (échelonnement) et réductions pour fratrie disponibles. Contactez-nous pour la grille tarifaire complète.</p>
-  </div>
-</section>
-
-<!-- ============ PÉDAGOGIE ============ -->
-<section id="pedagogie">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Notre approche</span>
-      <h2>Une pédagogie moderne, un enfant prêt pour demain</h2>
-      <p class="lead">Nous associons les valeurs éducatives essentielles aux outils de leur époque.</p>
-    </div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--space-6)">
-      <div class="peda-item reveal" style="--i:0">
-        <span class="peda-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-        <div><h3>Le numérique intelligent</h3><p>Tableaux interactifs, ressources en ligne et initiation raisonnée aux outils numériques — la technologie au service de l'apprentissage, jamais l'inverse.</p></div>
-      </div>
-      <div class="peda-item reveal" style="--i:1">
-        <span class="peda-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-6 10-6 10 6 10 6M12 3v3M5 20a7 7 0 0 1 14 0"/></svg></span>
-        <div><h3>Le bilinguisme français-anglais</h3><p>Un enseignement bilingue dès le plus jeune âge : votre enfant maîtrise le français ET l'anglais et communique avec le monde en toute confiance.</p></div>
-      </div>
-      <div class="peda-item reveal" style="--i:0">
-        <span class="peda-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
-        <div><h3>L'épanouissement au cœur</h3><p>Sport, arts, projets et activités : parce qu'un enfant heureux et équilibré est un enfant qui réussit.</p></div>
-      </div>
-      <div class="peda-item reveal" style="--i:1">
-        <span class="peda-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg></span>
-        <div><h3>Un suivi personnalisé et transparent</h3><p>Évaluation continue et bilans réguliers partagés avec vous : vous suivez les progrès de votre enfant en temps réel.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ACTIVITÉS EXTRA-SCOLAIRES ============ -->
-<section id="activites">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Au-delà des cours</span>
-      <h2>Des activités qui révèlent les talents</h2>
-      <p class="lead">Sport, arts, sciences et clubs : parce qu'on apprend aussi en s'amusant et en se dépassant.</p>
-    </div>
-    <div class="grid">
-      <article class="card reveal" style="--i:0"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M18 8v8M4 10v4M20 10v4M6 12h12"/></svg></span><h3>Sport &amp; bien-être</h3><p>Football, athlétisme, danse… pour se dépenser, coopérer et gagner en confiance.</p></article>
-      <article class="card reveal" style="--i:1"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></span><h3>Musique &amp; chant</h3><p>Éveil musical, chorale et instruments pour cultiver la sensibilité et l'écoute.</p></article>
-      <article class="card reveal" style="--i:2"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.3 0 2-.9 2-1.9 0-1-.8-1.6-.8-2.4 0-1 .8-1.7 1.8-1.7H16a5 5 0 0 0 5-5c0-4-4-7-9-7z"/><circle cx="8" cy="12" r="1.3"/><circle cx="12" cy="8" r="1.3"/><circle cx="16" cy="12" r="1.3"/></svg></span><h3>Arts &amp; créativité</h3><p>Dessin, peinture et travaux manuels pour libérer l'imagination de chaque enfant.</p></article>
-      <article class="card reveal" style="--i:0"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="8" width="12" height="12" rx="2"/><path d="M12 8V5M9 3h6M9.5 13h.01M14.5 13h.01M10 16.5h4M9 20v2M15 20v2"/></svg></span><h3>Sciences &amp; robotique</h3><p>Expériences, logique et initiation au code pour éveiller l'esprit scientifique.</p></article>
-      <article class="card reveal" style="--i:1"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span><h3>Langues &amp; culture</h3><p>Ateliers de langues et découvertes culturelles pour s'ouvrir au monde tôt.</p></article>
-      <article class="card reveal" style="--i:2"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 4-4 2 2-4z"/></svg></span><h3>Clubs &amp; sorties</h3><p>Clubs thématiques et sorties pédagogiques pour apprendre autrement, en groupe.</p></article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ÉQUIPE ============ -->
-<section id="equipe" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Notre équipe</span>
-      <h2>Des professionnels passionnés au service de vos enfants</h2>
-      <p class="lead">Une équipe qualifiée, bienveillante et engagée, qui connaît chaque élève par son prénom.</p>
-    </div>
-    <div class="team-grid">
-      <article class="card team-card reveal" style="--i:0">
-        <div class="team-avatar"><svg viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="av1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B3A8B"/><stop offset="1" stop-color="#12B5C9"/></linearGradient><clipPath id="avc1"><circle cx="48" cy="48" r="48"/></clipPath></defs><g clip-path="url(#avc1)"><rect width="96" height="96" fill="url(#av1)"/><circle cx="48" cy="39" r="16" fill="#fff"/><path d="M18 90c0-17 13-28 30-28s30 11 30 28z" fill="#fff"/></g></svg></div>
-        <h3>[Nom du directeur]</h3>
-        <div class="team-role">Direction de l'établissement</div>
-        <p>Garant du projet éducatif et de la sérénité de chaque famille.</p>
-      </article>
-      <article class="card team-card reveal" style="--i:1">
-        <div class="team-avatar"><svg viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="av2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2B4FB0"/><stop offset="1" stop-color="#5B78D6"/></linearGradient><clipPath id="avc2"><circle cx="48" cy="48" r="48"/></clipPath></defs><g clip-path="url(#avc2)"><rect width="96" height="96" fill="url(#av2)"/><circle cx="48" cy="39" r="16" fill="#fff"/><path d="M18 90c0-17 13-28 30-28s30 11 30 28z" fill="#fff"/></g></svg></div>
-        <h3>[Nom]</h3>
-        <div class="team-role">Responsable pédagogique</div>
-        <p>Coordonne les programmes et le suivi personnalisé des élèves.</p>
-      </article>
-      <article class="card team-card reveal" style="--i:2">
-        <div class="team-avatar"><svg viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="av3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12B5C9"/><stop offset="1" stop-color="#2B4FB0"/></linearGradient><clipPath id="avc3"><circle cx="48" cy="48" r="48"/></clipPath></defs><g clip-path="url(#avc3)"><rect width="96" height="96" fill="url(#av3)"/><circle cx="48" cy="39" r="16" fill="#fff"/><path d="M18 90c0-17 13-28 30-28s30 11 30 28z" fill="#fff"/></g></svg></div>
-        <h3>[Nom]</h3>
-        <div class="team-role">Enseignant·e référent·e</div>
-        <p>Accompagne les élèves avec exigence et bienveillance au quotidien.</p>
-      </article>
-      <article class="card team-card reveal" style="--i:3">
-        <div class="team-avatar"><svg viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="av4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B78D6"/><stop offset="1" stop-color="#12B5C9"/></linearGradient><clipPath id="avc4"><circle cx="48" cy="48" r="48"/></clipPath></defs><g clip-path="url(#avc4)"><rect width="96" height="96" fill="url(#av4)"/><circle cx="48" cy="39" r="16" fill="#fff"/><path d="M18 90c0-17 13-28 30-28s30 11 30 28z" fill="#fff"/></g></svg></div>
-        <h3>[Nom]</h3>
-        <div class="team-role">Vie scolaire &amp; sécurité</div>
-        <p>Veille au bien-être et à la sécurité des enfants toute la journée.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ TÉMOIGNAGES ============ -->
-<section id="temoignages">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Ils nous font confiance</span>
-      <h2>Ce que disent les parents</h2>
-      <p class="lead">Ils nous ont fait confiance pour l'avenir de leurs enfants.</p>
-    </div>
-    <div class="grid">
-      <article class="card quote-card reveal" style="--i:0">
-        <div class="quote-mark">"</div>
-        <p class="quote">Depuis que mon fils est à Holyflame, il a repris confiance en lui et adore aller à l'école. L'équipe est attentive et disponible, on se sent vraiment écoutés.</p>
-        <div class="quote-author"><span class="quote-avatar">A</span><div><b>Aïcha B.</b><span>Maman d'un élève en primaire</span></div></div>
-      </article>
-      <article class="card quote-card reveal" style="--i:1">
-        <div class="quote-mark">"</div>
-        <p class="quote">Ce qui m'a convaincu, c'est le sérieux de l'encadrement et la sécurité. Ma fille progresse et je reçois des nouvelles régulières de ses professeurs.</p>
-        <div class="quote-author"><span class="quote-avatar">M</span><div><b>Marc T.</b><span>Papa d'une élève au collège</span></div></div>
-      </article>
-      <article class="card quote-card reveal" style="--i:2">
-        <div class="quote-mark">"</div>
-        <p class="quote">Une école moderne qui garde de vraies valeurs. Mes deux enfants s'y épanouissent et les résultats sont au rendez-vous. Je recommande sans hésiter.</p>
-        <div class="quote-author"><span class="quote-avatar">S</span><div><b>Sandrine K.</b><span>Parent de deux enfants</span></div></div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ GALERIE ============ -->
-<section id="galerie" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">La vie à l'école en images</span>
-      <h2>Découvrez l'univers Holyflame</h2>
-      <p class="lead">Un aperçu de nos espaces, de nos activités et du quotidien de vos enfants.</p>
-    </div>
-    <div class="cf reveal" id="coverflow">
-      <button class="cf-nav cf-prev" id="cfPrev" type="button" aria-label="Photo précédente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <div class="cf-stage" id="cfStage">
-        <figure class="cf-slide"><img src="/assets/gallerie/joie-en-salle.jpg" alt="La joie en classe à Holy Flame" loading="lazy"><figcaption>La joie en classe</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/maternelle-matinee.jpg" alt="Maternelle en matinée" loading="lazy"><figcaption>Maternelle en matinée</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/enseignant-eleve.jpg" alt="Enseignants et élèves" loading="lazy"><figcaption>Enseignants &amp; élèves</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/sport-groupe.jpg" alt="Sport en groupe" loading="lazy"><figcaption>Sport en groupe</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/danse-cm2.jpg" alt="Spectacle de danse de la CM2" loading="lazy"><figcaption>Spectacle de danse — CM2</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/concours-eloquence.jpg" alt="Concours d'éloquence" loading="lazy"><figcaption>Concours d'éloquence</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/visite-musee.jpg" alt="Sortie au musée" loading="lazy"><figcaption>Sortie au musée</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/visite-autorites.jpg" alt="Visite des autorités" loading="lazy"><figcaption>Visite des autorités</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/benevolat.jpg" alt="Engagement et bénévolat" loading="lazy"><figcaption>Engagement &amp; bénévolat</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/fin-annee.jpg" alt="Fête de fin d'année" loading="lazy"><figcaption>Fête de fin d'année</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/challenge-national.jpg" alt="Concours et challenge national" loading="lazy"><figcaption>Challenge national</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/eleves-college.jpg" alt="Élèves du collège Holy Flame" loading="lazy"><figcaption>Élèves du collège</figcaption></figure>
-        <figure class="cf-slide"><img src="/assets/gallerie/salle-informatique.jpg" alt="Salle informatique de Holy Flame" loading="lazy"><figcaption>Salle informatique</figcaption></figure>
-      </div>
-      <button class="cf-nav cf-next" id="cfNext" type="button" aria-label="Photo suivante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-      <div class="cf-dots" id="cfDots"></div>
-    </div>
-    </div>
-    <p class="price-note">📸 Aperçu de la vie à Holyflame — ces photos sont facilement remplaçables par vos dernières photos à tout moment.</p>
-  </div>
-</section>
-
-<!-- ============ JOURNÉE TYPE ============ -->
-<section id="journee">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">La vie à l'école</span>
-      <h2>Une journée à Holyflame</h2>
-      <p class="lead">Immersion dans le quotidien de votre enfant : rythmé, structuré et sécurisant.</p>
-    </div>
-    <div class="timeline">
-      <div class="tl-item reveal" style="--i:0"><div class="tl-time">Le matin</div><div class="tl-body"><b>Accueil bienveillant.</b> Votre enfant est accueilli à l'entrée par une équipe attentive, dans un cadre calme et sécurisé.</div></div>
-      <div class="tl-item reveal" style="--i:1"><div class="tl-time">En classe</div><div class="tl-body"><b>Apprentissage &amp; interactivité.</b> Les cours alternent savoirs fondamentaux et activités interactives, entrecoupés de pauses encadrées dans la cour.</div></div>
-      <div class="tl-item reveal" style="--i:2"><div class="tl-time">À midi</div><div class="tl-body"><b>Repas encadré.</b> Un repas équilibré est servi sous surveillance, dans le respect et la convivialité.</div></div>
-      <div class="tl-item reveal" style="--i:3"><div class="tl-time">L'après-midi</div><div class="tl-body"><b>Projets &amp; éveil.</b> Approfondissement, projets et activités d'éveil pour nourrir la curiosité de chacun.</div></div>
-      <div class="tl-item reveal" style="--i:4"><div class="tl-time">En fin de journée</div><div class="tl-body"><b>Étude &amp; sérénité.</b> Un temps d'étude ou d'activités permet aux parents de récupérer leur enfant en toute tranquillité.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ACCÈS & INFOS PRATIQUES ============ -->
-<section id="acces" style="background:var(--bg-soft)">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Nous trouver</span>
-      <h2>Accès &amp; informations pratiques</h2>
-      <p class="lead">Une école facile d'accès, pensée pour le quotidien des familles.</p>
-    </div>
-    <div class="acces-grid">
-      <div class="info-list reveal">
-        <div class="info-row">
-          <span class="info-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-          <div><b>Adresse</b><p id="addrText">[Adresse], [Ville]</p></div>
+<!-- Comment ca marche -->
+<section class="py-xl bg-white border-y border-outline-variant" id="comment-ca-marche">
+<div class="container mx-auto px-lg max-w-container-max">
+<div class="text-center max-w-2xl mx-auto mb-xl">
+<span class="text-primary font-label-md uppercase tracking-wider bg-primary-fixed px-md py-xs rounded-full">Prise en main express</span>
+<h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Comment ça marche en 3 étapes simples</h2>
+<p class="font-body-lg text-body-lg text-secondary">Aucune compétence technique requise. Votre établissement est opérationnel le jour même.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-lg relative">
+<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">1</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Créez votre école</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+Indiquez le nom de votre établissement et son type : vos classes sont créées automatiquement, de la maternelle au lycée.
+        </p>
+<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[16px]">timer</span> En moins d'une minute
         </div>
-        <div class="info-row">
-          <span class="info-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-          <div><b>Horaires</b><p>[heure début] – [heure fin], du lundi au vendredi. Étude / garderie disponible.</p></div>
+</div>
+<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">2</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Invitez &amp; importez</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+Importez vos listes de classes et d'élèves via Excel en 1 clic ou ajout guidé. Envoyez les accès sécurisés à vos enseignants et surveillants.
+        </p>
+<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[16px]">upload_file</span> Import Excel compatible
         </div>
-        <div class="info-row">
-          <span class="info-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M4 12h16M8 5v7M16 5v7M7 20v-3M17 20v-3"/><circle cx="8.5" cy="14.5" r="1"/><circle cx="15.5" cy="14.5" r="1"/></svg></span>
-          <div><b>Transport scolaire</b><p>Service de ramassage sur les principaux axes [préciser les zones desservies].</p></div>
+</div>
+<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">3</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Commencez à gérer</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+Suivez les présences en direct, éditez les bulletins automatisés, encaissez les frais scolaires et communiquez directement avec les parents.
+        </p>
+<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[16px]">verified</span> Gestion sereine et sans papier
         </div>
-        <div class="info-row">
-          <span class="info-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg></span>
-          <div><b>Restauration</b><p>Cantine équilibrée et encadrée sur place, avec suivi des enfants pendant le repas.</p></div>
-        </div>
-      </div>
-      <div class="acces-media reveal">
-        <figure class="acces-photo">
-          <img src="/assets/facade.jpg" alt="Façade du Collège Holy Flame depuis la rue, Paris Congo, N'Djamena" loading="lazy">
-          <figcaption>📍 L'entrée de l'école vue de la rue</figcaption>
-        </figure>
-        <div class="map-wrap">
-          <iframe id="mapFrame" title="Localisation de l'école Holy Flame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-          <a id="mapLink" href="#" target="_blank" rel="noopener" class="btn btn--primary map-btn">Voir l'itinéraire</a>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+<div class="text-center mt-xl">
+<a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:opacity-90 transition-all inline-flex items-center gap-sm" href="/demarrer">
+<span class="material-symbols-outlined">how_to_reg</span>
+<span>Créer l'espace de mon école</span>
+</a>
+</div>
+</div>
 </section>
 
-<!-- ============ FAQ ============ -->
-<section id="faq">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Vos questions</span>
-      <h2>Vos questions, nos réponses</h2>
-    </div>
-    <div class="faq-list" id="faqList">
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Comment inscrire mon enfant ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>C'est simple : remplissez le formulaire de pré-inscription ci-dessous ou appelez-nous au <b>66 36 17 37</b>. Nous vous recontactons rapidement pour organiser un rendez-vous et vous guider dans les démarches.</p></div></div></div>
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Quels sont les frais de scolarité ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>Nos tarifs varient selon le cycle. Contactez-nous au <b>66 36 17 37</b> ou via le formulaire pour recevoir la grille tarifaire détaillée et les modalités de paiement (facilités possibles).</p></div></div></div>
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Quels sont les horaires de l'école ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>Les cours se déroulent de <b>[heure début]</b> à <b>[heure fin]</b>, du lundi au vendredi. Un service d'étude/garderie est proposé pour s'adapter à votre organisation.</p></div></div></div>
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Y a-t-il une cantine ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>Oui. Un service de restauration équilibré est proposé, avec un encadrement des enfants pendant le temps du repas. Les régimes particuliers peuvent être pris en compte.</p></div></div></div>
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Comment la sécurité est-elle assurée ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>La sécurité est notre priorité : accès contrôlé à l'entrée, présence permanente de personnel encadrant et surveillance des enfants tout au long de la journée.</p></div></div></div>
-      <div class="acc reveal"><button class="acc-head" aria-expanded="false">Comment suivez-vous les progrès de mon enfant ?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-body"><div><p>Vous recevez des bulletins réguliers, et des rencontres parents-professeurs sont organisées tout au long de l'année. Notre équipe reste joignable pour échanger sur l'évolution de votre enfant.</p></div></div></div>
-    </div>
-  </div>
+<!-- Avantages -->
+<section class="py-xl bg-surface" id="avantages">
+<div class="container mx-auto px-lg max-w-container-max">
+<div class="text-center max-w-2xl mx-auto mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-sm">Tout ce dont votre école a besoin, sans complexité</h2>
+<p class="font-body-lg text-body-lg text-secondary">Trois piliers fondamentaux pour libérer vos équipes des tâches répétitives.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-lg">
+<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="w-12 h-12 bg-primary-container text-on-primary rounded-xl flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-[28px]">badge</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Administration &amp; Enseignants</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+          Finie la paperasse. Vos professeurs saisissent notes et appréciations depuis n'importe quel appareil, génèrent des bulletins infalsifiables et partagent les cours facilement.
+        </p>
+<ul class="space-y-xs text-secondary font-label-sm">
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Saisie des notes ultra-rapide</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Calcul automatique des moyennes</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Emplois du temps &amp; absences en direct</li>
+</ul>
+</div>
+<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-xl flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-[28px]">family_restroom</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Espace Parents &amp; Élèves</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+          Une transparence totale pour rassurer les familles. Les parents suivent les retards, devoirs, convocations et reçoivent les reçus de paiement en temps réel sur smartphone ou PC.
+        </p>
+<ul class="space-y-xs text-secondary font-label-sm">
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Notifications SMS d'absence</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Téléchargement des bulletins PDF</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Paiement en ligne et reçus officiels</li>
+</ul>
+</div>
+<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="w-12 h-12 bg-tertiary text-tertiary-fixed rounded-xl flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Sécurité &amp; Sauvegarde</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+          Vos dossiers scolaires et registres financiers sont protégés. Chaque action sensible est tracée, et les accès sont strictement cloisonnés par rôle.
+        </p>
+<ul class="space-y-xs text-secondary font-label-sm">
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Mots de passe chiffrés</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Journal d'audit des actions</li>
+<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Droits d'accès stricts par rôle</li>
+</ul>
+</div>
+</div>
+</div>
 </section>
 
-<!-- ============ CTA FINAL ============ -->
-<section class="section--premium cta-final" id="cta">
-  <div class="container">
-    <span class="eyebrow reveal" style="color:var(--color-flame-gold)">Places limitées</span>
-    <h2 class="reveal" style="--i:1">Les inscriptions 2025-2026 sont ouvertes</h2>
-    <p class="lead reveal" style="--i:2">Offrez dès maintenant à votre enfant un environnement où il se sentira en sécurité, écouté et préparé pour réussir. Ne laissez pas passer votre place.</p>
-    <div class="reveal" style="--i:3"><a href="#contact" class="btn btn--primary btn--lg">Je réserve la place de mon enfant</a></div>
-    <p class="phone-note reveal" style="--i:4">Un doute, une question ? Appelez-nous directement au <a href="tel:+23566361737">66 36 17 37</a> — notre équipe vous répond avec plaisir.</p>
-  </div>
+<!-- Tarifs -->
+<section class="py-xl bg-white border-t border-outline-variant" id="tarifs">
+<div class="container mx-auto px-lg max-w-container-max">
+<div class="text-center max-w-2xl mx-auto mb-xl">
+<span class="text-primary font-label-md uppercase tracking-wider bg-secondary-container px-md py-xs rounded-full font-bold">Tarification claire</span>
+<h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Commencez avec 30 jours d'essai 100% gratuit</h2>
+<p class="font-body-lg text-body-lg text-secondary">Aucun engagement. Testez toutes les fonctionnalités avec vos équipes avant de vous décider.</p>
+</div>
+<div class="max-w-3xl mx-auto bg-surface-container-low rounded-2xl border-2 border-primary p-xl relative shadow-md">
+<div class="absolute -top-4 right-8 bg-primary text-on-primary text-xs font-bold px-md py-xs rounded-full uppercase tracking-wider">
+        Offre Découverte
+      </div>
+<div class="flex flex-col md:flex-row items-center justify-between gap-xl">
+<div class="space-y-sm text-left">
+<h3 class="font-headline-md text-headline-md text-primary font-bold">Formule Établissement Complet</h3>
+<p class="font-body-md text-body-md text-secondary">Accès illimité à tous les modules : élèves, professeurs, bulletins, trésorerie et portail parents.</p>
+<div class="flex flex-wrap items-center gap-sm pt-xs text-secondary font-label-sm">
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check_circle</span> 0 F pendant 30 jours</span>
+<span>•</span>
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check_circle</span> Aucun frais d'installation</span>
+</div>
+</div>
+<div class="text-center md:text-right shrink-0">
+<div class="text-primary font-headline-lg text-[40px] font-bold leading-none">0 F</div>
+<span class="text-secondary font-label-sm block mt-1">pendant 30 jours</span>
+<a class="mt-md inline-block bg-primary text-on-primary font-headline-sm text-headline-sm px-lg py-sm rounded-xl hover:opacity-90 transition-opacity" href="/demarrer">
+            Activer mon essai
+          </a>
+</div>
+</div>
+</div>
+</div>
 </section>
 
-<!-- ============ FORMULAIRE / WIZARD ============ -->
-<section class="enroll" id="contact">
-  <div class="container">
-    <div class="enroll-grid">
-      <div class="enroll-side reveal">
-        <span class="eyebrow">Demande de pré-inscription</span>
-        <h2>Réservez la place de votre enfant en 2 minutes</h2>
-        <p>Remplissez ce formulaire simple. Nous vous recontactons sous 48h pour finaliser ensemble, sans engagement.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Une réponse rapide et personnalisée</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Un accompagnement à chaque étape</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Aucune obligation d'inscription</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Vos données restent confidentielles</li>
-        </ul>
-      </div>
+<!-- Temoignages : initiales plutot que photos distantes, comme ailleurs dans l'application -->
+<section class="py-xl bg-surface" id="temoignages">
+<div class="container mx-auto px-lg max-w-container-max">
+<h2 class="font-headline-lg text-headline-lg text-primary text-center mb-xl font-bold">Ils nous font confiance au quotidien</h2>
+<div class="grid md:grid-cols-3 gap-lg">
+<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+<div class="flex items-center gap-md mb-md">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold border-2 border-primary-container shrink-0">EV</div>
+<div>
+<p class="font-label-md text-label-md text-primary font-bold">Dr. Éléonore Vence</p>
+<p class="font-label-sm text-label-sm text-secondary">Collège Saint-Exupéry</p>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+          « La mise en place a pris seulement une matinée. L'édition des bulletins qui nous prenait deux semaines est désormais bouclée en quelques clics. »
+        </p>
+</div>
+<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+<div class="flex items-center gap-md mb-md">
+<div class="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center font-bold border-2 border-secondary shrink-0">MS</div>
+<div>
+<p class="font-label-md text-label-md text-primary font-bold">Marc Sterling</p>
+<p class="font-label-sm text-label-sm text-secondary">Lycée International Bellevue</p>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+          « Les parents reçoivent les relevés et alertes immédiatement. Le suivi de l'assiduité s'est nettement amélioré dès le premier trimestre. »
+        </p>
+</div>
+<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+<div class="flex items-center gap-md mb-md">
+<div class="w-12 h-12 rounded-full bg-surface-tint text-white flex items-center justify-center font-bold border-2 border-surface-tint shrink-0">SJ</div>
+<div>
+<p class="font-label-md text-label-md text-primary font-bold">Sarah Jenkins</p>
+<p class="font-label-sm text-label-sm text-secondary">Groupe Scolaire Les Pépinières</p>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+          « La gestion des impayés était notre cauchemar. Avec les reçus automatisés et le suivi des arriérés, nous voyons enfin clair. »
+        </p>
+</div>
+</div>
+</div>
+</section>
 
-      <div class="wizard reveal" role="group" aria-label="Formulaire de pré-inscription">
-        <ol class="stepper" id="stepper" aria-hidden="true">
-          <li><span class="step-num">1</span><span class="step-label">Votre enfant</span></li>
-          <li><span class="step-num">2</span><span class="step-label">Coordonnées</span></li>
-          <li><span class="step-num">3</span><span class="step-label">Confirmation</span></li>
-        </ol>
-        <div class="stage" id="stage" aria-live="polite">
-
-          <!-- Étape 1 -->
-          <section class="step" data-step="0">
-            <h3>Parlez-nous de votre enfant</h3>
-            <p class="step-sub">Pour orienter votre demande vers le bon cycle.</p>
-            <div class="field">
-              <label for="childName">Prénom de votre enfant</label>
-              <div class="input-wrap"><span class="fi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><input class="input" id="childName" type="text" placeholder="Ex : Lina" autocomplete="off"></div>
-              <p class="field-error" data-for="childName"></p>
-            </div>
-            <div class="field">
-              <label>Classe ou cycle envisagé</label>
-              <div class="cycle-choice" id="cycleChoice">
-                <label class="cc-opt"><input type="radio" name="cycle" value="Maternelle"><span class="cc-ic">🧸</span><span class="cc-txt">Maternelle</span></label>
-                <label class="cc-opt"><input type="radio" name="cycle" value="Primaire"><span class="cc-ic">📖</span><span class="cc-txt">Primaire</span></label>
-                <label class="cc-opt"><input type="radio" name="cycle" value="Collège"><span class="cc-ic">🎓</span><span class="cc-txt">Collège</span></label>
-                <label class="cc-opt"><input type="radio" name="cycle" value="Lycée"><span class="cc-ic">🏆</span><span class="cc-txt">Lycée</span></label>
-              </div>
-              <p class="field-error" data-for="cycle"></p>
-            </div>
-          </section>
-
-          <!-- Étape 2 -->
-          <section class="step" data-step="1" hidden>
-            <h3>Vos coordonnées</h3>
-            <p class="step-sub">Pour que notre équipe puisse vous recontacter.</p>
-            <div class="field">
-              <label for="parentName">Votre nom et prénom</label>
-              <div class="input-wrap"><span class="fi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><input class="input" id="parentName" type="text" placeholder="Ex : Marie Dupont" autocomplete="name"></div>
-              <p class="field-error" data-for="parentName"></p>
-            </div>
-            <div class="field">
-              <label for="phone">Votre numéro de téléphone</label>
-              <div class="input-wrap"><span class="fi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></span><input class="input" id="phone" type="tel" placeholder="Ex : 66 36 17 37" autocomplete="tel"></div>
-              <p class="field-error" data-for="phone"></p>
-            </div>
-            <div class="field">
-              <label for="email">Votre adresse email</label>
-              <div class="input-wrap"><span class="fi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><input class="input" id="email" type="email" placeholder="Ex : nom@email.com" autocomplete="email"></div>
-              <p class="field-error" data-for="email"></p>
-            </div>
-          </section>
-
-          <!-- Étape 3 -->
-          <section class="step" data-step="2" hidden>
-            <h3>Un dernier mot ?</h3>
-            <p class="step-sub">Facultatif — puis validez votre demande.</p>
-            <div class="field">
-              <label for="message">Votre message ou vos questions</label>
-              <textarea class="textarea" id="message" placeholder="Une question, une disponibilité pour une visite..."></textarea>
-            </div>
-            <label class="consent">
-              <input type="checkbox" id="consent">
-              <span>J'accepte d'être recontacté(e) par Holyflame concernant ma demande.</span>
-            </label>
-            <p class="field-error" data-for="consent"></p>
-          </section>
-
-          <!-- Succès -->
-          <section class="step" data-step="3" hidden>
-            <div class="success">
-              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path class="check-anim" d="M20 6L9 17l-5-5"/></svg></div>
-              <h3>Demande envoyée <span aria-hidden="true">🎉</span></h3>
-              <p id="successMsg">Merci ! Nous vous recontactons sous 48h pour la suite.</p>
-              <div class="success-actions">
-                <a href="#" id="waResend" class="btn btn--wa" target="_blank" rel="noopener">
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11 11 0 0 0 4.3 3.8c1.6.6 1.9.5 2.3.5a2.5 2.5 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z"/></svg>
-                  Confirmer via WhatsApp
-                </a>
-                <a href="#" id="mailResend" class="btn btn--secondary">Envoyer par email</a>
-              </div>
-              <p style="font-size:var(--fs-small);color:var(--text-muted);margin-top:var(--space-4)">Si WhatsApp ne s'est pas ouvert, cliquez sur le bouton ci-dessus.</p>
-            </div>
-          </section>
-
-        </div>
-        <div class="wizard-nav" id="wizardNav">
-          <button class="btn btn--ghost" id="wzBack" hidden>Retour</button>
-          <button class="btn btn--primary" id="wzNext" style="margin-left:auto">Continuer</button>
-        </div>
-        <p class="rgpd" id="rgpdNote">Vos données sont confidentielles et utilisées uniquement pour traiter votre demande. Aucune communication à des tiers.</p>
-      </div>
-    </div>
-  </div>
+<!-- Appel a l'action final -->
+<section class="py-xl bg-primary text-on-primary relative overflow-hidden" id="inscription-directe">
+<div class="container mx-auto px-lg max-w-container-max relative z-10">
+<div class="max-w-3xl mx-auto text-center space-y-md">
+<h2 class="font-headline-lg text-headline-lg md:text-[38px] leading-tight font-bold">Démarrez la rentrée sereinement avec EduSystem Pro</h2>
+<p class="font-body-lg text-body-lg text-primary-fixed opacity-90">
+        Quatre informations suffisent : le nom de votre école, son type, et qui l'administre.
+        Vos classes sont créées automatiquement et votre espace est accessible immédiatement.
+      </p>
+<div class="pt-sm">
+<a class="bg-white text-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm" href="/demarrer">
+<span class="material-symbols-outlined">how_to_reg</span>
+<span>Créer l'espace de mon école</span>
+</a>
+</div>
+<p class="font-label-sm text-label-sm text-primary-fixed opacity-80 pt-xs">
+        Sans engagement ni coordonnées bancaires. Vous avez déjà un compte ?
+        <a class="underline font-bold hover:opacity-80" href="/login">Se connecter</a>
+      </p>
+</div>
+</div>
 </section>
 
 </main>
-<!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="brand"><span class="brand-name">Holy<b>flame</b></span></div>
-        <p style="color:var(--text-on-dark-muted)">École bilingue franco-anglaise — Assiduité · Travail · Réussite.</p>
-        <p style="color:var(--text-on-dark-muted);font-size:var(--fs-small)">BP 1238<br>[Ville / Quartier]</p>
-      </div>
-      <div>
-        <h4>Navigation</h4>
-        <ul>
-          <li><a href="#apropos">Notre mission</a></li>
-          <li><a href="#cycles">Nos cycles</a></li>
-          <li><a href="#tarifs">Tarifs</a></li>
-          <li><a href="#activites">Activités</a></li>
-          <li><a href="#acces">Accès &amp; infos</a></li>
-          <li><a href="#faq">FAQ</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Contact</h4>
-        <ul>
-          <li>Téléphone : <a href="tel:+23566361737">66 36 17 37</a></li>
-          <li>WhatsApp : <a id="waFooter" href="#" target="_blank" rel="noopener">Nous écrire</a></li>
-          <li>Email : <a href="mailto:holyflameschool@yahoo.fr">holyflameschool@yahoo.fr</a></li>
-          <li>Horaires : [heures d'ouverture]</li>
-          <li style="margin-top:var(--space-2)"><a href="#contact" class="btn btn--primary">Pré-inscription</a></li>
-          <li style="margin-top:var(--space-2)"><a href="/login">Espace parents &amp; personnel</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Suivez-nous</h4>
-        <div class="footer-social">
-          <a id="fbLink" href="#" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3V6h-3c-2 0-3 1-3 3v2H9v3h2v6h3v-6h2.5l.5-3H14v-1.5c0-.5.3-.5.7-.5H14z"/></svg></a>
-          <a id="waSocial" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11 11 0 0 0 4.3 3.8c1.6.6 1.9.5 2.3.5a2.5 2.5 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z"/></svg></a>
-          <a id="fbInsta" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Holyflame. Tous droits réservés.</span>
-      <span><a href="#">Mentions légales</a><a href="#">Politique de confidentialité</a></span>
-    </div>
-  </div>
+
+<footer class="w-full py-xl px-lg flex flex-col md:flex-row justify-between items-center gap-md bg-tertiary text-on-tertiary border-t border-tertiary-container">
+<div class="flex flex-col items-center md:items-start gap-xs">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[20px]">school</span>
+<span class="font-headline-sm text-headline-sm text-on-tertiary font-bold">EduSystem Pro</span>
+</div>
+<p class="font-label-sm text-label-sm opacity-80">EduSystem Pro — La plateforme scolaire simple et moderne.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-md">
+<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/demarrer">Créer mon école</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/login">Connexion</a>
+<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/inscription-parent">Espace parents</a>
+</div>
 </footer>
 
-<!-- ============ BOUTON WHATSAPP FLOTTANT ============ -->
-<a class="fab-wa" id="fabWa" href="#" target="_blank" rel="noopener" aria-label="Contacter Holyflame sur WhatsApp">
-  <span class="wa-pulse" aria-hidden="true"></span>
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11 11 0 0 0 4.3 3.8c1.6.6 1.9.5 2.3.5a2.5 2.5 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z"/></svg>
-</a>
-
-<script>
-/* =============================================================
-   ⚙️  CONFIGURATION — MODIFIEZ CES 4 LIGNES avec vos infos réelles
-   ============================================================= */
-const CONFIG = {
-  // Numéro WhatsApp au format international SANS le "+" ni espaces.
-  // 235 = indicatif du Tchad. Vérifiez l'indicatif si votre pays est différent.
-  whatsapp: "23566361737",
-  // Lien de votre page Facebook (à compléter)
-  facebook: "https://facebook.com/",
-  // Lien de votre page Instagram (optionnel)
-  instagram: "https://instagram.com/",
-  // Email de réception des demandes
-  email: "holyflameschool@yahoo.fr",
-  // Adresse de l'école
-  address: "BP 1238 — Paris Congo, N'Djamena, Tchad",
-  // Lieu pour la carte Google Maps — "Holy flame High school" est bien référencé
-  // sur Google Maps (N'Djamena). Vous pouvez aussi utiliser le code plus "4329+Q3C".
-  mapQuery: "Holy flame High school, N'Djamena"
-};
-/* ============================================================= */
-
-/* ===== Branche les liens WhatsApp / réseaux depuis la config ===== */
-function waLink(text){ return "https://wa.me/"+CONFIG.whatsapp+(text?("?text="+encodeURIComponent(text)):""); }
-const helloMsg = "Bonjour Holyflame 👋, je souhaite des informations sur les inscriptions.";
-[["fabWa",helloMsg],["waSocial",helloMsg],["waFooter",helloMsg]].forEach(([id,msg])=>{
-  const el=document.getElementById(id); if(el) el.href=waLink(msg);
-});
-{ const fb=document.getElementById("fbLink"); if(fb) fb.href=CONFIG.facebook; }
-{ const ig=document.getElementById("fbInsta"); if(ig) ig.href=CONFIG.instagram; }
-{ const addr=document.getElementById("addrText"); if(addr && CONFIG.address) addr.textContent=CONFIG.address; }
-{ // Carte Google Maps + bouton itinéraire (sans clé API)
-  const q=((CONFIG.mapQuery&&CONFIG.mapQuery.trim())?CONFIG.mapQuery:CONFIG.address)||"Holyflame";
-  const mf=document.getElementById("mapFrame");
-  if(mf) mf.src="https://www.google.com/maps?q="+encodeURIComponent(q)+"&z=16&output=embed";
-  const ml=document.getElementById("mapLink");
-  if(ml) ml.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
-}
-
-/* ===== Toast ===== */
-function toast(msg){
-  const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('in'));
-  setTimeout(()=>{t.classList.remove('in');t.addEventListener('transitionend',()=>t.remove(),{once:true});},3200);
-}
-
-/* ===== Progress bar ===== */
-const bar=document.querySelector('.progress');
-/* ===== Navbar scroll ===== */
-const nav=document.getElementById('navbar');
-let ticking=false;
-function onScroll(){
-  if(!ticking){requestAnimationFrame(()=>{
-    nav.classList.toggle('is-scrolled',window.scrollY>40);
-    const h=document.documentElement;
-    const p=h.scrollTop/(h.scrollHeight-h.clientHeight||1);
-    bar.style.transform='scaleX('+p+')';
-    ticking=false;
-  });ticking=true;}
-}
-window.addEventListener('scroll',onScroll,{passive:true});
-
-/* ===== Menu burger ===== */
-const toggle=document.getElementById('navToggle'),navLinks=document.getElementById('navLinks');
-toggle.addEventListener('click',()=>{
-  const open=navLinks.classList.toggle('open');
-  toggle.setAttribute('aria-expanded',open);
-});
-navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('open');toggle.setAttribute('aria-expanded','false');}));
-
-/* ===== Reveal au scroll ===== */
-const io=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');io.unobserve(e.target);}});
-},{threshold:0.15});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-
-/* ===== Compteurs animés ===== */
-function countUp(el){
-  const to=+el.dataset.count,suffix=el.dataset.suffix||'',ms=1400,start=performance.now();
-  const tick=now=>{
-    const p=Math.min((now-start)/ms,1),eased=1-Math.pow(1-p,3);
-    el.textContent=Math.round(to*eased).toLocaleString('fr-FR')+suffix;
-    if(p<1)requestAnimationFrame(tick);
-  };requestAnimationFrame(tick);
-}
-const countIO=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){countUp(e.target);countIO.unobserve(e.target);}});
-},{threshold:0.4});
-document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
-
-/* ===== FAQ accordion ===== */
-document.querySelectorAll('#faqList .acc').forEach(acc=>{
-  const head=acc.querySelector('.acc-head');
-  head.addEventListener('click',()=>{
-    const isOpen=acc.classList.toggle('open');
-    head.setAttribute('aria-expanded',isOpen);
-  });
-});
-
-/* ===== Wizard de pré-inscription ===== */
-const steps=[...document.querySelectorAll('.wizard .step')];
-const data={childName:'',cycle:'',parentName:'',phone:'',email:'',message:'',consent:false};
-let cur=0;
-const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phoneRe=/[0-9]{6,}/;
-const validators=[
-  ()=>{ if(!data.childName.trim())return{childName:'Merci d’indiquer le prénom de votre enfant.'}; if(!data.cycle)return{cycle:'Choisissez un cycle.'}; return ''; },
-  ()=>{ if(!data.parentName.trim())return{parentName:'Merci d’indiquer votre nom.'}; if(!phoneRe.test(data.phone))return{phone:'Numéro de téléphone invalide.'}; if(!emailRe.test(data.email))return{email:'Adresse email invalide.'}; return ''; },
-  ()=>{ if(!data.consent)return{consent:'Merci d’accepter d’être recontacté(e).'}; return ''; },
-  ()=>''
-];
-// sync
-document.getElementById('childName').addEventListener('input',e=>data.childName=e.target.value);
-document.querySelectorAll('input[name=cycle]').forEach(r=>r.addEventListener('change',e=>data.cycle=e.target.value));
-document.getElementById('parentName').addEventListener('input',e=>data.parentName=e.target.value);
-document.getElementById('phone').addEventListener('input',e=>data.phone=e.target.value);
-document.getElementById('email').addEventListener('input',e=>data.email=e.target.value);
-document.getElementById('message').addEventListener('input',e=>data.message=e.target.value);
-document.getElementById('consent').addEventListener('change',e=>data.consent=e.target.checked);
-
-const stepperEl=document.getElementById('stepper');
-function renderStepper(){
-  [...stepperEl.children].forEach((li,i)=>{
-    li.className='';
-    if(i<Math.min(cur,3))li.classList.add('done');
-    if(i===cur)li.classList.add('active');
-  });
-}
-const wzBack=document.getElementById('wzBack'),wzNext=document.getElementById('wzNext');
-const wizardNav=document.getElementById('wizardNav'),rgpdNote=document.getElementById('rgpdNote');
-
-function show(next,dir){
-  const outgoing=steps[cur],incoming=steps[next];
-  outgoing.classList.add(dir>0?'exit-left':'exit-right');
-  outgoing.addEventListener('transitionend',()=>{outgoing.hidden=true;outgoing.className='step';},{once:true});
-  incoming.hidden=false;
-  incoming.classList.add(dir>0?'enter-right':'enter-left');
-  requestAnimationFrame(()=>incoming.classList.add('enter-active'));
-  incoming.addEventListener('transitionend',()=>{incoming.className='step';},{once:true});
-  cur=next;
-  wzBack.hidden=(cur===0||cur>=3);
-  if(cur>=3){ // succès
-    wizardNav.style.display='none';
-    rgpdNote.style.display='none';
-    stepperEl.style.display='none';
-    const s=document.getElementById('successMsg');
-    s.textContent='Merci '+(data.parentName.trim().split(' ')[0]||'')+' ! Votre demande pour '+(data.childName||'votre enfant')+' ('+data.cycle+') est bien reçue. Cliquez ci-dessous pour l’envoyer à notre équipe.';
-    // Construit le message de pré-inscription
-    const msg="*Nouvelle demande de pré-inscription — Holyflame*\n\n"+
-      "👶 Enfant : "+data.childName+"\n"+
-      "🎓 Cycle : "+data.cycle+"\n"+
-      "👤 Parent : "+data.parentName+"\n"+
-      "📞 Téléphone : "+data.phone+"\n"+
-      "✉️ Email : "+data.email+"\n"+
-      (data.message?("💬 Message : "+data.message+"\n"):"");
-    const wa=document.getElementById('waResend');
-    if(wa) wa.href=waLink(msg);
-    const ml=document.getElementById('mailResend');
-    if(ml) ml.href="mailto:"+CONFIG.email+"?subject="+encodeURIComponent("Pré-inscription — "+data.childName+" ("+data.cycle+")")+"&body="+encodeURIComponent(msg.replace(/\*/g,''));
-    // Ouvre WhatsApp automatiquement (dans le geste de clic → non bloqué)
-    try{ window.open(waLink(msg),'_blank'); }catch(e){}
-    toast('Demande prête ✓ WhatsApp s’ouvre…');
-  } else {
-    wzNext.textContent=cur===2?'Envoyer ma demande':'Continuer';
-  }
-  renderStepper();
-}
-wzNext.addEventListener('click',()=>{
-  document.querySelectorAll('.wizard .field-error').forEach(e=>e.textContent='');
-  document.querySelectorAll('.wizard [aria-invalid]').forEach(e=>e.removeAttribute('aria-invalid'));
-  const problem=validators[cur]();
-  if(problem){
-    const [field,msg]=Object.entries(problem)[0];
-    const err=document.querySelector('.wizard .field-error[data-for='+field+']');
-    if(err)err.textContent=msg;
-    const input=document.getElementById(field);
-    if(input)input.setAttribute('aria-invalid','true');
-    return;
-  }
-  if(cur<3)show(cur+1,+1);
-});
-wzBack.addEventListener('click',()=>{if(cur>0&&cur<3)show(cur-1,-1);});
-renderStepper();
-
-/* ============ Interactivité au curseur (ordinateur uniquement) ============ */
-(function(){
-  const fine = window.matchMedia('(pointer:fine)').matches;
-  const okMotion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!fine || !okMotion) return;
-  let raf;
-
-  // Hero : parallaxe de l'image + halo lumineux qui suit la souris
-  const hero = document.getElementById('accueil');
-  const heroImg = hero && hero.querySelector('.hero-bg-img');
-  if(hero){
-    hero.addEventListener('mousemove', (e)=>{
-      const r = hero.getBoundingClientRect();
-      const px = (e.clientX - r.left)/r.width;
-      const py = (e.clientY - r.top)/r.height;
-      if(raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(()=>{
-        hero.style.setProperty('--mx', (px*100).toFixed(1)+'%');
-        hero.style.setProperty('--my', (py*100).toFixed(1)+'%');
-        if(heroImg) heroImg.style.transform = 'scale(1.09) translate3d('+((px-.5)*-24).toFixed(1)+'px,'+((py-.5)*-16).toFixed(1)+'px,0)';
-      });
-    }, {passive:true});
-    hero.addEventListener('mouseleave', ()=>{ if(heroImg) heroImg.style.transform=''; });
-  }
-
-  // Cartes : relief 3D + halo qui suit le curseur
-  document.querySelectorAll('.card, .etab-photo').forEach((el)=>{
-    el.classList.add('tilt');
-    el.addEventListener('mousemove', (e)=>{
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left)/r.width - .5;
-      const py = (e.clientY - r.top)/r.height - .5;
-      el.style.setProperty('--ry', (px*7).toFixed(2)+'deg');
-      el.style.setProperty('--rx', (py*-7).toFixed(2)+'deg');
-      el.style.setProperty('--gx', ((px+.5)*100).toFixed(1)+'%');
-      el.style.setProperty('--gy', ((py+.5)*100).toFixed(1)+'%');
-    }, {passive:true});
-    el.addEventListener('mouseleave', ()=>{ el.style.setProperty('--ry','0deg'); el.style.setProperty('--rx','0deg'); });
-  });
-
-  // Boutons d'action magnétiques
-  document.querySelectorAll('.btn--primary').forEach((btn)=>{
-    btn.addEventListener('mousemove', (e)=>{
-      const r = btn.getBoundingClientRect();
-      const mx = e.clientX - r.left - r.width/2;
-      const my = e.clientY - r.top - r.height/2;
-      btn.style.transform = 'translate('+(mx*.18).toFixed(1)+'px,'+(my*.30).toFixed(1)+'px)';
-    }, {passive:true});
-    btn.addEventListener('mouseleave', ()=>{ btn.style.transform=''; });
-  });
-})();
-
-/* ============ Galerie 3D coverflow ============ */
-(function(){
-  const cf = document.getElementById('coverflow');
-  if(!cf) return;
-  const stage = document.getElementById('cfStage');
-  const slides = Array.from(stage.querySelectorAll('.cf-slide'));
-  const dotsWrap = document.getElementById('cfDots');
-  const n = slides.length;
-  let active = 0, auto = null;
-
-  slides.forEach((_, i)=>{
-    const b = document.createElement('button');
-    b.type = 'button'; b.setAttribute('aria-label', 'Aller à la photo ' + (i+1));
-    b.addEventListener('click', ()=> go(i));
-    dotsWrap.appendChild(b);
-  });
-  const dots = Array.from(dotsWrap.children);
-
-  function layout(){
-    slides.forEach((s, i)=>{
-      let off = i - active;
-      if(off >  n/2) off -= n;
-      if(off < -n/2) off += n;
-      const abs = Math.abs(off);
-      const vis = abs <= 3;
-      const tx = off * 42;
-      const ry = Math.max(-55, Math.min(55, -off * 44));
-      const tz = -abs * 160;
-      const sc = Math.max(0.6, 1 - abs * 0.12);
-      s.style.transform = 'translate(-50%,-50%) translateX(' + tx + '%) translateZ(' + tz + 'px) rotateY(' + ry + 'deg) scale(' + sc + ')';
-      s.style.opacity = vis ? (abs === 0 ? 1 : (0.85 - abs * 0.12)) : 0;
-      s.style.zIndex = String(100 - abs);
-      s.style.pointerEvents = vis ? 'auto' : 'none';
-      s.classList.toggle('is-active', off === 0);
-    });
-    dots.forEach((d, i)=> d.classList.toggle('on', i === active));
-  }
-  function go(i){ active = (i % n + n) % n; layout(); restart(); }
-  const next = ()=> go(active + 1);
-  const prev = ()=> go(active - 1);
-
-  document.getElementById('cfNext').addEventListener('click', next);
-  document.getElementById('cfPrev').addEventListener('click', prev);
-  slides.forEach((s, i)=> s.addEventListener('click', ()=>{ if(i !== active) go(i); }));
-
-  cf.tabIndex = 0;
-  cf.addEventListener('keydown', (e)=>{ if(e.key === 'ArrowRight') next(); else if(e.key === 'ArrowLeft') prev(); });
-
-  let sx = null;
-  stage.addEventListener('pointerdown', (e)=>{ sx = e.clientX; pause(); });
-  window.addEventListener('pointerup', (e)=>{
-    if(sx === null) return;
-    const dx = e.clientX - sx;
-    if(dx > 40) prev(); else if(dx < -40) next();
-    sx = null; restart();
-  });
-
-  function play(){ auto = setInterval(next, 4200); }
-  function pause(){ if(auto){ clearInterval(auto); auto = null; } }
-  function restart(){ pause(); if(playing) play(); }
-  const playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  cf.addEventListener('mouseenter', pause);
-  cf.addEventListener('mouseleave', ()=>{ if(playing) play(); });
-
-  layout();
-  if(playing) play();
-})();
-</script>
 </body>
 </html>
