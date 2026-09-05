@@ -1,6 +1,7 @@
 package holyflame.administration.service;
 
 import holyflame.administration.repository.*;
+import holyflame.administration.util.AnneeScolaireUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class AlerteService {
     @Autowired private PaiementRepository paiementRepository;
     @Autowired private PersonnelRepository personnelRepository;
     @Autowired private ParametreRepository parametreRepository;
+    @Autowired private EtablissementRepository etablissementRepository;
     @Autowired private HorlogeService horlogeService;
 
     public record Alerte(String niveau, String icone, String message, String lien) {}
@@ -42,17 +44,34 @@ public class AlerteService {
                 elevesAbsents + " élève(s) avec ≥ 5 absences ce mois", "/surveillance"));
         }
 
-        // 2. Élèves sans aucun paiement ce trimestre (inscrits mais non à jour)
+        // 2. Eleves de l'annee scolaire active n'ayant encore rien verse.
+        //
+        // Ce comptage se faisait auparavant sur l'annee CIVILE et sur l'effectif total de
+        // l'etablissement, toutes annees scolaires confondues. Deux consequences : les eleves
+        // partis les annees precedentes etaient comptes comme mauvais payeurs a perpetuite, et
+        // le 1er janvier l'alerte repartait de zero puisque les versements de septembre a
+        // decembre tombaient dans l'annee civile precedente. Le comptage suit desormais
+        // l'annee scolaire, des deux cotes.
+        String anneeActive = anneeScolaireActive(etabId);
+        List<holyflame.administration.model.Eleve> elevesAnneeActive = eleveRepository
+            .findByEtablissementIdOrderByNomAscPrenomAsc(etabId).stream()
+            .filter(e -> e.getClasse() == null || anneeActive.equals(e.getClasse().getAnneeScolaire()))
+            .toList();
+        Set<Long> idsAnneeActive = elevesAnneeActive.stream()
+            .map(holyflame.administration.model.Eleve::getId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        Set<Long> ontVerse = paiementRepository.findByEtablissementId(etabId).stream()
+            .filter(p -> p.getEleve() != null && idsAnneeActive.contains(p.getEleve().getId()))
+            .filter(p -> anneeScolaireDuPaiement(p).equals(anneeActive))
+            .map(p -> p.getEleve().getId())
+            .collect(java.util.stream.Collectors.toSet());
+
+        long sansVersement = idsAnneeActive.size() - ontVerse.size();
         long totalEleves = eleveRepository.countByEtablissementId(etabId);
-        long elevesAvecPaiement = paiementRepository.findByEtablissementId(etabId).stream()
-            .filter(p -> p.getDatePaiement() != null
-                && p.getDatePaiement().getYear() == anneeActuelle)
-            .map(p -> p.getEleve() != null ? p.getEleve().getId() : -1L)
-            .distinct().count();
-        long sansVersement = totalEleves - elevesAvecPaiement;
         if (sansVersement > 0) {
             alertes.add(new Alerte("warning", "bi-cash-coin",
-                sansVersement + " élève(s) sans versement cette année", "/finances"));
+                sansVersement + " élève(s) sans versement pour " + anneeActive, "/finances"));
         }
 
         // 3. Fin d'année scolaire dans moins de 30 jours
@@ -76,5 +95,24 @@ public class AlerteService {
         }
 
         return alertes;
+    }
+
+    /** Annee scolaire de l'etablissement vise, sans dependre de l'utilisateur connecte. */
+    private String anneeScolaireActive(Long etabId) {
+        return etablissementRepository.findById(etabId)
+            .map(holyflame.administration.model.Etablissement::getAnneeScolaire)
+            .filter(a -> a != null && !a.isBlank())
+            .orElseGet(() -> AnneeScolaireUtil.pour(horlogeService.aujourdHui(etabId)));
+    }
+
+    /**
+     * Annee scolaire portee par le paiement. Les paiements enregistres avant l'ajout de ce champ
+     * ne la renseignent pas : on la deduit alors de la date de versement.
+     */
+    private String anneeScolaireDuPaiement(holyflame.administration.model.Paiement p) {
+        if (p.getAnneeScolaire() != null && !p.getAnneeScolaire().isBlank()) return p.getAnneeScolaire();
+        return p.getDatePaiement() != null
+            ? AnneeScolaireUtil.pour(p.getDatePaiement().toLocalDate())
+            : "";
     }
 }
