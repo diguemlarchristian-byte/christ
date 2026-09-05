@@ -123,6 +123,43 @@ Aucun module financier ne vous a ete confie pour l'instant. Contactez votre admi
 </div>
 </div>
 
+<!-- Recouvrement : la question de fond du tresorier. Ces indicateurs etaient calcules a chaque
+     affichage de la page et n'etaient rendus nulle part ; il fallait ouvrir l'onglet Scolarite
+     et lire les listes pour savoir ou en etait l'encaissement. -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+<div class="flex items-center justify-between gap-md flex-wrap mb-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Recouvrement de la scolarite</h3>
+<button class="text-primary font-label-md hover:underline flex items-center gap-xs" onclick="finSwitchTab('scolarite')" type="button">
+Detail par classe
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-lg">
+<div>
+<p class="text-label-sm text-secondary uppercase tracking-wider">Eleves a jour</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${nbElevesPayes}">0</p>
+</div>
+<div>
+<p class="text-label-sm text-secondary uppercase tracking-wider">Eleves en attente</p>
+<p class="text-headline-md font-bold" th:classappend="${nbElevesEnAttente > 0} ? 'text-error' : 'text-on-surface'" th:text="${nbElevesEnAttente}">0</p>
+</div>
+<div>
+<p class="text-label-sm text-secondary uppercase tracking-wider">Taux d'eleves a jour</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${tauxScolaritesPayees} + ' %'">0 %</p>
+</div>
+<div>
+<p class="text-label-sm text-secondary uppercase tracking-wider">Reste a encaisser</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${#numbers.formatDecimal(paiementsEnAttente, 0, 'COMMA', 0, 'POINT')} + ' F'">0 F</p>
+</div>
+</div>
+<div class="mt-md w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" th:style="'width: ' + ${tauxScolaritesPayees} + '%;'"></div>
+</div>
+<p class="mt-xs text-label-sm text-secondary" th:if="${paiementsEnAttente > 0}">
+Le reste a encaisser est estime sur les revenus prevus au budget de l'annee.
+</p>
+</div>
+
 <!-- Saisie rapide -->
 <div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg">
 <div class="flex gap-md mb-lg">
