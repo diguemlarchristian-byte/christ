@@ -65,6 +65,30 @@ Nouvelle fiche
 </a>
 </div>
 
+<!-- Etat des visites : visible avant les onglets, car c'est ce qui declenche le travail du
+     coordonnateur. Les compteurs etaient auparavant relegues dans l'onglet "Fiches de controle". -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-md">
+<div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+<p class="text-label-sm text-secondary uppercase tracking-wider">Fiches enregistrees</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${nbFiches}">0</p>
+</div>
+<div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+<p class="text-label-sm text-secondary uppercase tracking-wider">Enseignants visites</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${nbEnseignantsVisites}">0</p>
+</div>
+<button class="bg-white border rounded-xl p-lg shadow-sm text-left hover:border-primary transition-colors"
+        th:classappend="${#lists.size(enseignantsASuivre) > 0} ? 'border-error' : 'border-outline-variant'"
+        onclick="coordSwitchTab('evolution')" type="button">
+<p class="text-label-sm text-secondary uppercase tracking-wider">Enseignants a suivre</p>
+<p class="text-headline-md font-bold" th:classappend="${#lists.size(enseignantsASuivre) > 0} ? 'text-error' : 'text-on-surface'" th:text="${#lists.size(enseignantsASuivre)}">0</p>
+</button>
+<button class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm text-left hover:border-primary transition-colors"
+        onclick="coordSwitchTab('evolution')" type="button">
+<p class="text-label-sm text-secondary uppercase tracking-wider">Jamais visites</p>
+<p class="text-headline-md font-bold text-on-surface" th:text="${#lists.size(enseignantsJamaisVisites)}">0</p>
+</button>
+</div>
+
 <!-- Barre d'onglets -->
 <div class="flex gap-lg border-b border-outline-variant overflow-x-auto">
 <button class="coord-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors" data-tab="evolution" onclick="coordSwitchTab('evolution')" type="button">Evolution des enseignants</button>
@@ -75,6 +99,43 @@ Nouvelle fiche
 
 <!-- ================= ONGLET EVOLUTION DES ENSEIGNANTS ================= -->
 <div class="coord-tab-panel space-y-lg" data-panel="evolution" id="panel-evolution">
+
+<!-- A traiter en priorite : derniere visite insuffisante, ou note en recul d'une visite a l'autre. -->
+<div class="bg-white border border-error rounded-xl shadow-sm overflow-hidden" th:unless="${#lists.isEmpty(enseignantsASuivre)}">
+<div class="p-md bg-error-container text-on-error-container border-b border-error font-headline-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-[20px]">priority_high</span>
+Enseignants a suivre en priorite
+</div>
+<div class="divide-y divide-outline-variant/30">
+<div class="px-lg py-md flex items-center justify-between gap-md flex-wrap" th:each="e : ${enseignantsASuivre}">
+<div>
+<p class="font-medium text-on-surface" th:text="${e.enseignant.nom} + ' ' + ${e.enseignant.prenom}">Enseignant</p>
+<p class="text-label-sm text-secondary" th:text="${e.nbVisites} + ' visite(s) — derniere le ' + ${#temporals.format(e.derniereDate, 'dd/MM/yyyy')}">Historique</p>
+</div>
+<div class="flex items-center gap-sm">
+<span class="px-sm py-xs rounded-full text-label-sm font-bold bg-red-50 text-red-700" th:if="${e.derniereNote == 'INSUFFISANT'}">Insuffisant</span>
+<span class="flex items-center gap-xs text-red-700 text-label-sm font-bold" th:if="${e.tendance == 'BAISSE'}"><span class="material-symbols-outlined text-[16px]">trending_down</span> En baisse</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Angle mort corrige : le tableau ci-dessous se construit a partir des fiches, un enseignant
+     jamais visite n'y apparaissait donc jamais, alors que c'est lui qu'il reste a programmer. -->
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden" th:unless="${#lists.isEmpty(enseignantsJamaisVisites)}">
+<div class="p-md bg-surface-container-low border-b border-outline-variant font-headline-sm text-on-surface flex items-center justify-between gap-md flex-wrap">
+<span>Enseignants jamais visites</span>
+<a class="text-primary font-label-md hover:underline flex items-center gap-xs" th:href="@{/coordination/nouvelle}">
+<span class="material-symbols-outlined text-[18px]">add</span> Programmer une visite
+</a>
+</div>
+<div class="p-lg flex flex-wrap gap-sm">
+<span class="px-md py-xs rounded-full bg-surface-container text-on-surface text-label-sm"
+      th:each="p : ${enseignantsJamaisVisites}"
+      th:text="${p.nom} + ' ' + ${p.prenom}">Enseignant</span>
+</div>
+</div>
+
 <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
 <div class="p-md bg-surface-container-low border-b border-outline-variant font-headline-sm text-on-surface">Evolution des enseignants (visites de classe)</div>
 <div class="overflow-x-auto">

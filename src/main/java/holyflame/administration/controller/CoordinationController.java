@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -60,9 +61,27 @@ public class CoordinationController {
             .filter(f -> f.getEnseignant() != null)
             .map(f -> f.getEnseignant().getId()).distinct().count());
 
-        model.addAttribute("evolutionEnseignants", evolutionParEnseignant(fiches));
+        List<Map<String, Object>> evolution = evolutionParEnseignant(fiches);
+        model.addAttribute("evolutionEnseignants", evolution);
         model.addAttribute("qualiteNotes", qualiteDesNotes(etabId));
         model.addAttribute("avisRecurrents", avisRecurrents(etabId));
+
+        // Le tableau d'evolution se construit a partir des fiches : un enseignant jamais visite
+        // n'y figure donc pas du tout. C'est pourtant lui que le coordonnateur doit programmer.
+        Set<Long> dejaVisites = fiches.stream()
+            .filter(f -> f.getEnseignant() != null)
+            .map(f -> f.getEnseignant().getId())
+            .collect(Collectors.toSet());
+        List<Personnel> jamaisVisites = personnelRepository
+            .findByFonctionAndEtablissementIdOrderByNomAsc("ENSEIGNANT", etabId).stream()
+            .filter(p -> !dejaVisites.contains(p.getId()))
+            .toList();
+        model.addAttribute("enseignantsJamaisVisites", jamaisVisites);
+
+        // Ceux qui appellent une action : derniere visite insuffisante, ou note en recul.
+        model.addAttribute("enseignantsASuivre", evolution.stream()
+            .filter(l -> "INSUFFISANT".equals(l.get("derniereNote")) || "BAISSE".equals(l.get("tendance")))
+            .toList());
 
         return "coordination";
     }
