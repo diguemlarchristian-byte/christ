@@ -211,9 +211,15 @@
 </form>
 <!-- Lien discret vers l'inscription -->
 <div class="pt-lg border-t border-outline-variant text-center space-y-xs">
+<!-- Le chemin court passe devant : l'assistant detaille reste accessible pour qui veut
+     tout regler d'emblee, mais il ne doit plus etre la seule porte d'entree visible. -->
+<a class="flex items-center justify-center gap-sm w-full py-3 rounded-lg bg-primary text-on-primary font-label-md hover:opacity-90 transition-all" href="/demarrer">
+<span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+Creer mon ecole en 1 minute
+</a>
 <p class="font-body-md text-on-surface-variant">
-              Pas encore membre ? <br class="md:hidden"/>
-<a class="text-primary font-semibold hover:underline" href="/inscription-ecole">Enregistrer votre etablissement</a>
+              Vous preferez tout parametrer maintenant ? <br class="md:hidden"/>
+<a class="text-primary font-semibold hover:underline" href="/inscription-ecole">Assistant detaille</a>
 </p>
 <p class="font-body-md text-on-surface-variant">
               Vous etes parent d'eleve ? <br class="md:hidden"/>

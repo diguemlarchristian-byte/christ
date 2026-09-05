@@ -17,6 +17,8 @@
 <span class="material-symbols-outlined text-[#00236f] text-[48px] mb-2" style="font-variation-settings: 'FILL' 1;">check_circle</span>
 <h1 class="text-2xl font-bold text-[#00236f]">Etablissement cree avec succes</h1>
 <p class="text-sm text-[#505f76] mt-2" th:text="'« ' + ${nomEcole} + ' » est maintenant enregistre dans le systeme.'"></p>
+<p class="text-sm text-[#00236f] mt-1" th:if="${nbClassesCreees != null and nbClassesCreees > 0}"
+   th:text="${nbClassesCreees} + ' classe(s) ont ete creees automatiquement. Vous pouvez deja inscrire vos eleves.'"></p>
 </div>
 
 <div class="space-y-4">

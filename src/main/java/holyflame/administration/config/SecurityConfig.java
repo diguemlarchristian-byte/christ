@@ -114,6 +114,9 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/login", "/error", "/inscription-ecole", "/inscription-ecole/**",
+                    // Creation d'une ecole en un seul ecran : meme porte d'entree publique que
+                    // l'assistant detaille /inscription-ecole, dont elle est la version courte.
+                    "/demarrer",
                     "/inscription-parent", "/inscription-parent/**",
                     "/mot-de-passe-oublie", "/reinitialiser-mot-de-passe",
                     // Webhook CinetPay : appele serveur a serveur par CinetPay, sans session

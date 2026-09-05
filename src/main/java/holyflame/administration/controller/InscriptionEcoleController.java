@@ -1,16 +1,10 @@
 package holyflame.administration.controller;
 
-import holyflame.administration.model.Classe;
-import holyflame.administration.model.Etablissement;
-import holyflame.administration.model.Utilisateur;
-import holyflame.administration.repository.ClasseRepository;
-import holyflame.administration.repository.EtablissementRepository;
-import holyflame.administration.repository.UtilisateurRepository;
 import holyflame.administration.service.AssistantService;
+import holyflame.administration.service.CreationEcoleService;
 import holyflame.administration.service.FileStorageService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,19 +19,16 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 public class InscriptionEcoleController {
 
     private static final String SESSION_KEY = "inscriptionEcoleDonnees";
 
-    @Autowired private EtablissementRepository etablissementRepository;
-    @Autowired private UtilisateurRepository utilisateurRepository;
-    @Autowired private ClasseRepository classeRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    // La creation de l'etablissement (et ses dependances : depots, encodeur, plan comptable)
+    // a ete deplacee dans CreationEcoleService, partagee avec l'ecran /demarrer.
+    @Autowired private CreationEcoleService creationEcoleService;
     @Autowired private FileStorageService fileStorageService;
-    @Autowired private holyflame.administration.service.PlanComptableService planComptableService;
     @Autowired private AssistantService assistantService;
 
     /** Code de niveau -> [nom affiche, cycle]. Utilise pour generer une classe par defaut par niveau coche. */
@@ -232,82 +223,25 @@ public class InscriptionEcoleController {
         if (donnees == null) {
             return "redirect:/inscription-ecole";
         }
-        if (adminNomComplet == null || adminNomComplet.isBlank() || adminEmail == null || adminEmail.isBlank()) {
-            model.addAttribute("erreur", "Le nom et l'email de l'administrateur sont obligatoires.");
+
+        // La creation elle-meme vit dans CreationEcoleService, partagee avec l'ecran de
+        // demarrage rapide (/demarrer) : les deux chemins produisent ainsi exactement le
+        // meme etablissement, avec les memes valeurs par defaut.
+        CreationEcoleService.EcoleCreee resultat;
+        try {
+            resultat = creationEcoleService.creer(donnees, adminNomComplet, adminEmail, mapRole(adminRole));
+        } catch (CreationEcoleService.CreationRefusee e) {
+            model.addAttribute("erreur", e.getMessage());
             return "inscription-ecole-utilisateurs";
         }
-        if (utilisateurRepository.findByEmail(adminEmail.trim()).isPresent()) {
-            model.addAttribute("erreur", "Un compte existe deja avec cet email.");
-            return "inscription-ecole-utilisateurs";
-        }
-
-        // Etablissement
-        Etablissement etab = new Etablissement();
-        etab.setNom(donnees.nom);
-        etab.setAdresse(donnees.adresse);
-        etab.setEmail(donnees.email);
-        etab.setTelephone(donnees.telephone);
-        etab.setTypeEtablissement(donnees.niveaux != null ? donnees.niveaux : donnees.categorie);
-        etab.setContact(adminNomComplet.trim());
-        etab.setAnneeScolaire(donnees.anneeScolaire != null ? donnees.anneeScolaire : (LocalDate.now().getYear() + "-" + (LocalDate.now().getYear() + 1)));
-        etab.setStatut("ACTIF");
-        etab.setDateCreation(LocalDate.now());
-        String codeAcces = "HF-" + LocalDate.now().getYear() + "-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        etab.setCodeAcces(codeAcces);
-
-        etab.setDateDebutSession(donnees.dateDebutSession);
-        etab.setDateFinSession(donnees.dateFinSession);
-        etab.setSystemeNotation(donnees.systemeNotation != null ? donnees.systemeNotation : "NUMERIQUE");
-        etab.setSeuilAssiduite(donnees.seuilAssiduite != null ? donnees.seuilAssiduite : 75);
-        etab.setAlerteAbsences(donnees.alerteAbsences);
-        etab.setCalculRetard(donnees.calculRetard);
-        etab.setStatutsIncompletAbandon(donnees.statutsIncompletAbandon);
-        etab.setRangAutomatique(donnees.rangAutomatique);
-        etab.setLogoPath(donnees.logoPath);
-        etab.setCouleurPrimaire(donnees.couleurPrimaire != null ? donnees.couleurPrimaire : "#00236f");
-        etab.setLangueSysteme(donnees.langueSysteme != null ? donnees.langueSysteme : "Francais");
-
-        etablissementRepository.save(etab);
-        planComptableService.seedSiVide(etab.getId());
-
-        // Classes generees automatiquement a partir des niveaux coches a l'etape 1
-        // (une classe "A" par niveau ; l'etablissement pourra ajouter des sections
-        // ou des classes speciales ensuite depuis Gestion Academique).
-        if (donnees.niveauxSelectionnes != null) {
-            for (String code : donnees.niveauxSelectionnes) {
-                String[] info = NIVEAUX.get(code);
-                if (info == null) continue;
-                Classe classe = new Classe();
-                classe.setNom(info[0] + " A");
-                classe.setNiveau(info[0]);
-                classe.setAnneeScolaire(etab.getAnneeScolaire());
-                classe.setEtablissementId(etab.getId());
-                classeRepository.save(classe);
-            }
-        }
-
-        // Administrateur
-        String[] parts = adminNomComplet.trim().split("\\s+", 2);
-        String prenom = parts.length > 1 ? parts[0] : "";
-        String nomFamille = parts.length > 1 ? parts[1] : parts[0];
-        String role = mapRole(adminRole);
-        String motDePasseGenere = genererMotDePasse();
-
-        Utilisateur admin = new Utilisateur();
-        admin.setNom(nomFamille.toUpperCase());
-        admin.setPrenom(prenom);
-        admin.setEmail(adminEmail.trim());
-        admin.setMotDePasse(passwordEncoder.encode(motDePasseGenere));
-        admin.setRole(role);
-        admin.setEtablissement(etab);
-        utilisateurRepository.save(admin);
 
         session.removeAttribute(SESSION_KEY);
 
-        ra.addFlashAttribute("codeAcces", codeAcces);
-        ra.addFlashAttribute("motDePasse", motDePasseGenere);
-        ra.addFlashAttribute("adminEmail", admin.getEmail());
-        ra.addFlashAttribute("nomEcole", etab.getNom());
+        ra.addFlashAttribute("codeAcces", resultat.codeAcces());
+        ra.addFlashAttribute("motDePasse", resultat.motDePasse());
+        ra.addFlashAttribute("adminEmail", resultat.adminEmail());
+        ra.addFlashAttribute("nomEcole", resultat.nomEcole());
+        ra.addFlashAttribute("nbClassesCreees", resultat.nbClassesCreees());
         return "redirect:/inscription-ecole/confirmation";
     }
 
@@ -351,19 +285,5 @@ public class InscriptionEcoleController {
             case "director", "it" -> "ADMIN";
             default -> "ADMIN";
         };
-    }
-
-    private String genererMotDePasse() {
-        // ThreadLocalRandom plutot que SecureRandom : ce mot de passe est temporaire et
-        // affiche immediatement a l'admin pour changement, pas besoin d'aleatoire cryptographique,
-        // et SecureRandom peut se bloquer plusieurs secondes en attendant de l'entropie sur certains
-        // conteneurs Linux (cause reelle d'un crash observe en production sur cette route).
-        String caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-        var random = java.util.concurrent.ThreadLocalRandom.current();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            sb.append(caracteres.charAt(random.nextInt(caracteres.length())));
-        }
-        return sb.toString();
     }
 }
