@@ -38,7 +38,7 @@
 </script>
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
-<main class="max-w-container-max mx-auto p-lg">
+<main class="max-w-container-max mx-auto p-lg pb-20 md:pb-lg">
 <div class="flex items-center text-outline font-label-sm text-label-sm mb-md">
 <a class="hover:underline" th:href="@{/infirmerie}">Infirmerie</a>
 <span class="material-symbols-outlined text-[16px] mx-2">chevron_right</span>
@@ -113,5 +113,6 @@
 
 </div>
 </main>
+<div th:replace="~{fragments/mobile-nav-infirmerie :: nav('pai')}"></div>
 </body>
 </html>

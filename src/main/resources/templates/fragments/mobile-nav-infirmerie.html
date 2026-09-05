@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  Navigation mobile (< 768px) du module Infirmerie.
+
+  Les pages Infirmerie ne portaient qu'une barre laterale "hidden md:flex" (et les
+  pages secondaires n'en avaient aucune) : sous 768px l'infirmier perdait toute
+  navigation et ne pouvait plus passer du tableau de bord aux consultations, aux PAI
+  ou au stock sans revenir en arriere dans son navigateur.
+
+  N'utilise que des jetons de couleur presents dans la configuration Tailwind des
+  quatre pages du module (surface, outline-variant, primary, secondary, on-surface,
+  surface-container-lowest, error) — les pages secondaires ont une palette plus
+  reduite que le tableau de bord.
+
+  Usage : <div th:replace="~{fragments/mobile-nav-infirmerie :: nav('stock')}"></div>
+  activePage : dashboard | consultations | pai | stock
+
+  La page hote doit reserver la hauteur de la barre (pb-20 sur le conteneur defilant),
+  sans quoi la barre recouvre le bas du contenu.
+-->
+<div th:fragment="nav(activePage)" class="md:hidden">
+
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-stretch h-14 bg-surface/95 backdrop-blur-md border-t border-outline-variant z-50">
+<a th:class="'flex-1 flex flex-col items-center justify-center gap-0.5 ' + (${activePage == 'dashboard'} ? 'text-primary font-semibold' : 'text-secondary')" th:href="@{/infirmerie}">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-label-sm">Tableau</span>
+</a>
+<a th:class="'flex-1 flex flex-col items-center justify-center gap-0.5 ' + (${activePage == 'consultations'} ? 'text-primary font-semibold' : 'text-secondary')" th:href="@{/infirmerie/consultations}">
+<span class="material-symbols-outlined text-[22px]">history</span>
+<span class="text-label-sm">Visites</span>
+</a>
+<a th:class="'flex-1 flex flex-col items-center justify-center gap-0.5 ' + (${activePage == 'pai'} ? 'text-primary font-semibold' : 'text-secondary')" th:href="@{/infirmerie/pai}">
+<span class="material-symbols-outlined text-[22px]">assignment_ind</span>
+<span class="text-label-sm">PAI</span>
+</a>
+<a th:class="'flex-1 flex flex-col items-center justify-center gap-0.5 ' + (${activePage == 'stock'} ? 'text-primary font-semibold' : 'text-secondary')" th:href="@{/infirmerie/stock}">
+<span class="material-symbols-outlined text-[22px]">inventory_2</span>
+<span class="text-label-sm">Stock</span>
+</a>
+<button class="flex-1 flex flex-col items-center justify-center gap-0.5 text-secondary" onclick="document.getElementById('infirmerie-menu-mobile').classList.remove('hidden')" type="button">
+<span class="material-symbols-outlined text-[22px]">menu</span>
+<span class="text-label-sm">Plus</span>
+</button>
+</nav>
+
+<div class="hidden fixed inset-0 bg-surface z-[60] flex flex-col" id="infirmerie-menu-mobile">
+<div class="flex items-center justify-between px-lg py-md border-b border-outline-variant shrink-0">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">medical_services</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Infirmerie</h2>
+</div>
+<button class="text-on-surface p-xs" onclick="document.getElementById('infirmerie-menu-mobile').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-grow overflow-y-auto py-sm">
+<a class="flex items-center gap-md px-lg py-md text-on-surface" th:href="@{/infirmerie}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-md px-lg py-md text-on-surface" th:href="@{/infirmerie/consultations}">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-md text-label-md">Consultations</span>
+</a>
+<a class="flex items-center gap-md px-lg py-md text-on-surface" th:href="@{/infirmerie/pai}">
+<span class="material-symbols-outlined">assignment_ind</span>
+<span class="font-label-md text-label-md">PAI &amp; Allergies</span>
+</a>
+<a class="flex items-center gap-md px-lg py-md text-on-surface" th:href="@{/infirmerie/stock}">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md">Stock</span>
+</a>
+<a class="flex items-center gap-md px-lg py-md text-on-surface" th:href="@{/assistant}">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-md text-label-md">Assistant</span>
+</a>
+</div>
+<div class="px-lg py-lg border-t border-outline-variant shrink-0 space-y-xs">
+<a class="flex items-center gap-md py-sm text-on-surface" th:href="@{/dashboard}" th:if="${utilisateurConnecte != null and utilisateurConnecte.role == 'ADMIN'}">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-md text-label-md">Retour a l'administration</span>
+</a>
+<a class="flex items-center gap-md py-sm text-error" href="#" onclick="document.getElementById('logout-form-infirmerie-mobile').submit(); return false;">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Deconnexion</span>
+</a>
+<form id="logout-form-infirmerie-mobile" method="post" th:action="@{/logout}" style="display:none"></form>
+</div>
+</div>
+
+</div>
+</body>
+</html>

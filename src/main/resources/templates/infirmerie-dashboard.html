@@ -110,7 +110,7 @@
 </div>
 </header>
 
-<main class="flex-1 overflow-y-auto p-lg max-w-container-max mx-auto w-full">
+<main class="flex-1 overflow-y-auto p-lg pb-20 md:pb-lg max-w-container-max mx-auto w-full">
 
 <div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
 <div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
@@ -338,5 +338,6 @@ PAI &amp; Allergies (Actifs)
         document.getElementById('consultation-eleve-recherche').scrollIntoView({behavior: 'smooth', block: 'center'});
     });
 </script>
+<div th:replace="~{fragments/mobile-nav-infirmerie :: nav('dashboard')}"></div>
 </body>
 </html>
