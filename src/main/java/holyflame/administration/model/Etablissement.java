@@ -48,7 +48,25 @@ public class Etablissement {
     private String langueSysteme = "Francais";
     private String fuseauHoraire = "(GMT+00:00) Abidjan";
 
+    // ── Regime academique ────────────────────────────────────────────────
+    // SCOLAIRE : trimestres, matieres a coefficient, bulletin trimestriel (comportement historique).
+    // LMD      : semestres, unites d'enseignement a credits, releve de notes semestriel.
+    // La valeur par defaut vaut pour tous les etablissements deja en base : basculer un
+    // etablissement en LMD est un acte explicite de l'administrateur, jamais une migration.
+    private String regimeAcademique = "SCOLAIRE";
+
+    // Regles de deliberation LMD. Elles varient d'un pays et d'un etablissement a l'autre —
+    // notamment la compensation et la note eliminatoire — donc rien n'est fige dans le code.
+    private Double seuilValidationUE = 10.0;
+    private boolean compensationSemestrielle = true;
+    /** Sous cette note, une UE ne peut plus etre compensee. Null = pas de note eliminatoire. */
+    private Double noteEliminatoire;
+    private Integer creditsParSemestre = 30;
+
     public Etablissement() {}
+
+    /** Vrai lorsque l'etablissement fonctionne en unites d'enseignement et credits. */
+    public boolean estRegimeLMD() { return "LMD".equals(regimeAcademique); }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -102,4 +120,14 @@ public class Etablissement {
     public void setLangueSysteme(String langueSysteme) { this.langueSysteme = langueSysteme; }
     public String getFuseauHoraire() { return fuseauHoraire; }
     public void setFuseauHoraire(String fuseauHoraire) { this.fuseauHoraire = fuseauHoraire; }
+    public String getRegimeAcademique() { return regimeAcademique; }
+    public void setRegimeAcademique(String regimeAcademique) { this.regimeAcademique = regimeAcademique; }
+    public Double getSeuilValidationUE() { return seuilValidationUE; }
+    public void setSeuilValidationUE(Double seuilValidationUE) { this.seuilValidationUE = seuilValidationUE; }
+    public boolean isCompensationSemestrielle() { return compensationSemestrielle; }
+    public void setCompensationSemestrielle(boolean compensationSemestrielle) { this.compensationSemestrielle = compensationSemestrielle; }
+    public Double getNoteEliminatoire() { return noteEliminatoire; }
+    public void setNoteEliminatoire(Double noteEliminatoire) { this.noteEliminatoire = noteEliminatoire; }
+    public Integer getCreditsParSemestre() { return creditsParSemestre; }
+    public void setCreditsParSemestre(Integer creditsParSemestre) { this.creditsParSemestre = creditsParSemestre; }
 }

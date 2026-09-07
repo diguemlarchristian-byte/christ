@@ -5,6 +5,7 @@ import holyflame.administration.repository.*;
 import holyflame.administration.service.EtablissementService;
 import holyflame.administration.service.FileStorageService;
 import holyflame.administration.service.JournalService;
+import holyflame.administration.service.RegimeAcademiqueService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class ParametreController {
 
     @Autowired private ParametreRepository parametreRepository;
+    @Autowired private RegimeAcademiqueService regimeAcademiqueService;
     @Autowired private FraisScolariteRepository fraisRepository;
     @Autowired private ClasseRepository classeRepository;
     @Autowired private MatiereRepository matiereRepository;
@@ -50,7 +52,11 @@ public class ParametreController {
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
 
     private static final Set<String> CLES_ETABLISSEMENT = Set.of(
-        "nomEtablissement", "anneeScolaire", "adresse", "langueSysteme", "fuseauHoraire", "couleurPrimaire");
+        "nomEtablissement", "anneeScolaire", "adresse", "langueSysteme", "fuseauHoraire", "couleurPrimaire",
+        // Regime academique et regles de deliberation : champs de l'entite Etablissement,
+        // pas des parametres cle/valeur — ils conditionnent des calculs, pas de l'affichage.
+        "regimeAcademique", "seuilValidationUE", "compensationSemestrielle",
+        "noteEliminatoireActive", "noteEliminatoire", "creditsParSemestre");
 
     @GetMapping
     public String index(Model model) {
@@ -170,6 +176,9 @@ public class ParametreController {
                 if (formParams.containsKey("langueSysteme")) etab.setLangueSysteme(formParams.get("langueSysteme"));
                 if (formParams.containsKey("fuseauHoraire")) etab.setFuseauHoraire(formParams.get("fuseauHoraire"));
                 if (formParams.containsKey("couleurPrimaire")) etab.setCouleurPrimaire(formParams.get("couleurPrimaire"));
+                // Regime academique et seuils de deliberation : regles portees par le service,
+                // partagees avec le calcul des resultats.
+                regimeAcademiqueService.configurer(etab, formParams, formParams.containsKey("_regimeSoumis"));
                 etablissementRepository.save(etab);
 
                 // L'annee academique ne doit jamais ecraser Etablissement.anneeScolaire directement :

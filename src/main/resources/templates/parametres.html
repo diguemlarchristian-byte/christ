@@ -215,6 +215,64 @@
 </div>
 </div>
 
+<!-- Regime academique : scolaire (trimestres) ou LMD (semestres, UE, credits) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card" id="regime-academique">
+<input name="_regimeSoumis" type="hidden" value="1"/>
+<div class="flex items-center gap-md mb-xl">
+<div class="bg-primary-container/10 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined">workspace_premium</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm">Regime academique</h4>
+</div>
+<div class="space-y-xl">
+
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface-variant block">Mode de fonctionnement</label>
+<select class="w-full p-md border border-outline-variant rounded-lg text-body-md" id="regimeAcademique" name="regimeAcademique">
+<option th:selected="${etablissement == null or etablissement.regimeAcademique == null or etablissement.regimeAcademique == 'SCOLAIRE'}" value="SCOLAIRE">Scolaire — trimestres, matieres a coefficient, bulletins</option>
+<option th:selected="${etablissement != null and etablissement.regimeAcademique == 'LMD'}" value="LMD">Universitaire (LMD) — semestres, unites d'enseignement, credits</option>
+</select>
+<p class="text-label-sm text-on-surface-variant">Le mode universitaire remplace les bulletins trimestriels par des releves de notes semestriels et fait valider les etudiants unite par unite. Les notes deja saisies ne sont pas modifiees.</p>
+</div>
+
+<!-- Regles de deliberation : n'ont de sens qu'en LMD -->
+<div class="space-y-xl border-t border-outline-variant pt-xl" id="regles-lmd">
+<p class="font-label-md text-label-md text-on-surface">Regles de deliberation</p>
+<p class="text-label-sm text-on-surface-variant -mt-3">Ces regles varient d'un pays et d'un etablissement a l'autre. Verifiez-les avec votre direction des etudes avant la premiere deliberation : elles determinent qui valide son semestre.</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface-variant block">Moyenne exigee pour valider une unite (/20)</label>
+<input class="w-full p-md border border-outline-variant rounded-lg text-body-md" max="20" min="0.5" name="seuilValidationUE" step="0.5" th:value="${etablissement != null and etablissement.seuilValidationUE != null ? etablissement.seuilValidationUE : 10}" type="number"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface-variant block">Credits par semestre</label>
+<input class="w-full p-md border border-outline-variant rounded-lg text-body-md" max="120" min="1" name="creditsParSemestre" step="1" th:value="${etablissement != null and etablissement.creditsParSemestre != null ? etablissement.creditsParSemestre : 30}" type="number"/>
+<p class="text-label-sm text-on-surface-variant">Sert a controler la maquette pedagogique : la somme des credits des unites d'un semestre doit tomber juste.</p>
+</div>
+</div>
+
+<label class="flex items-start gap-md cursor-pointer">
+<input class="mt-1 w-5 h-5 accent-primary" name="compensationSemestrielle" th:checked="${etablissement == null or etablissement.compensationSemestrielle}" type="checkbox" value="true"/>
+<span>
+<span class="font-label-md text-label-md text-on-surface block">Autoriser la compensation entre unites</span>
+<span class="text-label-sm text-on-surface-variant">Quand la moyenne du semestre atteint le seuil, les unites en dessous sont validees et leurs credits attribues. Le releve indique toujours qu'une unite a ete obtenue par compensation.</span>
+</span>
+</label>
+
+<label class="flex items-start gap-md cursor-pointer">
+<input class="mt-1 w-5 h-5 accent-primary" id="noteEliminatoireActive" name="noteEliminatoireActive" th:checked="${etablissement != null and etablissement.noteEliminatoire != null}" type="checkbox" value="true"/>
+<span class="flex-1">
+<span class="font-label-md text-label-md text-on-surface block">Appliquer une note eliminatoire</span>
+<span class="text-label-sm text-on-surface-variant block mb-2">Sous cette note, une unite ne peut plus etre compensee, meme si la moyenne du semestre est atteinte.</span>
+<input class="w-40 p-md border border-outline-variant rounded-lg text-body-md" max="20" min="0" name="noteEliminatoire" step="0.5" th:value="${etablissement != null and etablissement.noteEliminatoire != null ? etablissement.noteEliminatoire : 5}" type="number"/>
+</span>
+</label>
+
+</div>
+</div>
+</div>
+
 <!-- Identite de l'etablissement (pour bulletins, cartes, recus...) -->
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card">
 <div class="flex items-center gap-md mb-xl">
@@ -671,6 +729,29 @@
             var el = document.getElementById(cible);
             if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
         }
+    })();
+</script>
+<script>
+    // Les regles de deliberation ne concernent que le mode universitaire : les afficher en
+    // mode scolaire laisserait croire qu'elles s'appliquent aux bulletins trimestriels.
+    // Masquage visuel seulement — les champs restent soumis, donc un aller-retour
+    // scolaire -> LMD ne perd pas les seuils deja saisis.
+    (function () {
+        var select = document.getElementById('regimeAcademique');
+        var regles = document.getElementById('regles-lmd');
+        if (!select || !regles) return;
+
+        var caseElim = document.getElementById('noteEliminatoireActive');
+        var champElim = document.querySelector('input[name="noteEliminatoire"]');
+
+        function majAffichage() {
+            regles.hidden = (select.value !== 'LMD');
+            if (caseElim && champElim) champElim.disabled = !caseElim.checked;
+        }
+
+        select.addEventListener('change', majAffichage);
+        if (caseElim) caseElim.addEventListener('change', majAffichage);
+        majAffichage();
     })();
 </script>
 </body>
