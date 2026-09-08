@@ -20,13 +20,25 @@
 <span class="material-symbols-outlined mr-md">dashboard</span>
 <span class="font-body-md text-body-md">Tableau de bord</span>
 </a>
-<a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/secretariat}" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'SECRETAIRE')}">
+<a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/secretariat}" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'SECRETAIRE' or utilisateurConnecte.role == 'TRESORIER')}">
 <span class="material-symbols-outlined mr-md">group</span>
 <span class="font-body-md text-body-md">Eleves</span>
 </a>
 <a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'financier'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/finances}">
 <span class="material-symbols-outlined mr-md">payments</span>
 <span class="font-body-md text-body-md">Comptabilite</span>
+</a>
+<a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'frais'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/frais}">
+<span class="material-symbols-outlined mr-md">receipt_long</span>
+<span class="font-body-md text-body-md">Frais de scolarite</span>
+</a>
+<a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'grand-livre'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/comptabilite/grand-livre}">
+<span class="material-symbols-outlined mr-md">menu_book</span>
+<span class="font-body-md text-body-md">Grand livre</span>
+</a>
+<a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'balance'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/comptabilite/balance}">
+<span class="material-symbols-outlined mr-md">balance</span>
+<span class="font-body-md text-body-md">Balance generale</span>
 </a>
 <a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/messagerie}" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'TRESORIER' or utilisateurConnecte.role == 'COMPTABLE')}">
 <span class="material-symbols-outlined mr-md">forum</span>

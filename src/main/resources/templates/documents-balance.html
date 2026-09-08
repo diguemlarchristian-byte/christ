@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro | Balance generale</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+    tailwind.config = { theme: { extend: { colors: {
+        "primary": /*[[${accentColor} ?: '#00236f']]*/ '#00236f',
+        "on-primary": "#ffffff", "secondary": "#505f76",
+        "secondary-container": "#d0e1fb", "on-secondary-container": "#54647a",
+        "background": "#f7f9fb", "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f2f4f6", "surface-container": "#eceef0",
+        "on-surface": "#191c1e", "on-surface-variant": "#444651",
+        "outline-variant": "#c5c5d3", "error": "#ba1a1a", "success": "#1b7f4c"
+    }, spacing: { "base": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px" },
+       borderRadius: { DEFAULT: "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+       fontSize: {
+         "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+         "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+         "body-md": ["14px", {"lineHeight": "20px"}],
+         "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+         "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+       } } } }
+</script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .montant { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+    @media print {
+      .no-print { display: none !important; }
+      main { margin-left: 0 !important; padding: 0 !important; }
+      body { background: #fff; }
+      .carte-imprimable { border: none !important; }
+    }
+</style>
+</head>
+<body class="bg-background text-on-surface">
+
+<div class="no-print" th:replace="~{fragments/sidebar-tresorier :: admin('balance')}"></div>
+
+<main class="md:ml-[260px] p-md sm:p-lg pb-24 md:pb-lg">
+
+<header class="mb-lg flex flex-wrap items-start justify-between gap-md">
+  <div>
+    <h1 class="text-headline-lg text-primary">Balance generale</h1>
+    <p class="text-body-md text-on-surface-variant mt-1"
+       th:text="${etablissement != null ? etablissement.nom : ''} + ' — du ' + ${#temporals.format(debut, 'dd/MM/yyyy')} + ' au ' + ${#temporals.format(fin, 'dd/MM/yyyy')}">
+    </p>
+  </div>
+  <button class="no-print px-md py-sm rounded-lg border border-outline-variant text-label-md flex items-center gap-sm hover:bg-surface-container transition-all"
+          onclick="window.print()" type="button">
+    <span class="material-symbols-outlined text-[20px]">print</span> Imprimer
+  </button>
+</header>
+
+<form class="no-print bg-surface-container-lowest border border-outline-variant rounded-xl p-md mb-lg flex flex-wrap items-end gap-md"
+      method="get" th:action="@{/comptabilite/balance}">
+  <div class="space-y-1">
+    <label class="text-label-sm text-on-surface-variant block" for="debut">Du</label>
+    <input class="p-sm border border-outline-variant rounded-lg text-body-md" id="debut" name="debut"
+           th:value="${debut}" type="date"/>
+  </div>
+  <div class="space-y-1">
+    <label class="text-label-sm text-on-surface-variant block" for="fin">Au</label>
+    <input class="p-sm border border-outline-variant rounded-lg text-body-md" id="fin" name="fin"
+           th:value="${fin}" type="date"/>
+  </div>
+  <button class="px-md py-sm rounded-lg bg-primary text-on-primary text-label-md hover:opacity-90 transition-all" type="submit">
+    Afficher
+  </button>
+  <a class="px-md py-sm rounded-lg border border-outline-variant text-label-md hover:bg-surface-container transition-all"
+     th:href="@{/comptabilite/grand-livre(debut=${debut},fin=${fin})}">Voir le grand livre</a>
+</form>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl text-center"
+     th:if="${#lists.isEmpty(balance.lignes)}">
+  <span class="material-symbols-outlined text-on-surface-variant text-[40px]">balance</span>
+  <p class="text-body-md mt-sm">Aucune ecriture sur cette periode.</p>
+  <p class="text-label-sm text-on-surface-variant mt-1">
+    La balance se remplit a partir des depenses et des encaissements enregistres.
+  </p>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden carte-imprimable"
+     th:unless="${#lists.isEmpty(balance.lignes)}">
+  <div class="overflow-x-auto">
+    <table class="w-full text-body-md" style="min-width: 44rem;">
+      <thead>
+        <tr class="bg-surface-container-low border-b border-outline-variant">
+          <th class="text-left p-sm text-label-sm text-on-surface-variant">Compte</th>
+          <th class="text-left p-sm text-label-sm text-on-surface-variant">Intitule</th>
+          <th class="text-right p-sm text-label-sm text-on-surface-variant">Ecritures</th>
+          <th class="text-right p-sm text-label-sm text-on-surface-variant">Debit</th>
+          <th class="text-right p-sm text-label-sm text-on-surface-variant">Credit</th>
+          <th class="text-right p-sm text-label-sm text-on-surface-variant">Solde</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-outline-variant/40" th:each="l : ${balance.lignes}">
+          <td class="p-sm montant text-left font-medium" th:text="${l.code}">60110</td>
+          <td class="p-sm" th:text="${l.libelle}">Libelle</td>
+          <td class="p-sm montant text-on-surface-variant" th:text="${l.nbEcritures}">0</td>
+          <td class="p-sm montant" th:text="${l.totalDebit} > 0 ? ${#numbers.formatDecimal(l.totalDebit, 0, 'WHITESPACE', 0, 'POINT')} : '—'">0</td>
+          <td class="p-sm montant" th:text="${l.totalCredit} > 0 ? ${#numbers.formatDecimal(l.totalCredit, 0, 'WHITESPACE', 0, 'POINT')} : '—'">0</td>
+          <td class="p-sm montant font-medium"
+              th:classappend="${l.solde() < 0} ? 'text-success' : ''"
+              th:text="${#numbers.formatDecimal(l.solde(), 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="bg-surface-container-low border-t-2 border-outline-variant font-semibold">
+          <td class="p-sm" colspan="3">Totaux</td>
+          <td class="p-sm montant" th:text="${#numbers.formatDecimal(balance.totalDebit, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+          <td class="p-sm montant" th:text="${#numbers.formatDecimal(balance.totalCredit, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+          <td class="p-sm montant"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="p-md border-t border-outline-variant bg-surface-container-low flex flex-wrap items-baseline justify-between gap-sm">
+    <span class="text-label-md" th:text="${balance.estBeneficiaire()} ? 'Resultat de la periode — excedent' : 'Resultat de la periode — deficit'">Resultat</span>
+    <span class="text-headline-sm montant"
+          th:classappend="${balance.estBeneficiaire()} ? 'text-success' : 'text-error'"
+          th:text="${#numbers.formatDecimal(balance.resultat(), 0, 'WHITESPACE', 0, 'POINT')} + ' FCFA'">0</span>
+  </div>
+</div>
+
+<p class="text-label-sm text-on-surface-variant mt-md max-w-3xl">
+  Les encaissements de scolarite sont imputes au compte <span class="font-medium">70110 Scolarite</span>.
+  Les ecritures etant saisies en partie simple, les colonnes debit et credit ne s'equilibrent pas :
+  leur ecart est le resultat de la periode.
+</p>
+
+</main>
+</body>
+</html>

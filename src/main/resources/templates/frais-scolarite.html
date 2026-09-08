@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro | Frais de scolarite</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+    tailwind.config = {
+        theme: { extend: { colors: {
+            "primary": /*[[${accentColor} ?: '#00236f']]*/ '#00236f',
+            "on-primary": "#ffffff",
+            "primary-container": "#1e3a8a",
+            "secondary": "#505f76",
+            "secondary-container": "#d0e1fb",
+            "on-secondary-container": "#54647a",
+            "background": "#f7f9fb",
+            "surface": "#f7f9fb",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f2f4f6",
+            "surface-container": "#eceef0",
+            "on-surface": "#191c1e",
+            "on-surface-variant": "#444651",
+            "outline-variant": "#c5c5d3",
+            "tertiary": "#222a3e",
+            "tertiary-container": "#384055",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#a4acc5",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "success": "#1b7f4c",
+            "success-container": "#d7f0e2"
+        }, spacing: { "base": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px" },
+           borderRadius: { DEFAULT: "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+           fontSize: {
+             "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+             "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+             "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+             "body-lg": ["16px", {"lineHeight": "24px"}],
+             "body-md": ["14px", {"lineHeight": "20px"}],
+             "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+             "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+           } } }
+    }
+</script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .montant { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="bg-background text-on-surface">
+
+<div class="no-print" th:replace="~{fragments/sidebar-tresorier :: admin('frais')}"></div>
+
+<main class="md:ml-[260px] p-md sm:p-lg pb-24 md:pb-lg">
+
+<header class="mb-lg">
+<h1 class="text-headline-lg text-primary">Frais de scolarite</h1>
+<p class="text-body-md text-on-surface-variant mt-1">
+  Ce que chaque famille doit regler. Les frais marques obligatoires alimentent
+  automatiquement le tableau des impayes.
+</p>
+</header>
+
+<div class="mb-lg p-md rounded-xl bg-error-container border border-error text-on-error-container text-body-md"
+     th:if="${erreur}" th:text="${erreur}"></div>
+<div class="mb-lg p-md rounded-xl bg-success-container border border-success text-success text-body-md"
+     th:if="${succes}" th:text="${succes}"></div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+
+  <!-- Formulaire de creation -->
+  <section class="lg:col-span-1">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-lg sticky top-lg">
+      <div class="flex items-center gap-sm mb-lg">
+        <span class="material-symbols-outlined text-primary">add_card</span>
+        <h2 class="text-headline-sm">Nouveau frais</h2>
+      </div>
+
+      <form class="space-y-md" method="post" th:action="@{/frais}">
+        <div class="space-y-1">
+          <label class="text-label-md text-on-surface-variant block" for="designation">Designation</label>
+          <input class="w-full p-sm border border-outline-variant rounded-lg text-body-md" id="designation"
+                 name="designation" placeholder="Ex : Scolarite 2e trimestre" required type="text"/>
+        </div>
+
+        <div class="grid grid-cols-2 gap-sm">
+          <div class="space-y-1">
+            <label class="text-label-md text-on-surface-variant block" for="typeFrais">Type</label>
+            <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" id="typeFrais" name="typeFrais">
+              <option th:each="t : ${types}" th:text="${t}" th:value="${t}"></option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-md text-on-surface-variant block" for="echeance">Echeance</label>
+            <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" id="echeance" name="echeance">
+              <option th:each="e : ${echeances}" th:text="${e}" th:value="${e}"></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-label-md text-on-surface-variant block" for="montant">Montant (FCFA)</label>
+          <input class="w-full p-sm border border-outline-variant rounded-lg text-body-md montant" id="montant"
+                 min="1" name="montant" placeholder="150000" required step="any" type="number"/>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-label-md text-on-surface-variant block" for="niveauCible">Niveau concerne</label>
+          <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" id="niveauCible" name="niveauCible">
+            <option value="">Tous les niveaux</option>
+            <option th:each="n : ${niveaux}" th:text="${n}" th:value="${n}"></option>
+          </select>
+          <p class="text-label-sm text-on-surface-variant">Laissez « tous les niveaux » si le frais concerne toute l'ecole.</p>
+        </div>
+
+        <label class="flex items-start gap-sm cursor-pointer pt-1">
+          <input class="mt-1 w-5 h-5 accent-primary" name="obligatoire" type="checkbox" value="true"/>
+          <span>
+            <span class="text-label-md block">Frais obligatoire</span>
+            <span class="text-label-sm text-on-surface-variant">
+              Un frais obligatoire non regle apparait dans les impayes et declenche les rappels.
+            </span>
+          </span>
+        </label>
+
+        <button class="w-full bg-primary text-on-primary py-sm rounded-lg text-label-md flex items-center justify-center gap-sm hover:opacity-90 transition-all" type="submit">
+          <span class="material-symbols-outlined text-[20px]">save</span> Ajouter ce frais
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Liste des frais -->
+  <section class="lg:col-span-2 space-y-md">
+
+    <div class="flex flex-wrap items-baseline justify-between gap-sm px-1">
+      <h2 class="text-headline-sm">Frais en vigueur</h2>
+      <p class="text-body-md text-on-surface-variant">
+        Total obligatoire par eleve :
+        <span class="text-primary font-semibold montant"
+              th:text="${#numbers.formatDecimal(totalObligatoire, 0, 'WHITESPACE', 0, 'POINT')} + ' FCFA'">0</span>
+      </p>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl text-center"
+         th:if="${#lists.isEmpty(frais)}">
+      <span class="material-symbols-outlined text-on-surface-variant text-[40px]">receipt_long</span>
+      <p class="text-body-lg mt-sm">Aucun frais defini</p>
+      <p class="text-body-md text-on-surface-variant mt-1">
+        Tant qu'aucun frais n'existe, aucun impaye ne peut etre calcule et aucun rappel envoye.
+      </p>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-lg"
+         th:each="f : ${frais}">
+      <form method="post" th:action="@{'/frais/' + ${f.id} + '/modifier'}">
+        <div class="flex flex-wrap items-center gap-sm mb-md">
+          <span class="text-label-sm px-sm py-1 rounded-full bg-secondary-container text-on-secondary-container"
+                th:text="${f.typeFrais}">TYPE</span>
+          <span class="text-label-sm px-sm py-1 rounded-full bg-primary/10 text-primary"
+                th:text="${f.echeance}">ANNUEL</span>
+          <span class="text-label-sm px-sm py-1 rounded-full bg-surface-container text-on-surface-variant"
+                th:text="${f.niveauCible != null ? f.niveauCible : 'Tous niveaux'}">Tous niveaux</span>
+          <span class="text-label-sm px-sm py-1 rounded-full bg-success-container text-success"
+                th:if="${f.obligatoire}">Obligatoire</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+          <div class="space-y-1 md:col-span-2">
+            <label class="text-label-sm text-on-surface-variant block">Designation</label>
+            <input class="w-full p-sm border border-outline-variant rounded-lg text-body-md"
+                   name="designation" required th:value="${f.designation}" type="text"/>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Type</label>
+            <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" name="typeFrais">
+              <option th:each="t : ${types}" th:selected="${t == f.typeFrais}" th:text="${t}" th:value="${t}"></option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Echeance</label>
+            <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" name="echeance">
+              <option th:each="e : ${echeances}" th:selected="${e == f.echeance}" th:text="${e}" th:value="${e}"></option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Montant (FCFA)</label>
+            <input class="w-full p-sm border border-outline-variant rounded-lg text-body-md montant"
+                   min="1" name="montant" required step="any" th:value="${f.montant}" type="number"/>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Niveau concerne</label>
+            <select class="w-full p-sm border border-outline-variant rounded-lg text-body-md" name="niveauCible">
+              <option value="">Tous les niveaux</option>
+              <option th:each="n : ${niveaux}" th:selected="${n == f.niveauCible}" th:text="${n}" th:value="${n}"></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-md mt-md pt-md border-t border-outline-variant">
+          <label class="flex items-center gap-sm cursor-pointer">
+            <input class="w-5 h-5 accent-primary" name="obligatoire" th:checked="${f.obligatoire}" type="checkbox" value="true"/>
+            <span class="text-label-md">Obligatoire</span>
+          </label>
+          <div class="flex items-center gap-sm">
+            <button class="px-md py-sm rounded-lg border border-outline-variant text-label-md hover:bg-surface-container transition-all" type="submit">
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <form class="mt-sm" method="post" th:action="@{'/frais/' + ${f.id} + '/supprimer'}"
+            onsubmit="return confirm('Retirer definitivement ce frais ? Les familles ne le verront plus.');">
+        <button class="text-label-sm text-error hover:underline" type="submit">Retirer ce frais</button>
+      </form>
+    </div>
+
+  </section>
+</div>
+
+</main>
+</body>
+</html>
