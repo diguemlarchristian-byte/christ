@@ -150,6 +150,8 @@ public class SecurityConfig {
                 .requestMatchers("/frais/**").hasAnyRole("ADMIN", "TRESORIER")
                 // Grand livre et balance : documents de lecture, sans effet sur les donnees.
                 .requestMatchers("/comptabilite/**").hasAnyRole("ADMIN", "TRESORIER")
+                // Remises et echeanciers : suivi financier des familles, coeur du poste comptable.
+                .requestMatchers("/suivi-familles/**").hasAnyRole("ADMIN", "TRESORIER")
                 .requestMatchers("/gestion-academique/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-classes/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-salles/**").hasAnyRole("ADMIN", "DIRECTEUR")

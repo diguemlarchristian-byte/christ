@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSystem Pro | Suivi des familles</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<script id="tailwind-config" th:inline="javascript">
+    tailwind.config = { theme: { extend: { colors: {
+        "primary": /*[[${accentColor} ?: '#00236f']]*/ '#00236f',
+        "on-primary": "#ffffff", "secondary": "#505f76",
+        "secondary-container": "#d0e1fb", "on-secondary-container": "#54647a",
+        "background": "#f7f9fb", "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f2f4f6", "surface-container": "#eceef0",
+        "on-surface": "#191c1e", "on-surface-variant": "#444651",
+        "outline-variant": "#c5c5d3",
+        "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a",
+        "success": "#1b7f4c", "success-container": "#d7f0e2",
+        "warning": "#8a5a00", "warning-container": "#fbf0d9"
+    }, spacing: { "base": "4px", "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "32px" },
+       borderRadius: { DEFAULT: "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+       fontSize: {
+         "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+         "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+         "body-md": ["14px", {"lineHeight": "20px"}],
+         "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+         "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+       } } } }
+</script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .montant { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .chevron { transform: rotate(180deg); }
+    .chevron { transition: transform 0.15s ease; }
+</style>
+</head>
+<body class="bg-background text-on-surface">
+
+<div class="no-print" th:replace="~{fragments/sidebar-tresorier :: admin('suivi-familles')}"></div>
+
+<main class="md:ml-[260px] p-md sm:p-lg pb-24 md:pb-lg">
+
+<header class="mb-lg">
+  <h1 class="text-headline-lg text-primary">Suivi des familles</h1>
+  <p class="text-body-md text-on-surface-variant mt-1">
+    Remises accordees et versements convenus, pour l'annee
+    <span class="font-medium" th:text="${anneeScolaire}">2026-2027</span>.
+  </p>
+</header>
+
+<div class="mb-lg p-md rounded-xl bg-error-container border border-error text-on-error-container text-body-md"
+     th:if="${erreur}" th:text="${erreur}"></div>
+<div class="mb-lg p-md rounded-xl bg-success-container border border-success text-success text-body-md"
+     th:if="${succes}" th:text="${succes}"></div>
+
+<!-- Ce qui demande une action aujourd'hui -->
+<div class="mb-lg p-md rounded-xl bg-warning-container border border-warning"
+     th:if="${!#lists.isEmpty(echeancesEnRetard)}">
+  <div class="flex items-center gap-sm">
+    <span class="material-symbols-outlined text-warning">schedule</span>
+    <span class="text-label-md text-warning"
+          th:text="${#lists.size(echeancesEnRetard)} + ' versement(s) en retard'">0 versement</span>
+  </div>
+  <p class="text-body-md text-on-surface-variant mt-1">
+    Des echeances convenues sont depassees sans reglement. Les eleves concernes apparaissent en tete de liste.
+  </p>
+</div>
+
+<form class="mb-lg flex flex-wrap gap-sm" method="get" th:action="@{/suivi-familles}">
+  <input class="flex-1 min-w-[14rem] p-sm border border-outline-variant rounded-lg text-body-md"
+         name="recherche" placeholder="Rechercher un eleve par nom ou matricule" th:value="${recherche}" type="search"/>
+  <button class="px-md py-sm rounded-lg bg-primary text-on-primary text-label-md hover:opacity-90 transition-all" type="submit">
+    Rechercher
+  </button>
+  <a class="px-md py-sm rounded-lg border border-outline-variant text-label-md hover:bg-surface-container transition-all"
+     th:href="@{/suivi-familles}" th:if="${recherche != null and !recherche.isBlank()}">Tout afficher</a>
+</form>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl text-center"
+     th:if="${#lists.isEmpty(eleves)}">
+  <span class="material-symbols-outlined text-on-surface-variant text-[40px]">group</span>
+  <p class="text-body-md mt-sm">Aucun eleve a afficher.</p>
+</div>
+
+<div class="space-y-sm">
+  <details class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden"
+           th:each="e : ${eleves}" th:with="s=${situations.get(e.id)}, retards=${s.echeancesEnRetard(aujourdhui)}">
+
+    <summary class="p-md flex flex-wrap items-center gap-md hover:bg-surface-container-low transition-colors">
+      <div class="flex-1 min-w-[12rem]">
+        <div class="flex flex-wrap items-center gap-sm">
+          <span class="text-label-md" th:text="${e.nom} + ' ' + ${e.prenom}">NOM Prenom</span>
+          <span class="text-label-sm text-on-surface-variant" th:text="${e.matricule}">MAT-001</span>
+          <span class="text-label-sm text-on-surface-variant"
+                th:if="${e.classe != null}" th:text="${e.classe.nom}">CP1 A</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-sm mt-1">
+          <span class="text-label-sm px-sm py-0.5 rounded-full bg-warning-container text-warning"
+                th:if="${!#lists.isEmpty(retards)}"
+                th:text="${#lists.size(retards)} + ' versement(s) en retard'">retard</span>
+          <span class="text-label-sm px-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container"
+                th:if="${s.remises > 0}"
+                th:text="'Remise ' + ${#numbers.formatDecimal(s.remises, 0, 'WHITESPACE', 0, 'POINT')} + ' F'">Remise</span>
+          <span class="text-label-sm px-sm py-0.5 rounded-full bg-success-container text-success"
+                th:if="${s.estExonere()}">Exonere</span>
+          <span class="text-label-sm px-sm py-0.5 rounded-full bg-success-container text-success"
+                th:if="${s.estSolde() and !s.estExonere()}">A jour</span>
+        </div>
+      </div>
+
+      <div class="text-right">
+        <div class="montant text-label-md"
+             th:classappend="${s.reste() > 0} ? 'text-error' : 'text-success'"
+             th:text="${#numbers.formatDecimal(s.reste(), 0, 'WHITESPACE', 0, 'POINT')} + ' F'">0 F</div>
+        <div class="text-label-sm text-on-surface-variant montant"
+             th:text="'verse ' + ${#numbers.formatDecimal(s.verse, 0, 'WHITESPACE', 0, 'POINT')} + ' / ' + ${#numbers.formatDecimal(s.montantDu, 0, 'WHITESPACE', 0, 'POINT')}">0 / 0</div>
+      </div>
+      <span class="material-symbols-outlined text-on-surface-variant chevron">expand_more</span>
+    </summary>
+
+    <div class="p-md border-t border-outline-variant space-y-lg">
+
+      <!-- Detail du du -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-sm">
+        <div class="p-sm rounded-lg bg-surface-container-low">
+          <p class="text-label-sm text-on-surface-variant">Frais dus</p>
+          <p class="montant text-label-md" th:text="${#numbers.formatDecimal(s.montantBrut, 0, 'WHITESPACE', 0, 'POINT')}">0</p>
+        </div>
+        <div class="p-sm rounded-lg bg-surface-container-low">
+          <p class="text-label-sm text-on-surface-variant">Remises</p>
+          <p class="montant text-label-md text-secondary" th:text="'− ' + ${#numbers.formatDecimal(s.remises, 0, 'WHITESPACE', 0, 'POINT')}">0</p>
+        </div>
+        <div class="p-sm rounded-lg bg-surface-container-low">
+          <p class="text-label-sm text-on-surface-variant">A regler</p>
+          <p class="montant text-label-md" th:text="${#numbers.formatDecimal(s.montantDu, 0, 'WHITESPACE', 0, 'POINT')}">0</p>
+        </div>
+        <div class="p-sm rounded-lg bg-surface-container-low">
+          <p class="text-label-sm text-on-surface-variant">Deja verse</p>
+          <p class="montant text-label-md text-success" th:text="${#numbers.formatDecimal(s.verse, 0, 'WHITESPACE', 0, 'POINT')}">0</p>
+        </div>
+      </div>
+
+      <!-- Remises accordees -->
+      <div>
+        <h3 class="text-label-md mb-sm">Remises accordees</h3>
+        <p class="text-body-md text-on-surface-variant" th:if="${#lists.isEmpty(s.remisesAccordees)}">
+          Aucune remise. L'eleve doit la totalite des frais obligatoires de son niveau.
+        </p>
+        <div class="flex flex-wrap items-center gap-sm p-sm rounded-lg bg-surface-container-low mb-sm"
+             th:each="r : ${s.remisesAccordees}">
+          <span class="text-label-md montant"
+                th:text="${r.type == 'MONTANT'} ? ${#numbers.formatDecimal(r.valeur, 0, 'WHITESPACE', 0, 'POINT')} + ' F' : ${r.valeur} + ' %'">0</span>
+          <span class="text-label-sm px-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container"
+                th:if="${r.motif != null}" th:text="${r.motif}">BOURSE</span>
+          <span class="text-body-md text-on-surface-variant flex-1" th:text="${r.commentaire}"></span>
+          <form method="post" th:action="@{'/suivi-familles/remises/' + ${r.id} + '/retirer'}"
+                onsubmit="return confirm('Retirer cette remise ? L eleve devra de nouveau la totalite.');">
+            <button class="text-label-sm text-error hover:underline" type="submit">Retirer</button>
+          </form>
+        </div>
+
+        <form class="flex flex-wrap items-end gap-sm mt-sm" method="post" th:action="@{/suivi-familles/remises}">
+          <input name="eleveId" th:value="${e.id}" type="hidden"/>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Type</label>
+            <select class="p-sm border border-outline-variant rounded-lg text-body-md" name="type">
+              <option value="POURCENTAGE">Pourcentage</option>
+              <option value="MONTANT">Montant fixe</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Valeur</label>
+            <input class="w-28 p-sm border border-outline-variant rounded-lg text-body-md montant"
+                   min="1" name="valeur" placeholder="50" required step="any" type="number"/>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-sm text-on-surface-variant block">Motif</label>
+            <select class="p-sm border border-outline-variant rounded-lg text-body-md" name="motif">
+              <option th:each="m : ${motifs}" th:text="${m}" th:value="${m}"></option>
+            </select>
+          </div>
+          <div class="space-y-1 flex-1 min-w-[10rem]">
+            <label class="text-label-sm text-on-surface-variant block">Commentaire</label>
+            <input class="w-full p-sm border border-outline-variant rounded-lg text-body-md"
+                   name="commentaire" placeholder="Facultatif" type="text"/>
+          </div>
+          <button class="px-md py-sm rounded-lg bg-primary text-on-primary text-label-md hover:opacity-90 transition-all" type="submit">
+            Accorder
+          </button>
+        </form>
+      </div>
+
+      <!-- Echeancier -->
+      <div class="pt-md border-t border-outline-variant">
+        <h3 class="text-label-md mb-sm">Echeancier de paiement</h3>
+
+        <p class="text-body-md text-on-surface-variant" th:if="${#lists.isEmpty(s.echeances)}">
+          Aucun echeancier. La famille doit regler la totalite sans date convenue.
+        </p>
+
+        <div class="overflow-x-auto" th:if="${!#lists.isEmpty(s.echeances)}">
+          <table class="w-full text-body-md" style="min-width: 30rem;">
+            <thead>
+              <tr class="border-b border-outline-variant">
+                <th class="text-left p-sm text-label-sm text-on-surface-variant">Versement</th>
+                <th class="text-left p-sm text-label-sm text-on-surface-variant">Prevu le</th>
+                <th class="text-right p-sm text-label-sm text-on-surface-variant">Montant</th>
+                <th class="text-right p-sm text-label-sm text-on-surface-variant">Regle</th>
+                <th class="text-right p-sm text-label-sm text-on-surface-variant">Reste</th>
+                <th class="text-left p-sm text-label-sm text-on-surface-variant">Etat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-outline-variant/40" th:each="ech : ${s.echeances}">
+                <td class="p-sm montant" th:text="'n° ' + ${ech.rang}">1</td>
+                <td class="p-sm montant" th:text="${#temporals.format(ech.datePrevue, 'dd/MM/yyyy')}">01/10/2026</td>
+                <td class="p-sm montant text-right" th:text="${#numbers.formatDecimal(ech.montantPrevu, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+                <td class="p-sm montant text-right text-success" th:text="${#numbers.formatDecimal(ech.montantRegle, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+                <td class="p-sm montant text-right" th:text="${#numbers.formatDecimal(ech.resteDu(), 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+                <td class="p-sm">
+                  <span class="text-label-sm px-sm py-0.5 rounded-full bg-success-container text-success"
+                        th:if="${ech.estSoldee()}">Solde</span>
+                  <span class="text-label-sm px-sm py-0.5 rounded-full bg-error-container text-on-error-container"
+                        th:if="${ech.estEnRetard(aujourdhui)}">En retard</span>
+                  <span class="text-label-sm px-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant"
+                        th:if="${!ech.estSoldee() and !ech.estEnRetard(aujourdhui)}">A venir</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex flex-wrap items-end gap-sm mt-md">
+          <form class="flex flex-wrap items-end gap-sm" method="post" th:action="@{/suivi-familles/echeanciers}">
+            <input name="eleveId" th:value="${e.id}" type="hidden"/>
+            <div class="space-y-1">
+              <label class="text-label-sm text-on-surface-variant block">Versements</label>
+              <input class="w-24 p-sm border border-outline-variant rounded-lg text-body-md montant"
+                     max="12" min="1" name="nbVersements" required type="number" value="3"/>
+            </div>
+            <div class="space-y-1">
+              <label class="text-label-sm text-on-surface-variant block">Premier le</label>
+              <input class="p-sm border border-outline-variant rounded-lg text-body-md"
+                     name="premiereEcheance" required th:value="${aujourdhui}" type="date"/>
+            </div>
+            <div class="space-y-1">
+              <label class="text-label-sm text-on-surface-variant block">Montant a etaler</label>
+              <input class="w-36 p-sm border border-outline-variant rounded-lg text-body-md montant"
+                     min="1" name="montantTotal" step="any" th:placeholder="${#numbers.formatDecimal(s.reste(), 0, 'POINT', 0, 'POINT')}" type="number"/>
+            </div>
+            <button class="px-md py-sm rounded-lg border border-primary text-primary text-label-md hover:bg-primary hover:text-on-primary transition-all" type="submit">
+              Planifier
+            </button>
+          </form>
+
+          <form method="post" th:action="@{'/suivi-familles/echeanciers/' + ${e.id} + '/supprimer'}"
+                th:if="${!#lists.isEmpty(s.echeances)}"
+                onsubmit="return confirm('Retirer cet echeancier ? Les paiements enregistres sont conserves.');">
+            <button class="text-label-sm text-error hover:underline pb-sm" type="submit">Retirer l'echeancier</button>
+          </form>
+        </div>
+        <p class="text-label-sm text-on-surface-variant mt-sm">
+          Laissez le montant vide pour etaler ce qui reste du, remises deduites.
+          Les versements sont mensuels a partir de la date choisie.
+        </p>
+      </div>
+
+    </div>
+  </details>
+</div>
+
+</main>
+</body>
+</html>

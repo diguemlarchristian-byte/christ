@@ -32,6 +32,10 @@
 <span class="material-symbols-outlined mr-md">receipt_long</span>
 <span class="font-body-md text-body-md">Frais de scolarite</span>
 </a>
+<a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'suivi-familles'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/suivi-familles}">
+<span class="material-symbols-outlined mr-md">family_restroom</span>
+<span class="font-body-md text-body-md">Suivi des familles</span>
+</a>
 <a th:class="'flex items-center px-md py-sm transition-all duration-200 ' + (${activePage == 'grand-livre'} ? 'border-l-4 border-primary text-on-tertiary bg-on-tertiary-fixed-variant/10' : 'rounded text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50')" th:href="@{/comptabilite/grand-livre}">
 <span class="material-symbols-outlined mr-md">menu_book</span>
 <span class="font-body-md text-body-md">Grand livre</span>

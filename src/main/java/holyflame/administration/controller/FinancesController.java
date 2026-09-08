@@ -9,6 +9,7 @@ import holyflame.administration.model.Eleve;
 import holyflame.administration.model.FraisScolarite;
 import holyflame.administration.model.LigneBudget;
 import holyflame.administration.model.Paiement;
+import holyflame.administration.model.RemiseEleve;
 import holyflame.administration.model.Parametre;
 import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.ArriereEleveRepository;
@@ -64,6 +65,8 @@ public class FinancesController {
     @Autowired private DepenseRepository depenseRepository;
     @Autowired private CategorieComptableRepository categorieComptableRepository;
     @Autowired private ArriereEleveRepository arriereEleveRepository;
+    @Autowired private holyflame.administration.repository.RemiseEleveRepository remiseEleveRepository;
+    @Autowired private holyflame.administration.service.SituationFinanciereService situationFinanciereService;
     @Autowired private ComptageCaisseRepository comptageCaisseRepository;
     @Autowired private ParametreRepository parametreRepository;
     @Autowired private FraisScolariteRepository fraisScolariteRepository;
@@ -476,18 +479,24 @@ public class FinancesController {
             .collect(Collectors.groupingBy(p -> p.getEleve().getId(),
                 Collectors.summingDouble(p -> p.getMontantVerse() != null ? p.getMontantVerse() : 0)));
 
-        int nbPayes = 0, nbEnAttente = 0;
+        // Le du tient compte des remises : un boursier exonere est compte comme a jour, pas
+        // comme impaye permanent. Sans cela le tableau devient faux des le premier mois, et
+        // un tableau faux cesse d'etre consulte.
+        String anneeCourante = etablissementService.getAnneeScolaireActive();
+        int nbPayes = 0, nbEnAttente = 0, nbExoneres = 0;
         for (Eleve e : tousLesEleves) {
-            double du = fraisObligatoires.stream()
-                .filter(f -> f.getNiveauCible() == null || f.getNiveauCible().isBlank()
-                    || (e.getClasse() != null && f.getNiveauCible().equalsIgnoreCase(e.getClasse().getNiveau())))
-                .mapToDouble(f -> f.getMontant() != null ? f.getMontant() : 0).sum();
+            List<RemiseEleve> remises = remiseEleveRepository
+                .findByEleveIdAndAnneeScolaire(e.getId(), anneeCourante);
+            double du = situationFinanciereService.montantBrut(e, fraisObligatoires)
+                - situationFinanciereService.totalRemises(e, fraisObligatoires, remises);
             double verse = paiementsParEleve.getOrDefault(e.getId(), 0.0);
+            if (du <= 0 && !remises.isEmpty()) nbExoneres++;
             if (du <= 0 || verse >= du) nbPayes++; else nbEnAttente++;
         }
         int totalEleves = nbPayes + nbEnAttente;
         model.addAttribute("nbElevesPayes", nbPayes);
         model.addAttribute("nbElevesEnAttente", nbEnAttente);
+        model.addAttribute("nbElevesExoneres", nbExoneres);
         model.addAttribute("tauxScolaritesPayees", totalEleves > 0 ? Math.round(nbPayes * 1000.0 / totalEleves) / 10.0 : 0);
     }
 
@@ -731,10 +740,11 @@ public class FinancesController {
 
         int nbRappels = 0;
         for (Eleve e : elevesAnneeActive) {
-            double du = fraisObligatoires.stream()
-                .filter(f -> f.getNiveauCible() == null || f.getNiveauCible().isBlank()
-                    || (e.getClasse() != null && f.getNiveauCible().equalsIgnoreCase(e.getClasse().getNiveau())))
-                .mapToDouble(f -> f.getMontant() != null ? f.getMontant() : 0).sum();
+            // Le du passe par SituationFinanciereService pour que les remises soient deduites :
+            // relancer un boursier exonere serait une faute vis-a-vis de la famille.
+            double du = situationFinanciereService.montantBrut(e, fraisObligatoires)
+                - situationFinanciereService.totalRemises(e, fraisObligatoires,
+                    remiseEleveRepository.findByEleveIdAndAnneeScolaire(e.getId(), anneeActive));
             double verse = paiementsParEleve.getOrDefault(e.getId(), 0.0);
             if (du > 0 && verse < du) {
                 e.setDernierRappelPaiement(horlogeService.maintenant());
@@ -793,6 +803,14 @@ public class FinancesController {
         var utilisateur = etablissementService.getCurrentUtilisateur();
         if (utilisateur != null) p.setEnregistreParId(utilisateur.getId());
         paiementRepository.save(p);
+
+        // Le versement solde les echeances en attente, de la plus ancienne a la plus recente :
+        // une famille qui paie rattrape d'abord son retard. Sans cette imputation, l'echeancier
+        // resterait a jamais impaye alors que l'argent est bien entre.
+        situationFinanciereService.imputer(eleve.getId(),
+            etablissementService.getAnneeScolaireActive(), montantVerse,
+            p.getDatePaiement() != null ? p.getDatePaiement().toLocalDate() : LocalDate.now());
+
         journalService.log("PAIEMENT_ENREGISTRÉ", "FINANCES",
             eleve.getNom() + " " + eleve.getPrenom() + " — " + montantVerse + " F (" + typePaiement + ")");
 
