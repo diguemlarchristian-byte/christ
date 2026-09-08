@@ -30,4 +30,23 @@ public class GlobalModelAttributes {
         }
         return COULEUR_PAR_DEFAUT;
     }
+
+    /**
+     * Vrai lorsque l'etablissement connecte fonctionne en unites d'enseignement et credits.
+     *
+     * Expose a toutes les pages pour que chacune n'affiche que ce qui a un sens chez elle :
+     * une universite n'a pas de trimestres, de bulletins ni de professeur titulaire, et
+     * laisser ces reglages visibles laisse croire qu'ils s'appliquent.
+     *
+     * Faux pour un visiteur non connecte : les pages publiques sont les memes pour tous.
+     */
+    @ModelAttribute("estUniversite")
+    public boolean estUniversite() {
+        try {
+            Etablissement etab = etablissementService.getCurrentEtablissement();
+            return etab != null && etab.estRegimeLMD();
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 }

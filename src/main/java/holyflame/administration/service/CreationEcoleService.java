@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -125,6 +126,7 @@ public class CreationEcoleService {
         etab.setLogoPath(donnees.logoPath);
         etab.setCouleurPrimaire(donnees.couleurPrimaire != null ? donnees.couleurPrimaire : "#00236f");
         etab.setLangueSysteme(donnees.langueSysteme != null ? donnees.langueSysteme : "Francais");
+        etab.setRegimeAcademique(deduireRegime(donnees.niveauxSelectionnes));
 
         etablissementRepository.save(etab);
         planComptableService.seedSiVide(etab.getId());
@@ -161,6 +163,23 @@ public class CreationEcoleService {
         utilisateurRepository.save(admin);
 
         return new EcoleCreee(etab.getNom(), codeAcces, admin.getEmail(), motDePasseGenere, nbClasses);
+    }
+
+    /**
+     * Regime deduit des niveaux retenus, plutot que demande a l'utilisateur.
+     *
+     * Choisir « Enseignement superieur » puis devoir rebasculer le regime a la main dans
+     * Parametres serait demander deux fois la meme chose — et laisserait un etablissement
+     * universitaire fonctionner en trimestres jusqu'a ce que quelqu'un s'en apercoive.
+     *
+     * Un etablissement mixte, qui irait du primaire au doctorat, reste en regime scolaire :
+     * ses classes du secondaire ont besoin de bulletins trimestriels. L'administrateur peut
+     * toujours forcer le LMD depuis Parametres si son cas le demande.
+     */
+    private String deduireRegime(List<String> niveauxSelectionnes) {
+        if (niveauxSelectionnes == null || niveauxSelectionnes.isEmpty()) return "SCOLAIRE";
+        boolean tousDuSuperieur = niveauxSelectionnes.stream().allMatch(c -> c != null && c.startsWith("SUPERIEUR_"));
+        return tousDuSuperieur ? "LMD" : "SCOLAIRE";
     }
 
     private String genererMotDePasse() {

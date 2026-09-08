@@ -34,6 +34,14 @@ public class GestionAcademiqueController {
 
     @GetMapping
     public String index(Model model) {
+        // Cet ecran raisonne en classes, matieres a coefficient et professeurs titulaires :
+        // aucune de ces notions n'existe en regime universitaire, ou les etudiants suivent des
+        // unites d'enseignement a credits. Aucune redirection vers un ecran universitaire n'est
+        // possible ici : la maquette pedagogique (UniteEnseignement, Parcours, ElementConstitutif,
+        // MaquettePedagogiqueService) existe cote modele, mais aucun controleur ni template ne
+        // l'expose encore. Tant que cet ecran n'est pas ecrit, l'adresse affiche le formulaire
+        // scolaire plutot qu'une page 404.
+
         Long etabId = etablissementService.getCurrentEtablissementId();
 
         List<Classe> classes = classeRepository.findByEtablissementId(etabId);

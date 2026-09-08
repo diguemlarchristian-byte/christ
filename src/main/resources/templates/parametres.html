@@ -186,7 +186,8 @@
 <option th:selected="${etablissement != null and etablissement.fuseauHoraire == '(GMT+03:00) Nairobi'}" value="(GMT+03:00) Nairobi">Afrique de l'Est — (GMT+03:00) Nairobi, Addis-Abeba</option>
 </select>
 </div>
-<div class="space-y-1">
+<!-- Devoirs et bonus : notions trimestrielles, sans objet en regime universitaire -->
+<div class="space-y-1" th:unless="${estUniversite}">
 <label class="font-label-md text-label-md text-on-surface-variant block">Devoirs autorises par matiere et par trimestre</label>
 <select class="w-full p-md border border-outline-variant rounded-lg text-body-md" name="NB_DEVOIRS_PAR_TRIMESTRE">
 <option th:selected="${p.get('NB_DEVOIRS_PAR_TRIMESTRE') == null or p.get('NB_DEVOIRS_PAR_TRIMESTRE') == '2'}" value="2">2 devoirs (Devoir 1 + Devoir 2)</option>
@@ -194,7 +195,7 @@
 </select>
 <p class="text-label-sm text-on-surface-variant">Au-dela, un avertissement s'affiche a la saisie (l'enseignant peut confirmer pour passer outre). Un seul examen est toujours autorise par matiere et par trimestre. La moyenne des devoirs reellement saisis (2 ou 3) et la note d'examen comptent ensuite chacune pour moitie dans la moyenne de la matiere.</p>
 </div>
-<div class="md:col-span-2 space-y-1">
+<div class="md:col-span-2 space-y-1" th:unless="${estUniversite}">
 <label class="font-label-md text-label-md text-on-surface-variant block">Bonus Participation &amp; Travaux Pratiques</label>
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
 <div>
@@ -591,7 +592,7 @@
 </form>
 
 <!-- Generation rapide des classes standards -->
-<div class="mt-lg bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card" id="config-outils">
+<div class="mt-lg bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card" id="config-outils" th:unless="${estUniversite}">
 <div class="flex items-center gap-md mb-md">
 <div class="bg-primary-container/10 p-3 rounded-lg text-primary">
 <span class="material-symbols-outlined">auto_fix_high</span>
@@ -628,7 +629,7 @@
 </div>
 
 <!-- Affectations enseignant / matiere / classe -->
-<div class="mt-lg bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card" id="config-autorisations">
+<div class="mt-lg bg-surface-container-lowest border border-outline-variant rounded-xl p-md sm:p-xl settings-card" id="config-autorisations" th:unless="${estUniversite}">
 <div class="flex items-center gap-md mb-md">
 <div class="bg-primary-container/10 p-3 rounded-lg text-primary">
 <span class="material-symbols-outlined">assignment_ind</span>
