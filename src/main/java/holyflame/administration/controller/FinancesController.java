@@ -796,7 +796,15 @@ public class FinancesController {
         p.setAnneeScolaire(eleve.getClasse() != null && eleve.getClasse().getAnneeScolaire() != null
             ? eleve.getClasse().getAnneeScolaire() : anneeScolairePaiement);
         p.setDescription(description);
-        p.setRecuNumero(recuNumero != null && !recuNumero.isBlank() ? recuNumero : prochainNumeroRecu(etabIdCourant, dateEffective));
+        // Un numero saisi a la main est accepte, mais jamais en double : deux recus portant le
+        // meme numero rendent la piece la plus ancienne contestable.
+        if (numeroRecuDejaPris(etabIdCourant, recuNumero)) {
+            ra.addFlashAttribute("erreur", "Le numero de recu « " + recuNumero.trim()
+                + " » a deja ete delivre. Laissez le champ vide pour que le suivant soit attribue.");
+            return "redirect:/finances?tab=scolarite";
+        }
+        p.setRecuNumero(recuNumero != null && !recuNumero.isBlank()
+            ? recuNumero.trim() : prochainNumeroRecu(etabIdCourant, dateEffective));
         if (fraisScolariteId != null && !fraisScolariteId.isBlank()) {
             fraisScolariteRepository.findById(Long.parseLong(fraisScolariteId)).ifPresent(p::setFraisScolarite);
         }
@@ -874,12 +882,44 @@ public class FinancesController {
         return resultat;
     }
 
+    /**
+     * Numero de recu suivant, pour l'annee scolaire de la date du paiement.
+     *
+     * Le rang se lit sur le plus grand numero deja delivre, jamais sur le nombre de paiements
+     * en base : supprimer un paiement faisait reculer le compteur, qui redonnait alors un
+     * numero deja remis a une famille. Deux recus portant le meme numero sont impossibles a
+     * justifier lors d'un controle, et la piece la plus ancienne devient contestable.
+     *
+     * La sequence peut donc presenter des trous — c'est le comportement correct : un numero
+     * annule reste consomme.
+     */
     private String prochainNumeroRecu(Long etabId, LocalDate date) {
         String anneeScolaire = AnneeScolaireUtil.pour(date);
-        long compte = paiementRepository.findByEtablissementId(etabId).stream()
-            .filter(p -> p.getDatePaiement() != null && anneeScolaire.equals(AnneeScolaireUtil.pour(p.getDatePaiement().toLocalDate())))
-            .count();
-        return "HF-" + anneeScolaire + "-" + String.format("%03d", compte + 1);
+        String prefixe = "HF-" + anneeScolaire + "-";
+
+        int dernierRang = paiementRepository.findByEtablissementId(etabId).stream()
+            .map(Paiement::getRecuNumero)
+            .filter(n -> n != null && n.startsWith(prefixe))
+            .map(n -> n.substring(prefixe.length()))
+            .mapToInt(suffixe -> {
+                try {
+                    return Integer.parseInt(suffixe.trim());
+                } catch (NumberFormatException e) {
+                    // Numero saisi a la main dans un autre format : il ne participe pas a la
+                    // sequence automatique, mais il ne doit pas la faire echouer non plus.
+                    return 0;
+                }
+            })
+            .max().orElse(0);
+
+        return prefixe + String.format("%03d", dernierRang + 1);
+    }
+
+    /** Vrai si ce numero de recu a deja ete delivre dans cet etablissement. */
+    private boolean numeroRecuDejaPris(Long etabId, String numero) {
+        if (numero == null || numero.isBlank()) return false;
+        return paiementRepository.findByEtablissementId(etabId).stream()
+            .anyMatch(p -> numero.trim().equalsIgnoreCase(p.getRecuNumero()));
     }
 
     @GetMapping("/paiements/{id}/recu")

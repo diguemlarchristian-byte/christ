@@ -41,7 +41,11 @@ public class DocumentsComptablesService {
 
     /** Une ligne du grand livre : une ecriture datee, imputee a un poste. */
     public record Ecriture(LocalDate date, String libelle, String tiers,
-                           double debit, double credit, double soldeCumule) {}
+                           double debit, double credit, double soldeCumule,
+                           String justificatifPath) {
+        /** Vrai quand la piece justificative est consultable depuis le grand livre. */
+        public boolean aUnJustificatif() { return justificatifPath != null && !justificatifPath.isBlank(); }
+    }
 
     /** Un compte du grand livre, avec ses ecritures et ses totaux. */
     public record CompteDetaille(String code, String libelle, String sens,
@@ -98,7 +102,7 @@ public class DocumentsComptablesService {
                     d.getBeneficiaire(),
                     estRecette ? 0 : montant,
                     estRecette ? montant : 0,
-                    0));
+                     0, d.getJustificatifPath()));
             }
 
             if (POSTE_SCOLARITE.equals(cat.getCode())) {
@@ -110,7 +114,7 @@ public class DocumentsComptablesService {
                         ? "Recu " + p.getRecuNumero() : "Encaissement scolarite";
                     ecritures.add(new Ecriture(
                         p.getDatePaiement() != null ? p.getDatePaiement().toLocalDate() : null,
-                        libelle, eleve, 0, montant, 0));
+                        libelle, eleve, 0, montant, 0, null));
                 }
             }
 
@@ -123,7 +127,8 @@ public class DocumentsComptablesService {
                 cumul += e.debit() - e.credit();
                 totalDebit += e.debit();
                 totalCredit += e.credit();
-                avecCumul.add(new Ecriture(e.date(), e.libelle(), e.tiers(), e.debit(), e.credit(), cumul));
+                avecCumul.add(new Ecriture(e.date(), e.libelle(), e.tiers(), e.debit(), e.credit(),
+                    cumul, e.justificatifPath()));
             }
 
             if (avecComptesVides || !avecCumul.isEmpty()) {

@@ -298,6 +298,9 @@ public class PersonnelController {
             case "ENSEIGNANT"  -> "ENSEIGNANT";
             case "SECRETAIRE"  -> "SECRETAIRE";
             case "TRESORIER"   -> "TRESORIER";
+            // Le comptable a son propre role depuis qu'il fallait pouvoir lui ouvrir la
+            // scolarite sans lui montrer la remuneration de ses collegues : le tresorier voit
+            // les salaires et le budget, le comptable non.
             case "COMPTABLE"   -> "COMPTABLE";
             case "SURVEILLANT" -> "SURVEILLANT";
             case "DIRECTEUR"   -> "DIRECTEUR";

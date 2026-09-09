@@ -147,11 +147,11 @@ public class SecurityConfig {
                 .requestMatchers("/tresorerie/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 // Les frais de scolarite quittent Parametres, qui est reserve a l'ADMIN : c'est
                 // le travail quotidien de la comptable, et les tarifs changent en cours d'annee.
-                .requestMatchers("/frais/**").hasAnyRole("ADMIN", "TRESORIER")
+                .requestMatchers("/frais/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 // Grand livre et balance : documents de lecture, sans effet sur les donnees.
-                .requestMatchers("/comptabilite/**").hasAnyRole("ADMIN", "TRESORIER")
+                .requestMatchers("/comptabilite/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 // Remises et echeanciers : suivi financier des familles, coeur du poste comptable.
-                .requestMatchers("/suivi-familles/**").hasAnyRole("ADMIN", "TRESORIER")
+                .requestMatchers("/suivi-familles/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 .requestMatchers("/gestion-academique/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-classes/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-salles/**").hasAnyRole("ADMIN", "DIRECTEUR")

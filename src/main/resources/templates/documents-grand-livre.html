@@ -118,6 +118,7 @@
             <th class="text-right p-sm text-label-sm text-on-surface-variant">Debit</th>
             <th class="text-right p-sm text-label-sm text-on-surface-variant">Credit</th>
             <th class="text-right p-sm text-label-sm text-on-surface-variant">Solde</th>
+            <th class="text-center p-sm text-label-sm text-on-surface-variant no-print">Piece</th>
           </tr>
         </thead>
         <tbody>
@@ -128,6 +129,12 @@
             <td class="p-sm montant" th:text="${e.debit} > 0 ? ${#numbers.formatDecimal(e.debit, 0, 'WHITESPACE', 0, 'POINT')} : '—'">0</td>
             <td class="p-sm montant" th:text="${e.credit} > 0 ? ${#numbers.formatDecimal(e.credit, 0, 'WHITESPACE', 0, 'POINT')} : '—'">0</td>
             <td class="p-sm montant text-on-surface-variant" th:text="${#numbers.formatDecimal(e.soldeCumule, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+            <td class="p-sm text-center no-print">
+              <a class="text-primary" target="_blank" th:href="@{'/uploads/' + ${e.justificatifPath}}" th:if="${e.aUnJustificatif()}" title="Voir la piece justificative">
+                <span class="material-symbols-outlined text-[18px]">attach_file</span>
+              </a>
+              <span class="text-on-surface-variant" th:unless="${e.aUnJustificatif()}">—</span>
+            </td>
           </tr>
         </tbody>
         <tfoot>
@@ -136,6 +143,7 @@
             <td class="p-sm montant" th:text="${#numbers.formatDecimal(c.totalDebit, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
             <td class="p-sm montant" th:text="${#numbers.formatDecimal(c.totalCredit, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
             <td class="p-sm montant" th:text="${#numbers.formatDecimal(c.solde(), 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+            <td class="no-print"></td>
           </tr>
         </tfoot>
       </table>
