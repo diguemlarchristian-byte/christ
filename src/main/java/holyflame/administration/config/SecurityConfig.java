@@ -153,6 +153,10 @@ public class SecurityConfig {
                 // Remises et echeanciers : suivi financier des familles, coeur du poste comptable.
                 .requestMatchers("/suivi-familles/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 .requestMatchers("/gestion-academique/**").hasAnyRole("ADMIN", "DIRECTEUR")
+                // Maquette pedagogique universitaire (parcours, unites, elements) : pendant de
+                // /gestion-academique en regime LMD. Le COORDONNATEUR y accede car il suit la
+                // maquette de sa filiere ; le DIRECTEUR non, comme sur les autres ecrans academiques.
+                .requestMatchers("/academique-universite/**").hasAnyRole("ADMIN", "COORDONNATEUR")
                 .requestMatchers("/gestion-classes/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-salles/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/matieres/**").hasAnyRole("ADMIN", "DIRECTEUR")

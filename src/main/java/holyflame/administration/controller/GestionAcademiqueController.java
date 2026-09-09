@@ -36,11 +36,13 @@ public class GestionAcademiqueController {
     public String index(Model model) {
         // Cet ecran raisonne en classes, matieres a coefficient et professeurs titulaires :
         // aucune de ces notions n'existe en regime universitaire, ou les etudiants suivent des
-        // unites d'enseignement a credits. Aucune redirection vers un ecran universitaire n'est
-        // possible ici : la maquette pedagogique (UniteEnseignement, Parcours, ElementConstitutif,
-        // MaquettePedagogiqueService) existe cote modele, mais aucun controleur ni template ne
-        // l'expose encore. Tant que cet ecran n'est pas ecrit, l'adresse affiche le formulaire
-        // scolaire plutot qu'une page 404.
+        // unites d'enseignement a credits. Le menu ne propose plus l'entree, mais l'adresse
+        // reste atteignable — mieux vaut renvoyer vers la maquette pedagogique que d'afficher
+        // un formulaire de classes et de coefficients qui ne correspond a rien.
+        var etablissement = etablissementService.getCurrentEtablissement();
+        if (etablissement != null && etablissement.estRegimeLMD()) {
+            return "redirect:/academique-universite";
+        }
 
         Long etabId = etablissementService.getCurrentEtablissementId();
 

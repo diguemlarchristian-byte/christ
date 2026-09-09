@@ -17,9 +17,13 @@
 </a>
 
 <p class="px-lg pt-md pb-xs font-label-sm text-label-sm uppercase tracking-widest text-on-tertiary-container/60">Pedagogie</p>
-<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'gestion-academique'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/gestion-academique">
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'gestion-academique'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${estUniversite != true and utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/gestion-academique">
 <span class="material-symbols-outlined">school</span>
 <span class="font-label-md text-label-md">Gestion Academique</span>
+</a>
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'academique-universite'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${estUniversite == true and utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'COORDONNATEUR')}" href="/academique-universite">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-md text-label-md">Structure academique</span>
 </a>
 <a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'direction-suivi'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/direction/suivi">
 <span class="material-symbols-outlined">fact_check</span>
@@ -51,7 +55,7 @@
 <span class="material-symbols-outlined">event_busy</span>
 <span class="font-label-md text-label-md">Absences</span>
 </a>
-<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'passage'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${!estUniversite and utilisateurConnecte != null and (utilisateurConnecte.role == 'SECRETAIRE' or utilisateurConnecte.role == 'COORDONNATEUR' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/passage">
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'passage'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${estUniversite != true and utilisateurConnecte != null and (utilisateurConnecte.role == 'SECRETAIRE' or utilisateurConnecte.role == 'COORDONNATEUR' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/passage">
 <span class="material-symbols-outlined">move_up</span>
 <span class="font-label-md text-label-md">Passage de classe</span>
 </a>
