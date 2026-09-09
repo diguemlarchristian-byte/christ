@@ -97,6 +97,10 @@
 	</dependencies>
 
 	<build>
+		<!-- Nom de livrable fige : le Dockerfile et le Procfile referencent administration.jar.
+		     Sans ceci le jar porte le numero de version, et toute montee de version cassait le
+		     deploiement au COPY, sans erreur visible avant l'execution. -->
+		<finalName>administration</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

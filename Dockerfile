@@ -9,7 +9,7 @@ RUN mvn -B clean package -DskipTests
 # Etape 2 : image d'execution allegee (JRE seul, pas le JDK complet)
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/administration-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/administration.jar app.jar
 
-EXPOSE 8099
+EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]

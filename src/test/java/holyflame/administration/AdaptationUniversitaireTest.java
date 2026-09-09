@@ -150,6 +150,10 @@ class AdaptationUniversitaireTest {
             ctx.setVariable("matieres", java.util.List.of());
             ctx.setVariable("autorisations", java.util.List.of());
             ctx.setVariable("autorisationsAffichage", java.util.List.of());
+            // Niveaux proposes pour le "Niveau cible" d'un frais : cette liste vient de
+            // ParametreController et le template appelle .isEmpty() dessus, donc elle ne peut
+            // pas rester nulle ici.
+            ctx.setVariable("niveauxDisponibles", java.util.List.of());
             return engine.process(template, ctx);
         }
 
