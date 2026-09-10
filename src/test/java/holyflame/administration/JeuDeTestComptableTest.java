@@ -126,7 +126,7 @@ class JeuDeTestComptableTest {
 
         // ── Production des documents ────────────────────────────────────
         Files.createDirectories(DOSSIER);
-        ecrireGuidePdf(balanceAnnee, balanceMois, livreAnnee);
+        ecrireGuidePdf();
         ecrireJeuDeDonnees(nbOperations, balanceAnnee, balanceMois);
         ecrireLisezMoi(nbOperations, balanceAnnee, balanceMois);
         ecrireBalanceCsv(balanceAnnee, "balance-annee-2026-2027.csv");
@@ -597,9 +597,8 @@ class JeuDeTestComptableTest {
 
     // ── Guide PDF ───────────────────────────────────────────────────────
 
-    private void ecrireGuidePdf(Balance annuelle, Balance mensuelle,
-                                List<CompteDetaille> livreAnnee) throws IOException {
-        String html = construireGuideHtml(annuelle, mensuelle, livreAnnee);
+    private void ecrireGuidePdf() throws IOException {
+        String html = construireGuideHtml();
         Files.writeString(DOSSIER.resolve("guide-comptable.html"), html, StandardCharsets.UTF_8);
 
         ByteArrayOutputStream sortie = new ByteArrayOutputStream();
@@ -615,27 +614,13 @@ class JeuDeTestComptableTest {
         Files.write(DOSSIER.resolve("guide-comptable.pdf"), sortie.toByteArray());
     }
 
-    private String construireGuideHtml(Balance annuelle, Balance mensuelle,
-                                       List<CompteDetaille> livreAnnee) {
-        StringBuilder ops = new StringBuilder();
-        int i = 1;
-        for (String l : journal) {
-            String[] c = l.split(";");
-            ops.append("<tr><td class=\"n\">").append(i++).append("</td>")
-               .append("<td>").append(c[0]).append("</td>")
-               .append("<td>").append(echapper(c[2])).append("</td>")
-               .append("<td class=\"g\">").append(echapper(c[3])).append("</td>")
-               .append("<td class=\"m\">").append(fmt(Double.parseDouble(c[5]))).append("</td></tr>");
-        }
-
-        StringBuilder comptes = new StringBuilder();
-        for (var l : annuelle.lignes()) {
-            comptes.append("<tr><td class=\"code\">").append(l.code()).append("</td>")
-                   .append("<td>").append(echapper(l.libelle())).append("</td>")
-                   .append("<td class=\"m\">").append(l.totalDebit() > 0 ? fmt(l.totalDebit()) : "—").append("</td>")
-                   .append("<td class=\"m\">").append(l.totalCredit() > 0 ? fmt(l.totalCredit()) : "—").append("</td></tr>");
-        }
-
+    /**
+     * Le guide s'adresse a la comptable, pas au developpeur : il ne contient donc plus le
+     * compte rendu du jeu de test — les 25 operations, les comptes mouvementes et les totaux
+     * de controle. Ces chiffres restent dans jeu-de-donnees.txt et dans les exports CSV, ou
+     * ils servent a verifier ; ils n'apprenaient rien a qui doit tenir une caisse.
+     */
+    private String construireGuideHtml() {
         return """
             <!DOCTYPE html><html><head><meta charset="UTF-8"/><style>
             @page { size: A4; margin: 18mm 16mm; }
@@ -660,13 +645,12 @@ class JeuDeTestComptableTest {
             </style></head><body>
 
             <h1>Guide de la comptable</h1>
-            <p class="sous">EduSystem Pro — jeu de test « %s », annee %s</p>
+            <p class="sous">EduSystem Pro — %s, annee %s</p>
 
             <div class="encadre">
-              <b>A quoi sert ce dossier.</b> Il contient une ecole de demonstration deja remplie
-              de 25 operations reparties sur une annee scolaire complete, et les documents qu'elles
-              produisent. Il evite d'avoir a ressaisir des donnees a chaque verification :
-              relancer le test <span class="cle">JeuDeTestComptableTest</span> regenere l'ensemble.
+              <b>Ce guide est le votre.</b> Il decrit, dans l'ordre ou vous les rencontrerez,
+              les gestes de la comptabilite d'une ecole : ouvrir l'annee, encaisser, enregistrer
+              une depense, et sortir les documents que l'on vous demandera.
             </div>
 
             <h2>1. Se connecter et s'y retrouver</h2>
@@ -753,46 +737,13 @@ class JeuDeTestComptableTest {
                   et les remettre a l'expert-comptable.</li>
             </ol>
 
-            <div class="saut"></div>
-            <h2>5. Ce que produit ce jeu de test</h2>
-            <p>Les 25 operations ci-dessous ont ete saisies dans l'ecole de demonstration, puis
-            les documents ont ete edites sur deux perimetres pour verifier qu'ils concordent.</p>
-
-            <table>
-              <tr><th>Controle</th><th>Comptes</th><th>Debit</th><th>Credit</th><th>Resultat</th></tr>
-              <tr><td>Annee 2026-2027</td><td>%d</td><td class="m">%s</td><td class="m">%s</td><td class="m">%s</td></tr>
-              <tr><td>Octobre 2026</td><td>%d</td><td class="m">%s</td><td class="m">%s</td><td class="m">%s</td></tr>
-            </table>
-
-            <div class="encadre">
-              <b>Ce que ces chiffres valident.</b> La balance est le recapitulatif exact du grand
-              livre : memes totaux, memes comptes. Le mois est contenu dans l'annee. Les ecritures
-              etant saisies en partie simple, l'ecart entre debit et credit n'est pas un
-              desequilibre — c'est le resultat de la periode.
-            </div>
-
-            <h2>6. Les 25 operations</h2>
-            <table>
-              <tr><th>N°</th><th>Date</th><th>Libelle</th><th>Tiers</th><th>Montant</th></tr>
-              %s
-            </table>
-
-            <h2>7. Comptes mouvementes sur l'annee</h2>
-            <table>
-              <tr><th>Compte</th><th>Intitule</th><th>Debit</th><th>Credit</th></tr>
-              %s
-            </table>
 
             <div class="pied">
-              Dossier « TEST COMPTABLE » — guide, jeu de donnees et exports CSV du grand livre et
-              de la balance, sur le mois et sur l'annee. Regenere par JeuDeTestComptableTest.
+              EduSystem Pro — guide de la comptable. Le detail de chaque ecran figure dans le
+              tutoriel d'utilisation du logiciel.
             </div>
             </body></html>
-            """.formatted(
-                echapper(ecole.getNom()), annee,
-                annuelle.lignes().size(), fmt(annuelle.totalDebit()), fmt(annuelle.totalCredit()), fmt(annuelle.resultat()),
-                mensuelle.lignes().size(), fmt(mensuelle.totalDebit()), fmt(mensuelle.totalCredit()), fmt(mensuelle.resultat()),
-                ops.toString(), comptes.toString());
+            """.formatted(echapper(ecole.getNom()), annee);
     }
 
     private static String echapper(String texte) {
