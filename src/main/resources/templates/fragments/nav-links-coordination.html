@@ -21,6 +21,18 @@
 <span class="material-symbols-outlined mr-md">fact_check</span>
 <span class="font-body-md text-body-md">Fiches de controle</span>
 </a>
+<!-- La securite accorde au coordonnateur la structure academique en regime LMD, et le passage
+     de classe en regime scolaire. Son menu n'en proposait aucun des deux : il devait d'abord
+     ouvrir une page qui remplace ce menu par celui de l'administration pour y trouver le lien.
+     Les rendre ici evite ce detour et rend son menu conforme a ses droits reels. -->
+<a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/academique-universite}" th:if="${estUniversite == true}">
+<span class="material-symbols-outlined mr-md">account_tree</span>
+<span class="font-body-md text-body-md">Structure academique</span>
+</a>
+<a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/passage}" th:if="${estUniversite != true}">
+<span class="material-symbols-outlined mr-md">moving</span>
+<span class="font-body-md text-body-md">Passage de classe</span>
+</a>
 <a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/personnel}">
 <span class="material-symbols-outlined mr-md">badge</span>
 <span class="font-body-md text-body-md">Personnel</span>

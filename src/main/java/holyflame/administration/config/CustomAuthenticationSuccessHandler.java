@@ -51,6 +51,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             case "INFIRMIER"   -> response.sendRedirect("/infirmerie");
             case "TRESORIER", "COMPTABLE" -> response.sendRedirect("/finances");
             case "COORDONNATEUR" -> response.sendRedirect("/coordination");
+            // MARKETING etait le seul role sans destination declaree : il tombait sur le cas par
+            // defaut et arrivait au tableau de bord de l'administration, ou figurent le total
+            // encaisse et le budget, alors que son espace — le site vitrine — existe depuis
+            // toujours a /marketing avec ses sept ecrans.
+            case "MARKETING" -> response.sendRedirect("/marketing");
             case "ELEVE"       -> response.sendRedirect("/portail");
             case "PARENT"      -> response.sendRedirect("/portail-parent");
             case "ADMIN" -> {
