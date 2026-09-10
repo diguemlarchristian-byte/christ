@@ -14,6 +14,7 @@ import holyflame.administration.repository.*;
 import holyflame.administration.service.DocumentsComptablesService;
 import holyflame.administration.service.DocumentsComptablesService.Balance;
 import holyflame.administration.service.DocumentsComptablesService.CompteDetaille;
+import holyflame.administration.service.FinanceModules;
 import holyflame.administration.service.PlanComptableService;
 import holyflame.administration.service.SituationFinanciereService;
 import org.junit.jupiter.api.DisplayName;
@@ -33,9 +34,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -58,6 +61,13 @@ class JeuDeTestComptableTest {
     /** Compte comptable livre avec le jeu de test, pour pouvoir ouvrir l'ecole de demonstration. */
     private static final String COMPTE_DEMO = "comptable@demo.td";
     private static final String MOT_DE_PASSE_DEMO = "Demo2026";
+    /**
+     * Modules financiers confies au compte livre. Ils dessinent la comptable que le guide
+     * decrit : elle encaisse, enregistre les depenses et sort les rapports, sans preparer la
+     * paie ni arbitrer le budget previsionnel.
+     */
+    private static final Set<String> MODULES_DEMO =
+        Set.of(FinanceModules.CAISSE, FinanceModules.DEPENSES, FinanceModules.RAPPORTS);
 
     @Autowired private DocumentsComptablesService documents;
     @Autowired private SituationFinanciereService situations;
@@ -90,6 +100,7 @@ class JeuDeTestComptableTest {
         int nbOperations = saisirLesOperations();
 
         assertEquals(25, nbOperations, "le jeu de test compte exactement 25 operations");
+        verifierLesDroitsAnnoncesParLeGuide();
 
         LocalDate debutAnnee = LocalDate.of(2026, 9, 1);
         LocalDate finAnnee = LocalDate.of(2027, 8, 31);
@@ -117,6 +128,7 @@ class JeuDeTestComptableTest {
         Files.createDirectories(DOSSIER);
         ecrireGuidePdf(balanceAnnee, balanceMois, livreAnnee);
         ecrireJeuDeDonnees(nbOperations, balanceAnnee, balanceMois);
+        ecrireLisezMoi(nbOperations, balanceAnnee, balanceMois);
         ecrireBalanceCsv(balanceAnnee, "balance-annee-2026-2027.csv");
         ecrireBalanceCsv(balanceMois, "balance-octobre-2026.csv");
         ecrireGrandLivreCsv(livreAnnee, "grand-livre-annee-2026-2027.csv");
@@ -143,6 +155,32 @@ class JeuDeTestComptableTest {
             System.out.println("=== Donnees annulees apres verification "
                 + "(ajoutez -Dcomptable.persister=true pour les conserver) ===");
         }
+    }
+
+    /**
+     * Le guide annonce a la comptable ce qu'elle peut ouvrir et ce qui lui sera refuse. Ces
+     * promesses ne tiennent pas a son role mais aux modules financiers de son compte, qu'un
+     * ADMIN peut modifier. Les verifier ici evite qu'une retouche de la segmentation ne rende
+     * le guide faux en silence : une comptable a qui l'on promet la caisse et qui recoit un
+     * 403 ne sait pas si elle s'est trompee d'ecran ou si l'application est en panne.
+     */
+    private void verifierLesDroitsAnnoncesParLeGuide() {
+        Utilisateur comptable = utilisateurRepository.findByEmail(COMPTE_DEMO).orElseThrow(
+            () -> new IllegalStateException("le compte livre avec le jeu de test est introuvable"));
+
+        assertTrue(FinanceModules.autorise(comptable, FinanceModules.CAISSE),
+            "le guide apprend a encaisser et a delivrer un recu");
+        assertTrue(FinanceModules.autorise(comptable, FinanceModules.DEPENSES),
+            "le guide apprend a enregistrer une depense");
+        assertTrue(FinanceModules.autorise(comptable, FinanceModules.RAPPORTS),
+            "le guide demande d'editer et de remettre les documents comptables");
+
+        assertFalse(FinanceModules.autorise(comptable, FinanceModules.PAIE_PREPARATION),
+            "le guide annonce que les salaires du personnel lui sont fermes");
+        assertFalse(FinanceModules.autorise(comptable, FinanceModules.PAIE_PAIEMENT),
+            "idem pour le declenchement de la paie");
+        assertFalse(FinanceModules.autorise(comptable, FinanceModules.BUDGET_PARAMETRAGE),
+            "le guide annonce que le budget previsionnel et les taux de paie lui sont fermes");
     }
 
     /**
@@ -200,6 +238,14 @@ class JeuDeTestComptableTest {
         u.setMotDePasse(passwordEncoder.encode(MOT_DE_PASSE_DEMO));
         u.setRole("COMPTABLE");
         u.setEtablissement(ecole);
+        // Les droits par defaut du role COMPTABLE (voir FinanceModules) excluent la caisse et
+        // ouvrent au contraire la paie et le budget previsionnel. Ce n'est pas la comptable que
+        // le guide decrit : celle-ci encaisse, enregistre les depenses et edite les documents,
+        // sans approcher les salaires ni arbitrer le budget. Le compte livre recoit donc
+        // exactement ces trois modules — ce qu'un ADMIN fait depuis Parametres > Roles > Acces
+        // aux interfaces. Sans cette ligne, le guide promettrait a la comptable des ecrans qui
+        // lui repondraient 403, et lui cacherait ceux qu'elle peut reellement ouvrir.
+        u.setModulesFinanceActifs(MODULES_DEMO);
         utilisateurRepository.saveAndFlush(u);
     }
 
@@ -437,6 +483,118 @@ class JeuDeTestComptableTest {
         return String.format("%,d", Math.round(montant)).replace(',', ' ');
     }
 
+    // ── Mode d'emploi du dossier ────────────────────────────────────────
+
+    /**
+     * Le mode d'emploi du dossier etait tenu a la main a cote des fichiers produits. Ses
+     * chiffres de controle cessaient d'etre vrais des que le jeu de donnees bougeait, sans
+     * que rien ne le signale : celui qui comparait ses totaux a ceux des CSV pouvait croire
+     * a une erreur de calcul la ou seul le mode d'emploi avait vieilli. Il est desormais
+     * reecrit a chaque execution, avec les totaux et le chemin du projet en cours.
+     */
+    private void ecrireLisezMoi(int nbOperations, Balance annuelle, Balance mensuelle) throws IOException {
+        String projet = Paths.get("").toAbsolutePath().toString();
+        String texte = """
+            DOSSIER TEST COMPTABLE — EduSystem Pro
+            ========================================================================
+
+            A quoi sert ce dossier
+            ------------------------------------------------------------------------
+            Il evite de ressaisir des donnees a chaque fois qu'il faut verifier la
+            comptabilite. Il contient une ecole de demonstration deja remplie de
+            %d operations reparties sur une annee scolaire complete, le guide destine
+            a la comptable, et les documents que ces operations produisent.
+
+
+            Ce que contient le dossier
+            ------------------------------------------------------------------------
+            LISEZ-MOI.txt                    Ce mode d'emploi, reecrit a chaque execution.
+            guide-comptable.pdf              Le guide, 4 pages, a imprimer ou a remettre
+                                             a la comptable.
+            guide-comptable.html             La meme chose, consultable au navigateur.
+
+            jeu-de-donnees.txt               Les %d operations et les totaux de controle.
+
+            balance-annee-%s.csv      Balance generale sur l'annee complete.
+            balance-octobre-2026.csv         Balance du seul mois d'octobre.
+            grand-livre-annee-%s.csv  Detail des ecritures sur l'annee.
+            grand-livre-octobre-2026.csv     Detail des ecritures d'octobre.
+
+            Les fichiers CSV s'ouvrent dans Excel ou LibreOffice (separateur : ;).
+
+
+            Regenerer le dossier
+            ------------------------------------------------------------------------
+            Depuis « %s » :
+
+                mvnw test -Dtest=JeuDeTestComptableTest
+
+            Le test recree les %d operations, verifie que la balance correspond bien
+            au grand livre sur le mois et sur l'annee, puis reecrit tous les fichiers
+            de ce dossier. Les donnees sont ensuite annulees : la base reste propre.
+
+
+            Consulter le jeu de test dans l'application
+            ------------------------------------------------------------------------
+            Pour retrouver ces donnees a l'ecran plutot que dans des fichiers :
+
+                mvnw test -Dtest=JeuDeTestComptableTest -Dcomptable.persister=true
+
+            L'ecole de demonstration est alors conservee en base, avec son compte :
+
+                Adresse       %s
+                Mot de passe  %s
+                Role          COMPTABLE
+
+            Ce compte ouvre Finances, Frais de scolarite, Suivi des familles, Grand
+            livre, Balance generale, et l'inscription d'un eleve. Il ne donne acces
+            ni aux salaires du personnel, ni au budget previsionnel, ni aux
+            parametres de l'etablissement : ces trois adresses repondent 403.
+
+            Ces droits ne viennent pas du role mais des modules financiers du compte,
+            fixes ici a : %s.
+
+            Les droits par defaut du role COMPTABLE sont differents (pas de caisse,
+            mais la paie et le budget) : un compte cree a la main dans Parametres >
+            Roles doit donc etre regle avant qu'on lui remette le guide.
+
+            Attention : chaque execution avec -Dcomptable.persister=true ajoute une
+            nouvelle ecole de demonstration. Supprimez la precedente depuis l'espace
+            Super-admin si vous ne voulez pas les accumuler.
+
+
+            Ce que le jeu de test valide
+            ------------------------------------------------------------------------
+            1. La balance est le recapitulatif exact du grand livre : memes totaux,
+               memes comptes mouvementes. Si ces deux documents divergeaient, aucun
+               ne serait fiable.
+            2. Le mois est contenu dans l'annee : ses totaux ne peuvent pas la depasser.
+            3. Le resultat est bien l'ecart entre credit et debit.
+            4. Les %d operations couvrent les cas reels d'une ecole : encaissements de
+               rentree, versements etales, salaires mensuels, charges de fonctionnement,
+               un investissement, un don, deux remises (enfant du personnel, fratrie).
+
+            Chiffres releves a la derniere execution :
+
+                Annee %s   %2d comptes   debit %9s   credit %9s
+                Octobre 2026      %2d comptes   debit %9s   credit %9s
+
+            Resultat de l'annee : %s FCFA (%s).
+
+            Les salaires d'une annee pesent plus que les encaissements de cinq
+            eleves : ce deficit est celui du jeu de donnees, pas un defaut de calcul.
+            """.formatted(
+                nbOperations, nbOperations, annee, annee, projet, nbOperations,
+                COMPTE_DEMO, MOT_DE_PASSE_DEMO,
+                MODULES_DEMO.stream().sorted().collect(java.util.stream.Collectors.joining(", ")),
+                nbOperations,
+                annee, annuelle.lignes().size(), fmt(annuelle.totalDebit()), fmt(annuelle.totalCredit()),
+                mensuelle.lignes().size(), fmt(mensuelle.totalDebit()), fmt(mensuelle.totalCredit()),
+                fmt(annuelle.resultat()), annuelle.estBeneficiaire() ? "excedent" : "deficit");
+
+        Files.writeString(DOSSIER.resolve("LISEZ-MOI.txt"), texte, StandardCharsets.UTF_8);
+    }
+
     // ── Guide PDF ───────────────────────────────────────────────────────
 
     private void ecrireGuidePdf(Balance annuelle, Balance mensuelle,
@@ -513,11 +671,22 @@ class JeuDeTestComptableTest {
 
             <h2>1. Se connecter et s'y retrouver</h2>
             <p>La comptable recoit un compte cree depuis <b>Personnel</b> avec la fonction
-            <b>COMPTABLE</b>. Ce point compte : la fonction « Tresorier » donnerait acces aux
-            salaires du personnel et au budget previsionnel.</p>
+            <b>COMPTABLE</b>. La fonction seule ne decide de rien : ce sont les
+            <b>modules financiers</b> du compte, regles par l'administrateur dans
+            <b>Parametres &gt; Roles &gt; Acces aux interfaces</b>, qui ouvrent ou ferment
+            chaque ecran. Le compte livre avec ce jeu de test en a recu trois — <b>Caisse</b>,
+            <b>Depenses</b>, <b>Rapports</b> — et c'est cette comptable-la que le guide decrit.</p>
+            <div class="alerte">
+              Un compte COMPTABLE cree sans reglage part avec l'inverse : pas de caisse, mais la
+              preparation de la paie et le budget previsionnel. Le tableau ci-dessous ne vaut
+              donc que pour les trois modules indiques. Avant de remettre ce guide, verifiez
+              dans Parametres &gt; Roles que le compte porte bien Caisse, Depenses et Rapports.
+            </div>
             <p>A la connexion, elle arrive directement sur <span class="cle">/finances</span>.
             Son menu comprend : Tableau de bord, Eleves, Comptabilite, Frais de scolarite,
-            Suivi des familles, Grand livre, Balance generale.</p>
+            Suivi des familles, Grand livre, Balance generale, Messagerie, Personnel et
+            Journal d'activite. L'entree <b>Personnel</b> donne les fiches en lecture seule :
+            les salaires, eux, restent fermes.</p>
 
             <table>
               <tr><th>Elle peut</th><th>Elle ne peut pas</th></tr>
@@ -535,8 +704,11 @@ class JeuDeTestComptableTest {
               <li><b>Definir les frais</b> — ecran <span class="cle">/frais</span>. Un frais marque
                   obligatoire alimente le tableau des impayes et declenche les rappels ; un frais
                   facultatif (la cantine, par exemple) n'y figure pas.</li>
-              <li><b>Verifier le plan comptable</b> — les 56 postes SYSCOHADA sont crees a
-                  l'ouverture de l'ecole. Aucune saisie n'est necessaire.</li>
+              <li><b>Le plan comptable est deja pret</b> — les 56 postes SYSCOHADA sont crees a
+                  l'ouverture de l'ecole. Aucune saisie n'est necessaire, et l'ecran qui les
+                  modifie releve du module Budget &amp; parametrage, qu'elle n'a pas. Elle
+                  retrouve ces postes la ou elle s'en sert : au moment de rattacher une
+                  depense, puis dans le grand livre et la balance.</li>
             </ol>
 
             <h2>3. Les gestes du quotidien</h2>

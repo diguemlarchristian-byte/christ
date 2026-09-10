@@ -21,9 +21,10 @@
 <h1 class="text-xl font-bold text-gray-900 mb-sm"
     th:text="${code == 403} ? 'Acces refuse' : (${code == 404} ? 'Page introuvable' : 'Une erreur est survenue')">Erreur</h1>
 
-<p class="text-gray-500 mb-lg"
-   th:text="${code == 403} ? 'Vous n''avez pas les autorisations necessaires pour acceder a cette page.' : (${code == 404} ? 'La page demandee n''existe pas ou a ete deplacee.' : 'Une erreur inattendue est survenue. Veuillez reessayer ou contacter le support si le probleme persiste.')">
-Details de l'erreur
+<p class="text-gray-500 mb-lg">
+<span th:if="${code == 403}">Vous n'avez pas les autorisations necessaires pour acceder a cette page.</span>
+<span th:if="${code == 404}">La page demandee n'existe pas ou a ete deplacee.</span>
+<span th:if="${code != 403 and code != 404}">Une erreur inattendue est survenue. Veuillez reessayer ou contacter le support si le probleme persiste.</span>
 </p>
 
 <p class="text-xs text-gray-400 mb-lg" th:if="${path != null}" th:text="'Code ' + ${code} + ' — ' + ${path}">Code — chemin</p>
