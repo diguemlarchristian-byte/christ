@@ -50,7 +50,7 @@
 </thead>
 <tbody class="divide-y divide-gray-100">
 <tr th:if="${absences.isEmpty()}">
-<td class="px-5 py-8 text-center text-gray-500" colspan="6">Aucune absence enregistree.</td>
+<td class="px-5 py-8 text-center text-gray-500" colspan="6">Aucune absence enregistree pour l'instant.</td>
 </tr>
 <tr th:each="a : ${absences}">
 <td class="px-5 py-3 font-medium" th:text="${a.eleve != null ? a.eleve.prenom + ' ' + a.eleve.nom : '?'}">Eleve</td>

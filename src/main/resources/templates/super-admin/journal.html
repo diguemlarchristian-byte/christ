@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Journal du super-admin - EduSystem Pro</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<header class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+<div>
+<h1 class="font-bold text-lg leading-none">EduSystem Pro</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400">Super Administration</p>
+</div>
+</div>
+<form method="post" th:action="@{/logout}">
+<button class="flex items-center gap-2 text-slate-300 hover:text-white text-sm" type="submit">
+<span class="material-symbols-outlined text-[18px]">logout</span> Deconnexion
+</button>
+</form>
+</header>
+
+<main class="max-w-7xl mx-auto px-8 py-8">
+
+<a class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-4" href="/super-admin">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span> Etablissements
+</a>
+
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-slate-900">Journal de mes actions</h2>
+<p class="text-gray-500">
+Ce que vous avez fait sur les etablissements de la plateforme. Ces actions n'apparaissent
+dans le journal d'aucune ecole : leurs administrateurs n'ont pas a y lire des actes qu'ils
+n'ont pas commis, et le journal d'une ecole disparait avec elle.
+</p>
+</div>
+
+<div class="flex flex-wrap gap-2 mb-6">
+<a class="px-3 py-1.5 rounded-lg border text-xs font-medium"
+   th:classappend="${action == null or action.isEmpty()} ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-gray-300 text-gray-700'"
+   href="/super-admin/journal">Tout</a>
+<a class="px-3 py-1.5 rounded-lg border text-xs font-medium"
+   th:classappend="${action == t} ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-gray-300 text-gray-700'"
+   th:each="t : ${typesAction}" th:href="@{/super-admin/journal(action=${t})}"
+   th:text="${#strings.replace(#strings.toLowerCase(t), '_', ' ')}">Type</a>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+<table class="w-full text-left text-sm">
+<thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+<tr>
+<th class="px-5 py-3">Date</th>
+<th class="px-5 py-3">Action</th>
+<th class="px-5 py-3">Detail</th>
+<th class="px-5 py-3">Compte</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100">
+<tr th:if="${#lists.isEmpty(actions)}">
+<!-- Messages en contenu HTML et non dans un ternaire : une apostrophe dans un litteral
+     Thymeleaf y ferme le litteral, et la page entiere cesse de se rendre. -->
+<td class="px-5 py-8 text-center text-gray-500" colspan="4">
+<span th:if="${action != null and !action.isEmpty()}">Aucune action de ce type pour l'instant.</span>
+<span th:unless="${action != null and !action.isEmpty()}">Aucune action enregistree pour l'instant.</span>
+</td>
+</tr>
+<tr th:each="a : ${actions}">
+<td class="px-5 py-3 text-gray-500 whitespace-nowrap"
+    th:text="${a.date != null} ? ${#temporals.format(a.date, 'dd/MM/yyyy HH:mm')} : '—'">date</td>
+<td class="px-5 py-3">
+<span class="px-2 py-0.5 rounded text-xs font-medium"
+      th:classappend="${a.action == 'SUPPRESSION_DEFINITIVE_ETABLISSEMENT'}
+                      ? 'bg-red-100 text-red-800'
+                      : (${a.action == 'REINITIALISATION_MOT_DE_PASSE_ADMIN'}
+                         ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700')"
+      th:text="${#strings.replace(#strings.toLowerCase(a.action), '_', ' ')}">action</span>
+</td>
+<td class="px-5 py-3" th:text="${a.detail}">detail</td>
+<td class="px-5 py-3 text-gray-500" th:text="${a.utilisateurEmail}">compte</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="flex items-center justify-between mt-6" th:if="${totalActions > 0}">
+<p class="text-sm text-gray-500">
+<span th:text="${premierElement}">1</span>–<span th:text="${dernierElement}">30</span>
+sur <span th:text="${totalActions}">0</span>
+</p>
+<div class="flex items-center gap-1" th:if="${totalPages > 1}">
+<a class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm" th:if="${page > 0}"
+   th:href="@{/super-admin/journal(action=${action},page=${page - 1})}">Precedent</a>
+<a class="px-3 py-1.5 rounded-lg border text-sm"
+   th:classappend="${p == page} ? 'bg-slate-900 text-white border-slate-900' : 'border-gray-300'"
+   th:each="p : ${pagesAffichees}"
+   th:href="@{/super-admin/journal(action=${action},page=${p})}"
+   th:text="${p + 1}">1</a>
+<a class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm" th:if="${page < totalPages - 1}"
+   th:href="@{/super-admin/journal(action=${action},page=${page + 1})}">Suivant</a>
+</div>
+</div>
+
+</main>
+</body>
+</html>

@@ -5,8 +5,11 @@ import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.EleveRepository;
 import holyflame.administration.repository.EtablissementRepository;
 import holyflame.administration.repository.PersonnelRepository;
+import holyflame.administration.repository.JournalActionRepository;
 import holyflame.administration.repository.UtilisateurRepository;
+import holyflame.administration.service.JournalService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +29,11 @@ public class SuperAdminController {
     @Autowired private EleveRepository eleveRepository;
     @Autowired private PersonnelRepository personnelRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JournalService journalService;
+    @Autowired private JournalActionRepository journalRepository;
+
+    private static final int TAILLE_PAGE_JOURNAL = 30;
+    private static final String MODULE_SUPER_ADMIN = "SUPER_ADMIN";
 
     @GetMapping
     public String dashboard(Model model) {
@@ -82,6 +90,51 @@ public class SuperAdminController {
         return "super-admin/dashboard";
     }
 
+    /**
+     * Journal du super-administrateur.
+     *
+     * Ses actions ne figurent dans le journal d'aucune ecole — c'est voulu : l'admin d'un
+     * etablissement n'a pas a lire, chez lui, des actes qu'il n'a pas commis, et le journal
+     * d'une ecole disparait avec elle, ce qui effacerait la trace de sa propre suppression.
+     * Elles se lisent donc ici, et seulement ici.
+     */
+    @GetMapping("/journal")
+    public String journal(@RequestParam(required = false) String action,
+                          @RequestParam(defaultValue = "0") int page,
+                          Model model) {
+        boolean filtre = action != null && !action.isBlank();
+
+        long total = filtre
+            ? journalRepository.countByModuleAndEtablissementIdIsNullAndAction(MODULE_SUPER_ADMIN, action)
+            : journalRepository.countByModuleAndEtablissementIdIsNull(MODULE_SUPER_ADMIN);
+        int totalPages = Math.max(1, (int) Math.ceil(total / (double) TAILLE_PAGE_JOURNAL));
+        int pageCourante = Math.max(0, Math.min(page, totalPages - 1));
+
+        PageRequest pr = PageRequest.of(pageCourante, TAILLE_PAGE_JOURNAL);
+        model.addAttribute("actions", filtre
+            ? journalRepository.findByModuleAndEtablissementIdIsNullAndActionOrderByDateDesc(MODULE_SUPER_ADMIN, action, pr)
+            : journalRepository.findByModuleAndEtablissementIdIsNullOrderByDateDesc(MODULE_SUPER_ADMIN, pr));
+
+        model.addAttribute("action", action);
+        model.addAttribute("typesAction", List.of(
+            "CREATION_ETABLISSEMENT", "MODIFICATION_ETABLISSEMENT", "SUSPENSION_ETABLISSEMENT",
+            "ACTIVATION_ETABLISSEMENT", "REINITIALISATION_MOT_DE_PASSE_ADMIN",
+            "MISE_EN_CORBEILLE_ETABLISSEMENT", "RESTAURATION_ETABLISSEMENT",
+            "SUPPRESSION_DEFINITIVE_ETABLISSEMENT", "CHANGEMENT_ABONNEMENT"));
+
+        List<Integer> pagesAffichees = new ArrayList<>();
+        for (int i = Math.max(0, pageCourante - 2); i <= Math.min(totalPages - 1, pageCourante + 2); i++) {
+            pagesAffichees.add(i);
+        }
+        model.addAttribute("page", pageCourante);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalActions", total);
+        model.addAttribute("pagesAffichees", pagesAffichees);
+        model.addAttribute("premierElement", total == 0 ? 0 : pageCourante * TAILLE_PAGE_JOURNAL + 1);
+        model.addAttribute("dernierElement", Math.min(total, (long) (pageCourante + 1) * TAILLE_PAGE_JOURNAL));
+        return "super-admin/journal";
+    }
+
     @PostMapping("/etablissements")
     public String creerEtablissement(
             @RequestParam String nom,
@@ -120,6 +173,8 @@ public class SuperAdminController {
         admin.setEtablissement(etab);
         utilisateurRepository.save(admin);
 
+        journalService.logSuperAdmin("CREATION_ETABLISSEMENT",
+            nom + " (code " + code + ") — compte administrateur " + adminEmail + " cree");
         ra.addFlashAttribute("success", "Établissement \"" + nom + "\" créé. Code d'accès : " + code);
         return "redirect:/super-admin";
     }
@@ -129,6 +184,7 @@ public class SuperAdminController {
         etablissementRepository.findById(id).ifPresent(e -> {
             e.setStatut("SUSPENDU");
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("SUSPENSION_ETABLISSEMENT", e.getNom() + " suspendu");
         });
         ra.addFlashAttribute("success", "Établissement suspendu.");
         return "redirect:/super-admin";
@@ -139,6 +195,7 @@ public class SuperAdminController {
         etablissementRepository.findById(id).ifPresent(e -> {
             e.setStatut("ACTIF");
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("ACTIVATION_ETABLISSEMENT", e.getNom() + " reactive");
         });
         ra.addFlashAttribute("success", "Établissement activé.");
         return "redirect:/super-admin";
@@ -168,6 +225,7 @@ public class SuperAdminController {
                 e.setAnneeScolaire(anneeScolaire);
             }
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("MODIFICATION_ETABLISSEMENT", e.getNom() + " modifie");
         });
 
         // Réinitialisation du mot de passe admin si renseigné
@@ -178,6 +236,11 @@ public class SuperAdminController {
                 Utilisateur admin = admins.get(0);
                 admin.setMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
                 utilisateurRepository.save(admin);
+                // Reinitialiser le mot de passe d'un administrateur d'ecole donne acces a tout ce
+                // que ce compte peut faire : c'est l'acte le plus lourd de cet ecran, et il ne
+                // laissait aucune trace. Le compte touche est nomme, jamais le mot de passe.
+                journalService.logSuperAdmin("REINITIALISATION_MOT_DE_PASSE_ADMIN",
+                    nom + " — mot de passe du compte " + admin.getEmail() + " reinitialise");
                 ra.addFlashAttribute("success", "Établissement \"" + nom + "\" modifié et mot de passe réinitialisé.");
                 return "redirect:/super-admin";
             }
@@ -192,6 +255,7 @@ public class SuperAdminController {
         etablissementRepository.findById(id).ifPresent(e -> {
             e.setStatut("SUPPRIME");
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("MISE_EN_CORBEILLE_ETABLISSEMENT", e.getNom() + " place en corbeille");
         });
         ra.addFlashAttribute("success", "Établissement déplacé dans la corbeille. Il peut être restauré.");
         return "redirect:/super-admin";
@@ -203,6 +267,7 @@ public class SuperAdminController {
         etablissementRepository.findById(id).ifPresent(e -> {
             e.setStatut("ACTIF");
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("RESTAURATION_ETABLISSEMENT", e.getNom() + " restaure depuis la corbeille");
         });
         ra.addFlashAttribute("success", "Établissement restauré avec succès.");
         return "redirect:/super-admin";
@@ -214,6 +279,11 @@ public class SuperAdminController {
         etablissementRepository.findById(id).ifPresent(e -> {
             if ("SUPPRIME".equals(e.getStatut())) {
                 List<Utilisateur> utilisateurs = utilisateurRepository.findByEtablissementId(id);
+                // Trace ecrite avant l'effacement : apres, il ne resterait plus rien a nommer.
+                // C'est l'unique acte irreversible de cet ecran.
+                journalService.logSuperAdmin("SUPPRESSION_DEFINITIVE_ETABLISSEMENT",
+                    e.getNom() + " (code " + e.getCodeAcces() + ") supprime definitivement, avec "
+                        + utilisateurs.size() + " compte(s)");
                 utilisateurRepository.deleteAll(utilisateurs);
                 etablissementRepository.delete(e);
             }
@@ -228,8 +298,11 @@ public class SuperAdminController {
                                     @RequestParam String plan,
                                     RedirectAttributes ra) {
         etablissementRepository.findById(id).ifPresent(e -> {
+            String ancien = e.getPlanAbonnement();
             e.setPlanAbonnement(plan);
             etablissementRepository.save(e);
+            journalService.logSuperAdmin("CHANGEMENT_ABONNEMENT",
+                e.getNom() + " — plan " + (ancien != null ? ancien : "aucun") + " vers " + plan);
         });
         ra.addFlashAttribute("success", "Plan mis à jour : " + plan + ".");
         return "redirect:/super-admin";

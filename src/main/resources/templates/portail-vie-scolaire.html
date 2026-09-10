@@ -136,7 +136,7 @@
 <div class="p-md border-b border-outline-variant bg-surface-container-low/50">
 <h3 class="font-headline-sm text-headline-sm text-primary flex items-center gap-xs"><span class="material-symbols-outlined">event_busy</span> Absences</h3>
 </div>
-<p class="text-center text-on-surface-variant py-lg" th:if="${#lists.isEmpty(absences)}">Aucune absence enregistree.</p>
+<p class="text-center text-on-surface-variant py-lg" th:if="${#lists.isEmpty(absences)}">Aucune absence enregistree pour l'instant.</p>
 <div class="divide-y divide-outline-variant" th:if="${!#lists.isEmpty(absences)}">
 <div class="p-md flex justify-between items-center gap-sm" th:each="a : ${absences}">
 <div>
