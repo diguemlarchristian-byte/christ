@@ -263,6 +263,15 @@ public class SecurityConfig {
                 // Journal d'activite : reserve au personnel (chacun n'y voit que ses propres actions,
                 // sauf ADMIN qui voit tout) — un eleve ou un parent n'a aucune raison d'y acceder.
                 .requestMatchers("/journal/**").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "COORDONNATEUR", "SURVEILLANT", "INFIRMIER", "MARKETING")
+                // Ces trois ecrans n'avaient aucune regle : ils tombaient sur anyRequest() et
+                // s'ouvraient donc a tout compte connecte, un parent ou un eleve compris. Le
+                // tableau de bord affiche le total encaisse, le budget et les effectifs de
+                // l'etablissement ; la recherche parcourt l'annuaire des eleves et du personnel.
+                // Ni l'un ni l'autre ne regarde une famille. Meme liste que le journal
+                // d'activite ci-dessus : le personnel, et lui seul.
+                .requestMatchers("/dashboard", "/recherche", "/emploi-du-temps", "/emploi-du-temps/**").hasAnyRole(
+                    "ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE",
+                    "COORDONNATEUR", "SURVEILLANT", "INFIRMIER", "MARKETING")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
