@@ -187,6 +187,10 @@ public class SecurityConfig {
                 .requestMatchers("/export/rapports/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
                 .requestMatchers("/export/eleves/excel").hasAnyRole("ADMIN", "DIRECTEUR", "TRESORIER", "COMPTABLE", "SECRETAIRE")
                 .requestMatchers("/export/notes/excel").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
+                // L'export de la paie expose tous les salaires : il suit le module de la paie et non
+                // la regle /export/** generique, qui l'aurait ouvert a un Comptable a qui l'ADMIN n'a
+                // justement pas confie la paie. Meme regle que /rh/salaires/**.
+                .requestMatchers("/export/paie/excel").access(financeAccess(holyflame.administration.service.FinanceModules.PAIE_PREPARATION))
                 // L'export de l'inventaire suit exactement l'ecran d'ou son bouton est clique.
                 // Cette ligne doit rester avant la regle /export/** qui suit, sinon elle ne serait
                 // jamais atteinte et le Directeur comme la secretaire recevraient un 403.

@@ -87,6 +87,16 @@
 <span class="material-symbols-outlined">bolt</span> Lancer la paie du mois
 </button>
 </form>
+<!-- Une declaration CNPS ou un recapitulatif pour un comptable externe se preparait en
+     relevant les bulletins un par un a l'ecran. Le mois affiche, ou l'annee entiere. -->
+<a class="px-lg py-2.5 border border-outline-variant text-on-surface-variant font-label-md text-label-md rounded-lg flex items-center gap-2 hover:bg-surface-container-low transition-all"
+   th:href="@{/export/paie/excel(annee=${anneeFiltre}, mois=${moisFiltre})}">
+<span class="material-symbols-outlined">download</span> Exporter le mois
+</a>
+<a class="px-lg py-2.5 border border-outline-variant text-on-surface-variant font-label-md text-label-md rounded-lg flex items-center gap-2 hover:bg-surface-container-low transition-all"
+   th:href="@{/export/paie/excel(annee=${anneeFiltre}, mois=0)}">
+<span class="material-symbols-outlined">calendar_month</span> Exporter l'annee
+</a>
 </div>
 </div>
 

@@ -6,6 +6,8 @@ import holyflame.administration.model.Depense;
 import holyflame.administration.model.Eleve;
 import holyflame.administration.model.Note;
 import holyflame.administration.model.Paiement;
+import holyflame.administration.model.Personnel;
+import holyflame.administration.model.SalaireMensuel;
 import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.ArticleInventaireRepository;
 import holyflame.administration.repository.CategorieComptableRepository;
@@ -14,6 +16,7 @@ import holyflame.administration.repository.EleveRepository;
 import holyflame.administration.repository.EnseignantAutorisationRepository;
 import holyflame.administration.repository.NoteRepository;
 import holyflame.administration.repository.PaiementRepository;
+import holyflame.administration.repository.SalaireMensuelRepository;
 import holyflame.administration.service.EtablissementService;
 import holyflame.administration.service.InventaireRegles;
 import holyflame.administration.util.AnneeScolaireUtil;
@@ -44,6 +47,7 @@ public class ExportController {
     @Autowired private DepenseRepository depenseRepository;
     @Autowired private CategorieComptableRepository categorieComptableRepository;
     @Autowired private ArticleInventaireRepository articleInventaireRepository;
+    @Autowired private SalaireMensuelRepository salaireMensuelRepository;
     @Autowired private EtablissementService etablissementService;
 
     // ── Styles partagés ──────────────────────────────────────────
@@ -188,6 +192,96 @@ public class ExportController {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"eleves.xlsx\"");
         wb.write(response.getOutputStream()); wb.close();
+    }
+
+    // ── Export de la paie ────────────────────────────────────────
+    // Les paiements de scolarite avaient leur export ; la paie n'en avait aucun. Preparer une
+    // declaration CNPS ou remettre un recapitulatif a un comptable externe imposait de relever
+    // les bulletins un par un a l'ecran. Une ligne par bulletin, brut, retenues, charges et net
+    // separes : c'est ce qu'une declaration demande, et ce qu'une archive hors application doit
+    // contenir. mois = 0 exporte l'annee entiere.
+    @GetMapping("/paie/excel")
+    public void exportPaie(@RequestParam int annee,
+                           @RequestParam(defaultValue = "0") int mois,
+                           HttpServletResponse response) throws IOException {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        List<SalaireMensuel> bulletins = etabId != null
+            ? salaireMensuelRepository.pourExport(etabId, annee, mois)
+            : List.of();
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("Paie");
+        XSSFCellStyle hStyle = makeHeaderStyle(wb, (byte)0, (byte)35, (byte)111);
+
+        String periode = mois > 0 ? MOIS[mois - 1] + " " + annee : "Annee " + annee;
+        Row titre = sheet.createRow(0);
+        Cell titreCell = titre.createCell(0);
+        titreCell.setCellValue("ETAT DE LA PAIE — " + periode.toUpperCase());
+        XSSFCellStyle titreStyle = wb.createCellStyle();
+        XSSFFont titreFont = wb.createFont(); titreFont.setBold(true); titreFont.setFontHeightInPoints((short)13);
+        titreStyle.setFont(titreFont); titreCell.setCellStyle(titreStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+
+        String[] headers = {"Periode","Matricule","Nom","Prenom","Fonction","Brut",
+                            "Retenues salariales","Charges patronales","Net a payer","Statut","Paye le"};
+        Row hRow = sheet.createRow(2);
+        for (int i = 0; i < headers.length; i++) {
+            Cell c = hRow.createCell(i); c.setCellValue(headers[i]); c.setCellStyle(hStyle);
+        }
+
+        DateTimeFormatter fmtDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        int row = 3;
+        double totalBrut = 0, totalRetenues = 0, totalCharges = 0, totalNet = 0;
+        for (SalaireMensuel s : bulletins) {
+            Personnel p = s.getPersonnel();
+            Row r = sheet.createRow(row++);
+            r.createCell(0).setCellValue(nomDuMois(s.getMois()) + " " + s.getAnnee());
+            r.createCell(1).setCellValue(p != null && p.getMatricule() != null ? p.getMatricule() : "");
+            r.createCell(2).setCellValue(p != null && p.getNom() != null ? p.getNom() : "");
+            r.createCell(3).setCellValue(p != null && p.getPrenom() != null ? p.getPrenom() : "");
+            r.createCell(4).setCellValue(p != null && p.getFonction() != null ? p.getFonction() : "");
+            r.createCell(5).setCellValue(valeur(s.getTotalBrut()));
+            r.createCell(6).setCellValue(valeur(s.getTotalRetenuesSalariales()));
+            r.createCell(7).setCellValue(valeur(s.getTotalChargesPatronales()));
+            r.createCell(8).setCellValue(valeur(s.getNetAPayer()));
+            r.createCell(9).setCellValue(s.getStatut() != null ? s.getStatut() : "");
+            r.createCell(10).setCellValue(s.getDatePaiement() != null ? s.getDatePaiement().format(fmtDate) : "");
+            totalBrut += valeur(s.getTotalBrut());
+            totalRetenues += valeur(s.getTotalRetenuesSalariales());
+            totalCharges += valeur(s.getTotalChargesPatronales());
+            totalNet += valeur(s.getNetAPayer());
+        }
+
+        Row total = sheet.createRow(row + 1);
+        Cell libelle = total.createCell(4);
+        libelle.setCellValue("TOTAUX (" + bulletins.size() + " bulletin(s))");
+        libelle.setCellStyle(titreStyle);
+        double[] totaux = {totalBrut, totalRetenues, totalCharges, totalNet};
+        for (int i = 0; i < totaux.length; i++) {
+            Cell c = total.createCell(5 + i);
+            c.setCellValue(totaux[i]);
+            c.setCellStyle(titreStyle);
+        }
+
+        for (int i = 0; i < headers.length; i++) sheet.autoSizeColumn(i);
+
+        String nomFichier = mois > 0
+            ? "paie-" + annee + "-" + String.format("%02d", mois) + ".xlsx"
+            : "paie-" + annee + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + nomFichier + "\"");
+        wb.write(response.getOutputStream()); wb.close();
+    }
+
+    private static final String[] MOIS = {"Janvier","Fevrier","Mars","Avril","Mai","Juin",
+                                          "Juillet","Aout","Septembre","Octobre","Novembre","Decembre"};
+
+    private String nomDuMois(int mois) {
+        return mois >= 1 && mois <= 12 ? MOIS[mois - 1] : String.valueOf(mois);
+    }
+
+    private double valeur(Double d) {
+        return d != null ? d : 0;
     }
 
     // ── Export inventaire ────────────────────────────────────────

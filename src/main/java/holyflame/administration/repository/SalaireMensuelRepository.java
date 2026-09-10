@@ -13,6 +13,13 @@ public interface SalaireMensuelRepository extends JpaRepository<SalaireMensuel, 
     List<SalaireMensuel> findByStatut(String statut);
     java.util.Optional<SalaireMensuel> findByPersonnelIdAndMoisAndAnnee(Long personnelId, int mois, int annee);
 
+    // Export des declarations sociales : le mois ou l'annee entiere, toujours ordonne comme
+    // une declaration se lit — par periode, puis par nom.
+    @Query("SELECT s FROM SalaireMensuel s WHERE s.personnel.etablissementId = :etabId "
+         + "AND s.annee = :annee AND (:mois = 0 OR s.mois = :mois) "
+         + "ORDER BY s.mois ASC, s.personnel.nom ASC, s.personnel.prenom ASC")
+    List<SalaireMensuel> pourExport(@Param("etabId") Long etabId, @Param("annee") int annee, @Param("mois") int mois);
+
     @Query("SELECT s FROM SalaireMensuel s WHERE s.personnel.etablissementId = :etabId "
          + "ORDER BY s.annee DESC, s.mois DESC, s.personnel.nom ASC")
     List<SalaireMensuel> findByEtablissementId(@Param("etabId") Long etabId);
