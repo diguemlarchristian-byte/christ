@@ -25,6 +25,13 @@
 <span class="material-symbols-outlined">account_tree</span>
 <span class="font-label-md text-label-md">Structure academique</span>
 </a>
+<!-- En regime LMD, « Gestion academique » disparait du menu : c'etait pourtant la seule porte
+     vers les matieres, dont dependent toutes les notes. Une universite ne pouvait donc plus
+     creer les matieres que sa saisie de notes exige. Le lien lui est rendu ici. -->
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'matieres'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${estUniversite == true and utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/matieres">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Matieres</span>
+</a>
 <a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'direction-suivi'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/direction/suivi">
 <span class="material-symbols-outlined">fact_check</span>
 <span class="font-label-md text-label-md">Suivi des saisies</span>
