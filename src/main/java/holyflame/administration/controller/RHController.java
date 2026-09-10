@@ -46,6 +46,7 @@ public class RHController {
     @Autowired private holyflame.administration.service.BulletinPaiePdfService bulletinPaiePdfService;
     @Autowired private holyflame.administration.service.FileStorageService fileStorageService;
     @Autowired private DocumentPersonnelRepository documentPersonnelRepository;
+    @Autowired private holyflame.administration.service.ClotureMensuelleService clotureMensuelleService;
 
 
     @GetMapping
@@ -853,6 +854,9 @@ public class RHController {
         model.addAttribute("retourUrl", retourUrl);
     }
 
+    // Le passage a « paye » ecrit trois choses : le statut du bulletin et deux depenses. Sans
+    // transaction, un echec au milieu laissait un salaire marque paye a moitie comptabilise.
+    @org.springframework.transaction.annotation.Transactional
     @PostMapping("/salaires/{id}/payer")
     public String payerSalaire(@PathVariable Long id, RedirectAttributes ra) {
         Long etabId = etablissementService.getCurrentEtablissementId();
@@ -867,6 +871,22 @@ public class RHController {
         anneeScolaireService.verifierModifiable(s.getAnneeScolaire(), etabId);
         if (cloturePaieService.estCloture(s.getMois(), s.getAnnee(), etabId)) {
             ra.addFlashAttribute("erreurMsg", messageMoisClos(s.getMois(), s.getAnnee()));
+            return "redirect:/personnel/" + pid + "#rh-salaires";
+        }
+
+        // Le paiement d'un salaire ecrit dans les comptes : il ne peut pas viser un mois
+        // comptable deja arrete. Seule la cloture d'annee etait verifiee, si bien qu'un salaire
+        // paye en juin pouvait encore ajouter une charge a un septembre depuis longtemps clos.
+        // MoisClotureException est rattrapee par GlobalExceptionHandler, comme partout ailleurs.
+        clotureMensuelleService.verifierModifiable(horlogeService.aujourdHui(), etabId);
+
+        // Deux clics sur « Payer » — une double soumission, un retour arriere, une connexion
+        // lente — passaient tous deux ce controle et comptabilisaient le salaire deux fois.
+        // Rien ne permettait ensuite de distinguer le doublon d'une seconde depense legitime :
+        // la masse salariale etait fausse sans que personne ne puisse le voir.
+        if (depenseRepository.existsBySalaireMensuelId(s.getId())) {
+            ra.addFlashAttribute("erreurMsg",
+                "Ce bulletin a deja ete comptabilise. Aucune ecriture n'a ete ajoutee.");
             return "redirect:/personnel/" + pid + "#rh-salaires";
         }
 
@@ -900,6 +920,7 @@ public class RHController {
             d.setStatut("PAYE");
             d.setAnneeScolaire(AnneeScolaireUtil.pour(horlogeService.aujourdHui()));
             d.setEtablissementId(etabId);
+            d.setSalaireMensuelId(s.getId());
             depenseRepository.save(d);
         });
 
@@ -915,6 +936,7 @@ public class RHController {
                 d.setStatut("PAYE");
                 d.setAnneeScolaire(AnneeScolaireUtil.pour(horlogeService.aujourdHui()));
                 d.setEtablissementId(etabId);
+                d.setSalaireMensuelId(s.getId());
                 depenseRepository.save(d);
             });
         }

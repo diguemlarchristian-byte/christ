@@ -28,8 +28,16 @@ public class Depense {
     private String anneeScolaire;
     private Long etablissementId;
 
+    // Bulletin de paie a l'origine de cette depense, quand elle vient de la paie. Sans ce lien,
+    // une depense de salaire n'etait reconnaissable qu'a son libelle : deux clics sur « Payer »
+    // produisaient deux depenses identiques, et rien ne permettait de s'en apercevoir ensuite.
+    private Long salaireMensuelId;
+
     private String justificatifPath;
     private String justificatifNomOriginal;
+
+    public Long getSalaireMensuelId() { return salaireMensuelId; }
+    public void setSalaireMensuelId(Long salaireMensuelId) { this.salaireMensuelId = salaireMensuelId; }
 
     public Depense() {}
 
