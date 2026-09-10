@@ -37,6 +37,8 @@ public class RHController {
     @Autowired private holyflame.administration.service.HorlogeService horlogeService;
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
     @Autowired private holyflame.administration.service.JournalService journalService;
+    @Autowired private holyflame.administration.service.CloturePaieService cloturePaieService;
+
 
     @GetMapping
     public String index() {
@@ -230,6 +232,16 @@ public class RHController {
         var utilisateurConnecte = etablissementService.getCurrentUtilisateur();
         model.addAttribute("utilisateurConnecte", utilisateurConnecte);
         model.addAttribute("modulesFinanceActifs", holyflame.administration.service.FinanceModules.effectifs(utilisateurConnecte));
+
+        boolean moisCloture = cloturePaieService.estCloture(moisFiltre, anneeFiltre, etabId);
+        model.addAttribute("moisCloture", moisCloture);
+        model.addAttribute("cloture", cloturePaieService.cloture(moisFiltre, anneeFiltre, etabId));
+        model.addAttribute("peutCloturer",
+            !moisCloture && cloturePaieService.peutCloturer(salairesDuMois, personnelSansBulletin.size()));
+        model.addAttribute("obstacleCloture",
+            moisCloture ? null : cloturePaieService.obstacleACloture(salairesDuMois, personnelSansBulletin.size()));
+        model.addAttribute("estAdmin", utilisateurConnecte != null && "ADMIN".equals(utilisateurConnecte.getRole()));
+        model.addAttribute("moisClos", cloturePaieService.moisClos(etabId, anneeFiltre));
         return "rh-salaires";
     }
 
@@ -281,11 +293,109 @@ public class RHController {
     // employe actif encore sans bulletin ce mois — reconduit le bulletin du mois precedent s'il
     // existe (montants identiques), sinon repart du contrat actif + des taux par defaut. L'admin
     // n'a plus qu'a parcourir et ajuster/valider, jamais a ressaisir depuis zero. =====
+    private static final String[] NOMS_MOIS = {"janvier","fevrier","mars","avril","mai","juin",
+        "juillet","aout","septembre","octobre","novembre","decembre"};
+
+    private String nomDuMois(int mois) {
+        return mois >= 1 && mois <= 12 ? NOMS_MOIS[mois - 1] : String.valueOf(mois);
+    }
+
+    private String messageMoisClos(int mois, int annee) {
+        return "La paie de " + nomDuMois(mois) + " " + annee + " est cloturee : elle ne peut plus"
+             + " etre modifiee. Un administrateur peut la rouvrir depuis la vue d'ensemble.";
+    }
+
+    /**
+     * Cloture la paie du mois affiche, pour tout le personnel.
+     *
+     * La cloture est une affirmation — « la paie de ce mois est complete » — et n'est donc
+     * acceptee que si elle est vraie : tout le personnel actif a un bulletin, et tous sont
+     * payes. Cloturer un mois ou il reste un bulletin en attente enfermerait quelqu'un dehors.
+     */
+    @PostMapping("/salaires/cloturer-mois")
+    public String cloturerMois(@RequestParam int mois, @RequestParam int annee, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        String retour = "redirect:/rh/salaires?mois=" + mois + "&annee=" + annee;
+
+        if (cloturePaieService.estCloture(mois, annee, etabId)) {
+            ra.addFlashAttribute("erreurMsg", "La paie de " + nomDuMois(mois) + " " + annee + " est deja cloturee.");
+            return retour;
+        }
+
+        List<SalaireMensuel> bulletins = bulletinsDuMois(etabId, mois, annee);
+        int sansBulletin = personnelActifSansBulletin(etabId, mois, annee);
+        String obstacle = cloturePaieService.obstacleACloture(bulletins, sansBulletin);
+        if (obstacle != null) {
+            ra.addFlashAttribute("erreurMsg", "Cloture impossible : " + obstacle);
+            return retour;
+        }
+
+        var auteur = etablissementService.getCurrentUtilisateur();
+        String nomAuteur = auteur == null ? "?"
+            : ((auteur.getPrenom() != null ? auteur.getPrenom() + " " : "")
+               + (auteur.getNom() != null ? auteur.getNom() : "")).trim();
+        var cloture = cloturePaieService.cloturer(mois, annee, etabId, nomAuteur, bulletins);
+
+        journalService.log("CLOTURE_PAIE_MOIS", "RH",
+            "Paie de " + nomDuMois(mois) + " " + annee + " cloturee — " + cloture.getNbBulletins()
+            + " bulletin(s), " + Math.round(cloture.getTotalNet()) + " F net");
+        ra.addFlashAttribute("successMsg", "Paie de " + nomDuMois(mois) + " " + annee
+            + " cloturee : " + cloture.getNbBulletins() + " bulletin(s) soldes.");
+        return retour;
+    }
+
+    /**
+     * Rouvre un mois clos. Reserve a l'ADMIN, et journalise : revenir sur une paie declaree
+     * complete est exactement ce que la cloture est censee rendre visible.
+     */
+    @PostMapping("/salaires/rouvrir-mois")
+    public String rouvrirMois(@RequestParam int mois, @RequestParam int annee,
+                              @RequestParam(required = false) String motif, RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        String retour = "redirect:/rh/salaires?mois=" + mois + "&annee=" + annee;
+
+        var utilisateur = etablissementService.getCurrentUtilisateur();
+        if (utilisateur == null || !"ADMIN".equals(utilisateur.getRole())) {
+            ra.addFlashAttribute("erreurMsg", "Seul un administrateur peut rouvrir une paie cloturee.");
+            return retour;
+        }
+        if (!cloturePaieService.estCloture(mois, annee, etabId)) {
+            ra.addFlashAttribute("erreurMsg", "La paie de " + nomDuMois(mois) + " " + annee + " n'est pas cloturee.");
+            return retour;
+        }
+
+        cloturePaieService.rouvrir(mois, annee, etabId);
+        journalService.log("REOUVERTURE_PAIE_MOIS", "RH",
+            "Paie de " + nomDuMois(mois) + " " + annee + " rouverte"
+            + (motif != null && !motif.isBlank() ? " — " + motif : " — sans motif indique"));
+        ra.addFlashAttribute("successMsg", "Paie de " + nomDuMois(mois) + " " + annee + " rouverte.");
+        return retour;
+    }
+
+    private List<SalaireMensuel> bulletinsDuMois(Long etabId, int mois, int annee) {
+        return salaireRepository.findByEtablissementId(etabId).stream()
+            .filter(s -> s.getMois() == mois && s.getAnnee() == annee)
+            .collect(Collectors.toList());
+    }
+
+    private int personnelActifSansBulletin(Long etabId, int mois, int annee) {
+        java.util.Set<Long> avecBulletin = bulletinsDuMois(etabId, mois, annee).stream()
+            .map(s -> s.getPersonnel().getId())
+            .collect(java.util.stream.Collectors.toSet());
+        return (int) personnelRepository.findByEtablissementIdOrderByNomAscPrenomAsc(etabId).stream()
+            .filter(p -> "ACTIF".equals(p.getStatut()) && !avecBulletin.contains(p.getId()))
+            .count();
+    }
+
     @PostMapping("/salaires/lancer-mois")
     public String lancerPaieDuMois(@RequestParam int mois, @RequestParam int annee, RedirectAttributes ra) {
         Long etabId = etablissementService.getCurrentEtablissementId();
         YearMonth periode = YearMonth.of(annee, mois);
         anneeScolaireService.verifierModifiable(AnneeScolaireUtil.pour(periode.atDay(1)), etabId);
+        if (cloturePaieService.estCloture(mois, annee, etabId)) {
+            ra.addFlashAttribute("erreurMsg", messageMoisClos(mois, annee));
+            return "redirect:/rh/salaires?mois=" + mois + "&annee=" + annee;
+        }
 
         int[] precedent = periodePrecedente(mois, annee);
         Map<String, String> taux = parametreRepository.findByCategorieAndEtablissementIdOrderByCleAsc("PAIE", etabId).stream()
@@ -470,6 +580,13 @@ public class RHController {
         YearMonth periode = YearMonth.of(annee, mois);
         anneeScolaireService.verifierModifiable(AnneeScolaireUtil.pour(periode.atDay(1)), etablissementService.getCurrentEtablissementId());
 
+        // C'est le trou que la cloture mensuelle vient fermer : sans elle, un bulletin « oublie »
+        // pouvait etre etabli des mois plus tard sur une periode que tout le monde croyait soldee.
+        if (cloturePaieService.estCloture(mois, annee, etablissementService.getCurrentEtablissementId())) {
+            ra.addFlashAttribute("erreurMsg", messageMoisClos(mois, annee));
+            return "redirect:/personnel/" + personnelId + "#rh-salaires";
+        }
+
         // Un seul bulletin par employe et par mois : evite un doublon (double soumission du
         // formulaire, retour arriere du navigateur...) qui fausserait la masse salariale et
         // risquerait un double virement si les deux bulletins sont marques payes independamment.
@@ -620,7 +737,7 @@ public class RHController {
     }
 
     @PostMapping("/salaires/{id}/payer")
-    public String payerSalaire(@PathVariable Long id) {
+    public String payerSalaire(@PathVariable Long id, RedirectAttributes ra) {
         Long etabId = etablissementService.getCurrentEtablissementId();
         SalaireMensuel s = salaireRepository.findById(id)
             .filter(sm -> sm.getPersonnel() != null && etabId != null && etabId.equals(sm.getPersonnel().getEtablissementId()))
@@ -631,6 +748,10 @@ public class RHController {
             return "redirect:/personnel/" + pid + "#rh-salaires";
         }
         anneeScolaireService.verifierModifiable(s.getAnneeScolaire(), etabId);
+        if (cloturePaieService.estCloture(s.getMois(), s.getAnnee(), etabId)) {
+            ra.addFlashAttribute("erreurMsg", messageMoisClos(s.getMois(), s.getAnnee()));
+            return "redirect:/personnel/" + pid + "#rh-salaires";
+        }
 
         s.setStatut("PAYE");
         s.setDatePaiement(horlogeService.aujourdHui());
@@ -696,6 +817,10 @@ public class RHController {
         Long pid = s.getPersonnel().getId();
         if ("PAYE".equals(s.getStatut())) {
             ra.addFlashAttribute("erreurMsg", "Ce bulletin est déjà payé et a été comptabilisé — il ne peut plus être supprimé.");
+            return "redirect:/personnel/" + pid + "#rh-salaires";
+        }
+        if (cloturePaieService.estCloture(s.getMois(), s.getAnnee(), etabId)) {
+            ra.addFlashAttribute("erreurMsg", messageMoisClos(s.getMois(), s.getAnnee()));
             return "redirect:/personnel/" + pid + "#rh-salaires";
         }
         String nomPersonnel = s.getPersonnel().getPrenom() + " " + s.getPersonnel().getNom();

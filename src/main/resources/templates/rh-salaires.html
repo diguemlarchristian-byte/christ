@@ -61,6 +61,7 @@
 
 <div class="flex-1 p-gutter max-w-container-max mx-auto w-full">
 <div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-success font-body-md text-body-md" th:text="${successMsg}"></div>
+<div th:if="${erreurMsg}" class="mb-lg p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreurMsg}"></div>
 <div th:if="${infoMsg}" class="mb-lg p-md rounded-lg bg-surface-container-low text-on-surface-variant font-body-md text-body-md" th:text="${infoMsg}"></div>
 <div class="mb-lg flex flex-wrap items-end justify-between gap-md">
 <div>
@@ -98,6 +99,65 @@
 <span class="material-symbols-outlined">calendar_month</span> Exporter l'annee
 </a>
 </div>
+</div>
+
+<!-- Etat de cloture du mois affiche. Un bulletin paye etait deja fige ; ce bandeau porte le
+     niveau au-dessus : le mois entier, pour que plus aucun bulletin « oublie » ne s'y ajoute. -->
+<div class="mb-lg p-md rounded-xl border border-outline-variant bg-surface-container-low flex flex-wrap items-center justify-between gap-md"
+     th:if="${moisCloture}">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">lock</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">
+Paie cloturee — <span th:text="${nomsMois[moisFiltre - 1]} + ' ' + ${anneeFiltre}">mois</span>
+</p>
+<p class="text-label-sm text-on-surface-variant" th:if="${cloture != null}"
+   th:text="${cloture.nbBulletins} + ' bulletin(s) soldes'
+            + (${cloture.clotureePar != null and !#strings.isEmpty(cloture.clotureePar)} ? ', par ' + cloture.clotureePar : '')
+            + (${cloture.dateCloture != null} ? ' le ' + ${#temporals.format(cloture.dateCloture, 'dd/MM/yyyy')} : '')">
+Detail
+</p>
+<p class="text-label-sm text-on-surface-variant">Plus aucun bulletin ne peut etre ajoute, paye ou supprime sur ce mois.</p>
+</div>
+</div>
+<form class="flex items-end gap-sm" method="post" th:action="@{/rh/salaires/rouvrir-mois}" th:if="${estAdmin}"
+      onsubmit="return confirm('Rouvrir la paie de ce mois ? La reouverture est journalisee.');">
+<input name="mois" th:value="${moisFiltre}" type="hidden"/>
+<input name="annee" th:value="${anneeFiltre}" type="hidden"/>
+<input class="rounded-lg border border-outline-variant px-md py-2 text-body-md" name="motif" placeholder="Motif de la reouverture" type="text"/>
+<button class="px-lg py-2.5 border border-outline-variant text-on-surface-variant font-label-md text-label-md rounded-lg" type="submit">
+Rouvrir
+</button>
+</form>
+<p class="text-label-sm text-on-surface-variant" th:unless="${estAdmin}">
+Seul un administrateur peut rouvrir un mois cloture.
+</p>
+</div>
+
+<div class="mb-lg p-md rounded-xl border border-outline-variant bg-surface-container-low flex flex-wrap items-center justify-between gap-md"
+     th:unless="${moisCloture}">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">lock_open</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">
+Paie ouverte — <span th:text="${nomsMois[moisFiltre - 1]} + ' ' + ${anneeFiltre}">mois</span>
+</p>
+<p class="text-label-sm text-on-surface-variant" th:if="${peutCloturer}">
+Tout le personnel actif est paye : ce mois peut etre cloture.
+</p>
+<p class="text-label-sm text-on-surface-variant" th:unless="${peutCloturer}" th:text="${obstacleCloture}">
+Ce qui manque
+</p>
+</div>
+</div>
+<form method="post" th:action="@{/rh/salaires/cloturer-mois}" th:if="${peutCloturer}"
+      onsubmit="return confirm('Cloturer la paie de ce mois ? Plus aucun bulletin ne pourra y etre ajoute.');">
+<input name="mois" th:value="${moisFiltre}" type="hidden"/>
+<input name="annee" th:value="${anneeFiltre}" type="hidden"/>
+<button class="px-lg py-2.5 bg-primary text-on-primary font-label-md text-label-md rounded-lg flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined">lock</span> Cloturer la paie du mois
+</button>
+</form>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg mb-lg">
