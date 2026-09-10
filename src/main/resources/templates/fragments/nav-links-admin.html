@@ -48,7 +48,7 @@
 <span class="material-symbols-outlined">quiz</span>
 <span class="font-label-md text-label-md">Examens</span>
 </a>
-<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'bulletins'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ENSEIGNANT' or utilisateurConnecte.role == 'SECRETAIRE')}" href="/bulletins">
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'bulletins'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR' or utilisateurConnecte.role == 'ENSEIGNANT' or utilisateurConnecte.role == 'SECRETAIRE')}" href="/bulletins">
 <span class="material-symbols-outlined">description</span>
 <span class="font-label-md text-label-md">Bulletins</span>
 </a>
