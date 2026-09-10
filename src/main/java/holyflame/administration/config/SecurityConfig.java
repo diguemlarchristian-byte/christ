@@ -187,6 +187,10 @@ public class SecurityConfig {
                 .requestMatchers("/export/rapports/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
                 .requestMatchers("/export/eleves/excel").hasAnyRole("ADMIN", "DIRECTEUR", "TRESORIER", "COMPTABLE", "SECRETAIRE")
                 .requestMatchers("/export/notes/excel").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
+                // L'export de l'inventaire suit exactement l'ecran d'ou son bouton est clique.
+                // Cette ligne doit rester avant la regle /export/** qui suit, sinon elle ne serait
+                // jamais atteinte et le Directeur comme la secretaire recevraient un 403.
+                .requestMatchers("/export/inventaire/excel").access(roleOuModuleDirecteur("INVENTAIRE", "ADMIN", "SECRETAIRE"))
                 .requestMatchers("/export/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
                 // Comptes/roles et securite restent strictement reserves a l'ADMIN, y compris pour le
                 // Directeur : sinon un Directeur pourrait s'auto-attribuer l'acces finance.
@@ -196,7 +200,10 @@ public class SecurityConfig {
                 // Simple coquille de redirection vers /finances?tab=budget (voir BudgetController) :
                 // la vraie segmentation se joue sur /finances/budget/** ci-dessous.
                 .requestMatchers("/budget/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                .requestMatchers("/inventaire/**").access(roleOuModuleDirecteur("INVENTAIRE", "ADMIN"))
+                // Le secretariat tient le materiel au quotidien — c'est lui qui range, sort et
+                // constate la casse. L'inventaire lui etait ferme, si bien que celui qui manipulait
+                // le materiel n'etait jamais celui qui pouvait l'enregistrer.
+                .requestMatchers("/inventaire/**").access(roleOuModuleDirecteur("INVENTAIRE", "ADMIN", "SECRETAIRE"))
                 // Paie : preparer/calculer un bulletin (module PAIE_PREPARATION, typiquement Comptable)
                 // est distinct de declencher son paiement reel — un acte de caisse qui comptabilise
                 // automatiquement une Depense (module PAIE_PAIEMENT, typiquement Tresorier). Le

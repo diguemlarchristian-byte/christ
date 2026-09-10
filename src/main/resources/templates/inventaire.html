@@ -18,6 +18,7 @@
                       "tertiary": [[${accentColor}]], "tertiary-container": "#384055", "on-tertiary-container": "#a4acc5",
                       "tertiary-fixed": "#dae2fd", "on-tertiary-fixed-variant": "#3f465c",
                       "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a",
+                      "success": "#1b7f4c", "success-container": "#d7f0e2",
                       "surface": "#f7f9fb", "background": "#f7f9fb", "on-background": "#191c1e",
                       "on-surface": "#191c1e", "on-surface-variant": "#444651",
                       "surface-container-lowest": "#ffffff", "surface-container-low": "#f2f4f6",
@@ -42,153 +43,376 @@
 <header class="bg-white border-b border-gray-200 px-4 md:px-8 py-4 flex flex-col sm:flex-row justify-between sm:items-center gap-md">
 <div>
 <h1 class="text-xl font-bold text-blue-900">Inventaire</h1>
-<p class="text-gray-500 text-sm">Gestion du materiel et des equipements de l'etablissement.</p>
+<p class="text-gray-500 text-sm">Materiel et equipements de l'etablissement, et ce qu'ils deviennent.</p>
 </div>
-<button class="bg-blue-900 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2" onclick="document.getElementById('modal-article').classList.remove('hidden')" type="button">
+<div class="flex items-center gap-2">
+<a class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-gray-50"
+   href="/export/inventaire/excel">
+<span class="material-symbols-outlined text-[18px]">download</span> Exporter
+</a>
+<button class="bg-blue-900 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
+        onclick="ouvrirAjout()" type="button">
 <span class="material-symbols-outlined text-[18px]">add</span> Ajouter un article
 </button>
+</div>
 </header>
 
 <main class="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-8">
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+<div class="mb-lg p-md rounded-xl bg-error-container border border-error text-on-error-container text-sm"
+     th:if="${erreur}" th:text="${erreur}"></div>
+<div class="mb-lg p-md rounded-xl bg-success-container border border-success text-success text-sm"
+     th:if="${succes}" th:text="${succes}"></div>
+
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
 <div class="bg-white border border-gray-200 rounded-xl p-5">
-<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Total articles</p>
+<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Articles</p>
 <p class="text-2xl font-bold text-blue-900" th:text="${totalArticles}">0</p>
 </div>
 <div class="bg-white border border-gray-200 rounded-xl p-5">
-<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Neufs</p>
-<p class="text-2xl font-bold text-green-700" th:text="${totalNeuf}">0</p>
+<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Unites en service</p>
+<p class="text-2xl font-bold text-green-700" th:text="${totalEnService}">0</p>
 </div>
 <div class="bg-white border border-gray-200 rounded-xl p-5">
 <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">En reparation</p>
 <p class="text-2xl font-bold text-amber-600" th:text="${totalReparation}">0</p>
 </div>
 <div class="bg-white border border-gray-200 rounded-xl p-5">
-<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Valeur totale</p>
+<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Hors service</p>
+<p class="text-2xl font-bold text-red-600" th:text="${totalHorsService}">0</p>
+</div>
+<div class="bg-white border border-gray-200 rounded-xl p-5">
+<p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Valeur en service</p>
 <p class="text-2xl font-bold text-blue-900" th:text="${#numbers.formatDecimal(valeurTotale, 0, 'COMMA', 0, 'POINT')} + ' F'">0 F</p>
 </div>
 </div>
 
+<form class="bg-white border border-gray-200 rounded-xl p-md mb-lg flex flex-col md:flex-row gap-3 md:items-end" method="get" th:action="@{/inventaire}">
+<div class="flex-1">
+<label class="text-xs text-gray-500 block mb-1">Rechercher</label>
+<input class="w-full p-2 border border-gray-300 rounded-lg" name="q" type="search"
+       placeholder="Nom, salle, n° de serie, fournisseur..." th:value="${filtre}"/>
+</div>
+<div>
+<label class="text-xs text-gray-500 block mb-1">Categorie</label>
+<select class="w-full md:w-44 p-2 border border-gray-300 rounded-lg" name="categorie">
+<option value="">Toutes</option>
+<option th:each="c : ${categories}" th:value="${c.key}" th:text="${c.value}"
+        th:selected="${c.key == filtreCategorie}">Categorie</option>
+</select>
+</div>
+<div>
+<label class="text-xs text-gray-500 block mb-1">Etat</label>
+<select class="w-full md:w-36 p-2 border border-gray-300 rounded-lg" name="etat">
+<option value="">Tous</option>
+<option th:each="e : ${etats}" th:value="${e.key}" th:text="${e.value}"
+        th:selected="${e.key == filtreEtat}">Etat</option>
+</select>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-blue-900 text-white rounded-lg font-medium" type="submit">Filtrer</button>
+<a class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700" th:if="${filtreActif}" href="/inventaire">Effacer</a>
+</div>
+</form>
+
+<p class="text-sm text-gray-500 mb-sm" th:if="${filtreActif}">
+<span th:text="${articles.size()}">0</span> article(s) sur <span th:text="${totalArticles}">0</span>.
+</p>
+
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
 <table class="w-full text-left text-sm hidden md:table">
 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-<tr><th class="px-5 py-3">Article</th><th class="px-5 py-3">Categorie</th><th class="px-5 py-3">Qte</th><th class="px-5 py-3">Etat</th><th class="px-5 py-3">Localisation</th><th class="px-5 py-3 text-right">Valeur</th><th class="px-5 py-3 text-right">Actions</th></tr>
+<tr>
+<th class="px-5 py-3">Article</th>
+<th class="px-5 py-3">Categorie</th>
+<th class="px-5 py-3">Etat</th>
+<th class="px-5 py-3 text-center">En service</th>
+<th class="px-5 py-3 text-center">Reparation</th>
+<th class="px-5 py-3 text-center">Hors svc</th>
+<th class="px-5 py-3">Localisation</th>
+<th class="px-5 py-3 text-right">Valeur</th>
+<th class="px-5 py-3 text-right">Actions</th>
+</tr>
 </thead>
 <tbody class="divide-y divide-gray-100">
 <tr th:if="${articles.isEmpty()}">
-<td class="px-5 py-8 text-center text-gray-500" colspan="7">Aucun article enregistre.</td>
+<td class="px-5 py-8 text-center text-gray-500" colspan="9"
+    th:text="${filtreActif} ? 'Aucun article ne correspond a cette recherche.' : 'Aucun article enregistre.'">Aucun article enregistre.</td>
 </tr>
-<tr th:each="a : ${articles}">
-<td class="px-5 py-3 font-medium" th:text="${a.nom}">Nom</td>
-<td class="px-5 py-3 text-gray-500" th:text="${a.categorie}">Categorie</td>
-<td class="px-5 py-3" th:text="${a.quantite}">0</td>
+<th:block th:each="a : ${articles}">
+<tr>
+<td class="px-5 py-3 font-medium">
+<button class="text-left hover:text-blue-900 flex items-center gap-1" type="button"
+        th:attr="onclick=|basculerFiche(${a.id})|">
+<span class="material-symbols-outlined text-[16px] text-gray-400" th:id="'chevron-' + ${a.id}">expand_more</span>
+<span th:text="${a.nom}">Nom</span>
+</button>
+</td>
+<td class="px-5 py-3 text-gray-500" th:text="${categories.getOrDefault(a.categorie, a.categorie != null ? a.categorie : '—')}">Categorie</td>
 <td class="px-5 py-3">
 <span class="px-2 py-0.5 rounded-full text-xs font-medium"
-      th:classappend="${a.etat == 'NEUF'} ? 'bg-green-100 text-green-800' : (${a.etat == 'EN_REPARATION'} ? 'bg-amber-100 text-amber-800' : (${a.etat == 'HORS_SERVICE'} ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'))"
-      th:text="${a.etat}">Etat</span>
+      th:classappend="${a.etat == 'NEUF'} ? 'bg-green-100 text-green-800' : (${a.etat == 'USE'} ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800')"
+      th:text="${etats.getOrDefault(a.etat, a.etat != null ? a.etat : '—')}">Etat</span>
 </td>
-<td class="px-5 py-3 text-gray-500" th:text="${a.localisation}">Lieu</td>
-<td class="px-5 py-3 text-right" th:text="${a.valeurUnitaire != null ? #numbers.formatDecimal(a.valeurUnitaire * a.quantite, 0, 'COMMA', 0, 'POINT') + ' F' : '--'}">--</td>
-<td class="px-5 py-3 text-right">
-<form class="inline" method="post" th:action="@{/inventaire/{id}/supprimer(id=${a.id})}" onsubmit="return confirm('Supprimer cet article ?');">
+<td class="px-5 py-3 text-center font-medium" th:text="${a.quantiteEnService}">0</td>
+<td class="px-5 py-3 text-center"
+    th:classappend="${a.quantiteEnReparation > 0} ? 'text-amber-600 font-medium' : 'text-gray-300'"
+    th:text="${a.quantiteEnReparation}">0</td>
+<td class="px-5 py-3 text-center"
+    th:classappend="${a.quantiteHorsService > 0} ? 'text-red-600 font-medium' : 'text-gray-300'"
+    th:text="${a.quantiteHorsService}">0</td>
+<td class="px-5 py-3 text-gray-500" th:text="${a.localisation != null and !#strings.isEmpty(a.localisation)} ? ${a.localisation} : '—'">Lieu</td>
+<td class="px-5 py-3 text-right" th:text="${a.valeurUnitaire != null ? #numbers.formatDecimal(a.valeurEnService, 0, 'COMMA', 0, 'POINT') + ' F' : '—'}">—</td>
+<td class="px-5 py-3 text-right whitespace-nowrap">
+<button class="text-blue-900 hover:underline text-xs mr-2" type="button"
+        th:attr="onclick=|basculerFiche(${a.id})|">Detail</button>
+<form class="inline" method="post" th:action="@{/inventaire/{id}/supprimer(id=${a.id})}"
+      onsubmit="return confirm('Supprimer cet article et tout son historique ?');">
 <button class="text-red-600 hover:underline text-xs" type="submit">Supprimer</button>
 </form>
 </td>
 </tr>
+<tr class="hidden bg-gray-50" th:id="'fiche-' + ${a.id}">
+<td class="px-5 py-4" colspan="9">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+
+<div>
+<h4 class="text-xs uppercase tracking-wider text-gray-500 mb-sm">Fiche</h4>
+<dl class="text-sm space-y-1">
+<div class="flex justify-between gap-md"><dt class="text-gray-500">Quantite totale</dt><dd th:text="${a.quantite}">0</dd></div>
+<div class="flex justify-between gap-md"><dt class="text-gray-500">Valeur unitaire</dt><dd th:text="${a.valeurUnitaire != null ? #numbers.formatDecimal(a.valeurUnitaire, 0, 'COMMA', 0, 'POINT') + ' F' : '—'}">—</dd></div>
+<div class="flex justify-between gap-md"><dt class="text-gray-500">Fournisseur</dt><dd th:text="${a.fournisseur != null and !#strings.isEmpty(a.fournisseur)} ? ${a.fournisseur} : '—'">—</dd></div>
+<div class="flex justify-between gap-md"><dt class="text-gray-500">N° de serie</dt><dd th:text="${a.numSerie != null and !#strings.isEmpty(a.numSerie)} ? ${a.numSerie} : '—'">—</dd></div>
+<div class="flex justify-between gap-md"><dt class="text-gray-500">Acquis le</dt><dd th:text="${a.dateAcquisition != null} ? ${#temporals.format(a.dateAcquisition, 'dd/MM/yyyy')} : '—'">—</dd></div>
+<div class="flex justify-between gap-md" th:if="${peutRattacherDepense}">
+<dt class="text-gray-500">Depense</dt>
+<dd th:if="${a.depenseId != null and depensesParId.containsKey(a.depenseId)}"
+    th:with="d=${depensesParId.get(a.depenseId)}"
+    th:text="${d.designation} + ' — ' + ${#numbers.formatDecimal(d.montant, 0, 'COMMA', 0, 'POINT')} + ' F'">Depense</dd>
+<dd th:unless="${a.depenseId != null and depensesParId.containsKey(a.depenseId)}" class="text-gray-400">Non rattachee</dd>
+</div>
+</dl>
+<p class="text-sm text-gray-600 mt-sm italic" th:if="${a.notes != null and !#strings.isEmpty(a.notes)}" th:text="${a.notes}">Notes</p>
+<button class="mt-md text-xs px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-white" type="button"
+        th:attr="onclick=|ouvrirModification(${a.id})|">Modifier la fiche</button>
+</div>
+
+<div>
+<h4 class="text-xs uppercase tracking-wider text-gray-500 mb-sm">Enregistrer un mouvement</h4>
+<form class="space-y-2" method="post" th:action="@{/inventaire/{id}/mouvement(id=${a.id})}">
+<select class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="type" required="required">
+<option th:each="t : ${typesMouvement}" th:value="${t.key}" th:text="${t.value}">Type</option>
+</select>
+<div class="grid grid-cols-2 gap-2">
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" min="1" name="quantite"
+       required="required" type="number" value="1" placeholder="Quantite"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="date" type="date"/>
+</div>
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="motif" type="text" placeholder="Motif (facultatif)"/>
+<button class="w-full px-3 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium" type="submit">Enregistrer</button>
+</form>
+</div>
+
+<div>
+<h4 class="text-xs uppercase tracking-wider text-gray-500 mb-sm">Historique</h4>
+<p class="text-sm text-gray-400" th:if="${!historique.containsKey(a.id)}">Aucun mouvement enregistre.</p>
+<ul class="space-y-2 max-h-56 overflow-y-auto" th:if="${historique.containsKey(a.id)}">
+<li class="text-sm border-l-2 border-gray-300 pl-sm" th:each="m : ${historique.get(a.id)}">
+<p class="font-medium" th:text="${typesMouvement.getOrDefault(m.type, m.type)} + ' — ' + ${m.quantite}">Mouvement</p>
+<p class="text-xs text-gray-500">
+<span th:text="${m.date != null} ? ${#temporals.format(m.date, 'dd/MM/yyyy')} : ''">date</span>
+<span th:if="${m.effectuePar != null and !#strings.isEmpty(m.effectuePar)}" th:text="' · ' + ${m.effectuePar}"></span>
+</p>
+<p class="text-xs text-gray-600 italic" th:if="${m.motif != null and !#strings.isEmpty(m.motif)}" th:text="${m.motif}">motif</p>
+</li>
+</ul>
+</div>
+
+</div>
+</td>
+</tr>
+</th:block>
 </tbody>
 </table>
+
 <div class="md:hidden divide-y divide-gray-100">
-<p class="p-lg text-center text-gray-500 text-sm" th:if="${articles.isEmpty()}">Aucun article enregistre.</p>
+<p class="p-lg text-center text-gray-500 text-sm" th:if="${articles.isEmpty()}"
+   th:text="${filtreActif} ? 'Aucun article ne correspond a cette recherche.' : 'Aucun article enregistre.'">Aucun article enregistre.</p>
 <div class="p-md" th:each="a : ${articles}">
 <div class="flex justify-between items-start mb-xs">
 <p class="font-medium text-sm" th:text="${a.nom}">Nom</p>
 <span class="px-2 py-0.5 rounded-full text-xs font-medium shrink-0"
-      th:classappend="${a.etat == 'NEUF'} ? 'bg-green-100 text-green-800' : (${a.etat == 'EN_REPARATION'} ? 'bg-amber-100 text-amber-800' : (${a.etat == 'HORS_SERVICE'} ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'))"
-      th:text="${a.etat}">Etat</span>
+      th:classappend="${a.etat == 'NEUF'} ? 'bg-green-100 text-green-800' : (${a.etat == 'USE'} ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800')"
+      th:text="${etats.getOrDefault(a.etat, a.etat != null ? a.etat : '—')}">Etat</span>
 </div>
-<p class="text-xs text-gray-500 mb-sm" th:text="${a.categorie} + ' — Qte ' + ${a.quantite} + (${a.localisation != null and !#strings.isEmpty(a.localisation)} ? ' — ' + a.localisation : '')">Details</p>
+<p class="text-xs text-gray-500 mb-xs" th:text="${categories.getOrDefault(a.categorie, a.categorie != null ? a.categorie : '—')} + (${a.localisation != null and !#strings.isEmpty(a.localisation)} ? ' — ' + a.localisation : '')">Details</p>
+<p class="text-xs mb-sm">
+<span class="text-green-700 font-medium" th:text="${a.quantiteEnService} + ' en service'">0</span>
+<span class="text-amber-600" th:if="${a.quantiteEnReparation > 0}" th:text="' · ' + ${a.quantiteEnReparation} + ' en reparation'"></span>
+<span class="text-red-600" th:if="${a.quantiteHorsService > 0}" th:text="' · ' + ${a.quantiteHorsService} + ' hors service'"></span>
+</p>
 <div class="flex items-center justify-between">
-<span class="text-sm font-bold" th:text="${a.valeurUnitaire != null ? #numbers.formatDecimal(a.valeurUnitaire * a.quantite, 0, 'COMMA', 0, 'POINT') + ' F' : '--'}">--</span>
-<form method="post" th:action="@{/inventaire/{id}/supprimer(id=${a.id})}" onsubmit="return confirm('Supprimer cet article ?');">
+<span class="text-sm font-bold" th:text="${a.valeurUnitaire != null ? #numbers.formatDecimal(a.valeurEnService, 0, 'COMMA', 0, 'POINT') + ' F' : '—'}">—</span>
+<div class="flex items-center gap-3">
+<button class="text-blue-900 text-xs font-bold uppercase" type="button"
+        th:attr="onclick=|ouvrirModification(${a.id})|">Modifier</button>
+<form method="post" th:action="@{/inventaire/{id}/supprimer(id=${a.id})}"
+      onsubmit="return confirm('Supprimer cet article et tout son historique ?');">
 <button class="text-red-600 text-xs font-bold uppercase" type="submit">Supprimer</button>
 </form>
 </div>
+</div>
+<details class="mt-sm">
+<summary class="text-xs text-blue-900 cursor-pointer">Mouvement et historique</summary>
+<form class="space-y-2 mt-sm" method="post" th:action="@{/inventaire/{id}/mouvement(id=${a.id})}">
+<select class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="type" required="required">
+<option th:each="t : ${typesMouvement}" th:value="${t.key}" th:text="${t.value}">Type</option>
+</select>
+<div class="grid grid-cols-2 gap-2">
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" min="1" name="quantite" required="required" type="number" value="1"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="date" type="date"/>
+</div>
+<input class="w-full p-2 border border-gray-300 rounded-lg text-sm" name="motif" type="text" placeholder="Motif (facultatif)"/>
+<button class="w-full px-3 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium" type="submit">Enregistrer</button>
+</form>
+<ul class="space-y-1 mt-sm" th:if="${historique.containsKey(a.id)}">
+<li class="text-xs text-gray-600 border-l-2 border-gray-300 pl-sm" th:each="m : ${historique.get(a.id)}"
+    th:text="${typesMouvement.getOrDefault(m.type, m.type)} + ' — ' + ${m.quantite} + (${m.date != null} ? ' · ' + ${#temporals.format(m.date, 'dd/MM/yyyy')} : '')">Mouvement</li>
+</ul>
+</details>
 </div>
 </div>
 </div>
 
 </main>
 
+<!-- Un seul formulaire sert a l'ajout et a la modification : deux formulaires jumeaux auraient
+     diverge des la premiere retouche, et l'un des deux aurait fini par oublier un champ. -->
 <div class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-lg" id="modal-article">
 <div class="bg-white rounded-xl p-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
 <div class="flex justify-between items-center mb-lg">
-<h3 class="font-bold text-lg">Ajouter un article</h3>
-<button onclick="document.getElementById('modal-article').classList.add('hidden')" type="button"><span class="material-symbols-outlined">close</span></button>
+<h3 class="font-bold text-lg" id="modal-titre">Ajouter un article</h3>
+<button onclick="fermerModal()" type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<form class="space-y-3" method="post" th:action="@{/inventaire}">
+<form class="space-y-3" id="form-article" method="post" th:action="@{/inventaire}">
 <div>
 <label class="text-xs text-gray-500 block mb-1">Nom</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" name="nom" required="required" type="text"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-nom" name="nom" required="required" type="text"/>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 <div>
 <label class="text-xs text-gray-500 block mb-1">Categorie</label>
-<select class="w-full p-2 border border-gray-300 rounded-lg" name="categorie">
-<option value="MOBILIER">Mobilier</option>
-<option value="INFORMATIQUE">Informatique</option>
-<option value="LIVRE">Livre</option>
-<option value="SPORT">Sport</option>
-<option value="MATERIEL_BUREAU">Materiel de bureau</option>
-<option value="AUTRE">Autre</option>
+<select class="w-full p-2 border border-gray-300 rounded-lg" id="f-categorie" name="categorie">
+<option th:each="c : ${categories}" th:value="${c.key}" th:text="${c.value}">Categorie</option>
 </select>
 </div>
 <div>
-<label class="text-xs text-gray-500 block mb-1">Etat</label>
-<select class="w-full p-2 border border-gray-300 rounded-lg" name="etat">
-<option value="NEUF">Neuf</option>
-<option value="BON_ETAT">Bon etat</option>
-<option value="USE">Use</option>
-<option value="EN_REPARATION">En reparation</option>
-<option value="HORS_SERVICE">Hors service</option>
+<label class="text-xs text-gray-500 block mb-1">Etat general</label>
+<select class="w-full p-2 border border-gray-300 rounded-lg" id="f-etat" name="etat">
+<option th:each="e : ${etats}" th:value="${e.key}" th:text="${e.value}">Etat</option>
 </select>
 </div>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 <div>
-<label class="text-xs text-gray-500 block mb-1">Quantite</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" min="0" name="quantite" required="required" type="number" value="1"/>
+<label class="text-xs text-gray-500 block mb-1">Quantite totale</label>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-quantite" min="0" name="quantite" required="required" type="number" value="1"/>
 </div>
 <div>
 <label class="text-xs text-gray-500 block mb-1">Valeur unitaire (F)</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" min="0" name="valeurUnitaire" step="0.01" type="number"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-valeur" min="0" name="valeurUnitaire" step="0.01" type="number"/>
 </div>
 </div>
+<p class="text-xs text-gray-500 -mt-1">
+Les unites en reparation ou hors service ne se saisissent pas ici : elles s'enregistrent
+en mouvement depuis la fiche de l'article, pour rester tracees.
+</p>
 <div>
 <label class="text-xs text-gray-500 block mb-1">Localisation</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" name="localisation" type="text"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-localisation" name="localisation" type="text" placeholder="Salle 6eme A, magasin..."/>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 <div>
 <label class="text-xs text-gray-500 block mb-1">Fournisseur</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" name="fournisseur" type="text"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-fournisseur" name="fournisseur" type="text"/>
 </div>
 <div>
 <label class="text-xs text-gray-500 block mb-1">N° de serie</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" name="numSerie" type="text"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-numserie" name="numSerie" type="text"/>
 </div>
 </div>
 <div>
 <label class="text-xs text-gray-500 block mb-1">Date d'acquisition</label>
-<input class="w-full p-2 border border-gray-300 rounded-lg" name="dateAcquisition" type="date"/>
+<input class="w-full p-2 border border-gray-300 rounded-lg" id="f-date" name="dateAcquisition" type="date"/>
+</div>
+<div th:if="${peutRattacherDepense}">
+<label class="text-xs text-gray-500 block mb-1">Depense qui a paye cet article</label>
+<select class="w-full p-2 border border-gray-300 rounded-lg" id="f-depense" name="depenseId">
+<option value="">Aucune</option>
+<option th:each="d : ${depenses}" th:value="${d.id}"
+        th:text="${(d.dateDepense != null ? #temporals.format(d.dateDepense, 'dd/MM/yyyy') + ' — ' : '')} + ${d.designation} + ' — ' + ${#numbers.formatDecimal(d.montant, 0, 'COMMA', 0, 'POINT')} + ' F'">Depense</option>
+</select>
+</div>
+<div>
+<label class="text-xs text-gray-500 block mb-1">Notes</label>
+<textarea class="w-full p-2 border border-gray-300 rounded-lg" id="f-notes" name="notes" rows="2"></textarea>
 </div>
 <div class="flex justify-end gap-2 pt-2">
-<button class="px-4 py-2 border border-gray-300 rounded-lg" onclick="document.getElementById('modal-article').classList.add('hidden')" type="button">Annuler</button>
+<button class="px-4 py-2 border border-gray-300 rounded-lg" onclick="fermerModal()" type="button">Annuler</button>
 <button class="px-4 py-2 bg-blue-900 text-white rounded-lg" type="submit">Enregistrer</button>
 </div>
 </form>
 </div>
 </div>
+
+<!-- Les fiches sont rendues avec la page : les donnees de modification sont lues depuis le
+     tableau plutot que rechargees, pour que le formulaire s'ouvre sans aller-retour serveur. -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+const ARTICLES = /*[[${articlesJson}]]*/ [];
+
+function basculerFiche(id) {
+  const ligne = document.getElementById('fiche-' + id);
+  const chevron = document.getElementById('chevron-' + id);
+  if (!ligne) return;
+  ligne.classList.toggle('hidden');
+  if (chevron) chevron.textContent = ligne.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+}
+
+function ouvrirAjout() {
+  document.getElementById('modal-titre').textContent = 'Ajouter un article';
+  const form = document.getElementById('form-article');
+  form.action = '/inventaire';
+  form.reset();
+  document.getElementById('modal-article').classList.remove('hidden');
+}
+
+function ouvrirModification(id) {
+  const a = ARTICLES.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('modal-titre').textContent = 'Modifier l’article';
+  const form = document.getElementById('form-article');
+  form.action = '/inventaire/' + id + '/modifier';
+  document.getElementById('f-nom').value = a.nom || '';
+  document.getElementById('f-categorie').value = a.categorie || 'AUTRE';
+  document.getElementById('f-etat').value = a.etat || 'BON_ETAT';
+  document.getElementById('f-quantite').value = a.quantite;
+  document.getElementById('f-valeur').value = a.valeurUnitaire != null ? a.valeurUnitaire : '';
+  document.getElementById('f-localisation').value = a.localisation || '';
+  document.getElementById('f-fournisseur').value = a.fournisseur || '';
+  document.getElementById('f-numserie').value = a.numSerie || '';
+  document.getElementById('f-date').value = a.dateAcquisition || '';
+  document.getElementById('f-notes').value = a.notes || '';
+  const depense = document.getElementById('f-depense');
+  if (depense) depense.value = a.depenseId != null ? a.depenseId : '';
+  document.getElementById('modal-article').classList.remove('hidden');
+}
+
+function fermerModal() {
+  document.getElementById('modal-article').classList.add('hidden');
+}
+/*]]>*/
+</script>
 </div>
 </body>
 </html>

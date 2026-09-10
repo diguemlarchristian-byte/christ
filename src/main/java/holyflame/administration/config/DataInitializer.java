@@ -32,6 +32,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private PeriodeCalendrierRepository periodeCalendrierRepository;
     @Autowired private AbsenceRepository absenceRepository;
     @Autowired private ArticleInfirmerieRepository articleInfirmerieRepository;
+    @Autowired private ArticleInventaireRepository articleInventaireRepository;
     @Autowired private FicheControleRepository ficheControleRepository;
     @Autowired private AvisParentRepository avisParentRepository;
     @Autowired private PointageRepository pointageRepository;
@@ -395,6 +396,40 @@ public class DataInitializer implements CommandLineRunner {
                     // l'admin le redeclarera depuis /parametres/calendrier si besoin.
                 }
             }
+        }
+
+        migrerLInventaire();
+    }
+
+    /**
+     * Reprise des inventaires saisis avant que le lot ne sache compter ses unites indisponibles.
+     *
+     * Ces deux reprises tournaient auparavant a chaque affichage de la page d'inventaire. Le
+     * rattachement des articles orphelins y etait particulierement dangereux : il donnait le
+     * materiel sans etablissement a la premiere ecole dont un responsable ouvrait l'ecran. Il
+     * n'a lieu ici que s'il n'existe qu'un seul etablissement — au-dela, aucun moyen honnete de
+     * deviner le proprietaire, et un article laisse de cote vaut mieux qu'un article vole.
+     */
+    private void migrerLInventaire() {
+        int enReparation = articleInventaireRepository.migrerEtatEnReparation();
+        int horsService = articleInventaireRepository.migrerEtatHorsService();
+        if (enReparation + horsService > 0) {
+            System.out.println("Inventaire : " + (enReparation + horsService)
+                + " article(s) repris sur les compteurs d'unites indisponibles.");
+        }
+
+        long orphelins = articleInventaireRepository.countByEtablissementIdIsNull();
+        if (orphelins == 0) return;
+
+        List<Etablissement> etablissements = etablissementRepository.findAll();
+        if (etablissements.size() == 1) {
+            int repris = articleInventaireRepository.migrateNullEtablissementId(etablissements.get(0).getId());
+            System.out.println("Inventaire : " + repris + " article(s) rattache(s) a "
+                + etablissements.get(0).getNom() + ".");
+        } else {
+            System.out.println("Inventaire : " + orphelins + " article(s) sans etablissement laisse(s)"
+                + " de cote (" + etablissements.size() + " etablissements en base, rattachement"
+                + " a faire a la main).");
         }
     }
 

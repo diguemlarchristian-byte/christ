@@ -1,11 +1,13 @@
 package holyflame.administration.controller;
 
+import holyflame.administration.model.ArticleInventaire;
 import holyflame.administration.model.CategorieComptable;
 import holyflame.administration.model.Depense;
 import holyflame.administration.model.Eleve;
 import holyflame.administration.model.Note;
 import holyflame.administration.model.Paiement;
 import holyflame.administration.model.Utilisateur;
+import holyflame.administration.repository.ArticleInventaireRepository;
 import holyflame.administration.repository.CategorieComptableRepository;
 import holyflame.administration.repository.DepenseRepository;
 import holyflame.administration.repository.EleveRepository;
@@ -13,6 +15,7 @@ import holyflame.administration.repository.EnseignantAutorisationRepository;
 import holyflame.administration.repository.NoteRepository;
 import holyflame.administration.repository.PaiementRepository;
 import holyflame.administration.service.EtablissementService;
+import holyflame.administration.service.InventaireRegles;
 import holyflame.administration.util.AnneeScolaireUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
@@ -40,6 +43,7 @@ public class ExportController {
     @Autowired private EnseignantAutorisationRepository autorisationRepository;
     @Autowired private DepenseRepository depenseRepository;
     @Autowired private CategorieComptableRepository categorieComptableRepository;
+    @Autowired private ArticleInventaireRepository articleInventaireRepository;
     @Autowired private EtablissementService etablissementService;
 
     // ── Styles partagés ──────────────────────────────────────────
@@ -183,6 +187,69 @@ public class ExportController {
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"eleves.xlsx\"");
+        wb.write(response.getOutputStream()); wb.close();
+    }
+
+    // ── Export inventaire ────────────────────────────────────────
+    // Un inventaire sert d'abord a etre presente : au conseil d'etablissement, a l'inspection,
+    // au partenaire qui finance un equipement. Il n'etait consultable qu'a l'ecran.
+    @GetMapping("/inventaire/excel")
+    public void exportInventaire(HttpServletResponse response) throws IOException {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        List<ArticleInventaire> articles = etabId != null
+            ? articleInventaireRepository.findByEtablissementIdOrderByCategorieAscNomAsc(etabId)
+            : List.of();
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("Inventaire");
+        XSSFCellStyle hStyle = makeHeaderStyle(wb, (byte)0, (byte)35, (byte)111);
+
+        Row titre = sheet.createRow(0);
+        Cell titreCell = titre.createCell(0);
+        titreCell.setCellValue("INVENTAIRE DU MATERIEL");
+        XSSFCellStyle titreStyle = wb.createCellStyle();
+        XSSFFont titreFont = wb.createFont(); titreFont.setBold(true); titreFont.setFontHeightInPoints((short)13);
+        titreStyle.setFont(titreFont); titreCell.setCellStyle(titreStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
+
+        String[] headers = {"Article","Categorie","Etat","Quantite","En service","En reparation",
+                            "Hors service","Localisation","Valeur unitaire","Valeur en service","Acquis le"};
+        Row hRow = sheet.createRow(2);
+        for (int i = 0; i < headers.length; i++) {
+            Cell c = hRow.createCell(i); c.setCellValue(headers[i]); c.setCellStyle(hStyle);
+        }
+
+        DateTimeFormatter fmtDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        int row = 3;
+        double valeurTotale = 0;
+        for (ArticleInventaire a : articles) {
+            Row r = sheet.createRow(row++);
+            r.createCell(0).setCellValue(a.getNom() != null ? a.getNom() : "");
+            r.createCell(1).setCellValue(InventaireRegles.libelleCategorie(a.getCategorie()));
+            r.createCell(2).setCellValue(InventaireRegles.libelleEtat(a.getEtat()));
+            r.createCell(3).setCellValue(a.getQuantite());
+            r.createCell(4).setCellValue(a.getQuantiteEnService());
+            r.createCell(5).setCellValue(a.getQuantiteEnReparation());
+            r.createCell(6).setCellValue(a.getQuantiteHorsService());
+            r.createCell(7).setCellValue(a.getLocalisation() != null ? a.getLocalisation() : "");
+            r.createCell(8).setCellValue(a.getValeurUnitaire() != null ? a.getValeurUnitaire() : 0);
+            r.createCell(9).setCellValue(a.getValeurEnService());
+            r.createCell(10).setCellValue(a.getDateAcquisition() != null ? a.getDateAcquisition().format(fmtDate) : "");
+            valeurTotale += a.getValeurEnService();
+        }
+
+        Row total = sheet.createRow(row + 1);
+        Cell libelleTotal = total.createCell(8);
+        libelleTotal.setCellValue("Valeur totale en service");
+        libelleTotal.setCellStyle(titreStyle);
+        Cell montantTotal = total.createCell(9);
+        montantTotal.setCellValue(valeurTotale);
+        montantTotal.setCellStyle(titreStyle);
+
+        for (int i = 0; i < headers.length; i++) sheet.autoSizeColumn(i);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"inventaire.xlsx\"");
         wb.write(response.getOutputStream()); wb.close();
     }
 
