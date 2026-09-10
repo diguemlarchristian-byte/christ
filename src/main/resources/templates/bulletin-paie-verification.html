@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verifier un bulletin de paie - EduSystem Pro</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<div th:replace="~{fragments/sidebar-admin :: admin('personnel')}"></div>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('personnel')}"></div>
+<div class="ml-0 md:ml-sidebar-width">
+
+<header class="bg-white border-b border-gray-200 px-4 md:px-8 py-4">
+<h1 class="text-xl font-bold text-blue-900">Verifier un bulletin de paie</h1>
+<p class="text-gray-500 text-sm">
+Comparer un bulletin papier a l'archive produite au moment du paiement.
+</p>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 md:px-8 py-4 md:py-8">
+
+<div class="bg-white border border-gray-200 rounded-xl p-lg mb-lg">
+<p class="text-sm text-gray-600 mb-md">
+Chaque bulletin est archive en PDF a l'instant ou il passe a « paye », et porte un code
+imprime en bas de page. Saisir ce code ici indique s'il correspond bien a une archive de
+cet etablissement, et ce qu'elle contient.
+</p>
+<form class="flex flex-col sm:flex-row gap-3 sm:items-end" method="get" th:action="@{/rh/salaires/verifier}">
+<div class="flex-1">
+<label class="text-xs text-gray-500 block mb-1" for="code">Code de verification</label>
+<input class="w-full p-2 border border-gray-300 rounded-lg font-mono" id="code" name="code"
+       placeholder="PAIE-202610-A1B2C3D4" th:value="${code}" type="text" required="required"/>
+</div>
+<button class="px-5 py-2 bg-blue-900 text-white rounded-lg font-medium" type="submit">Verifier</button>
+</form>
+</div>
+
+<div class="bg-white border border-red-200 rounded-xl p-lg" th:if="${recherche and bulletin == null}">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-red-600">error</span>
+<div>
+<p class="font-bold text-red-800">Aucune archive ne porte ce code.</p>
+<p class="text-sm text-gray-600 mt-1">
+Le document presente ne provient pas de cet etablissement, le code a ete mal recopie,
+ou le bulletin a ete edite avant la mise en place de l'archivage.
+</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white border border-green-200 rounded-xl overflow-hidden" th:if="${bulletin != null}">
+<div class="bg-green-50 border-b border-green-200 px-lg py-md flex items-center gap-3">
+<span class="material-symbols-outlined text-green-700">verified</span>
+<p class="font-bold text-green-800">Ce code correspond a un bulletin archive.</p>
+</div>
+<dl class="p-lg space-y-2 text-sm">
+<div class="flex justify-between gap-md">
+<dt class="text-gray-500">Employe</dt>
+<dd class="font-medium" th:text="${bulletin.personnel.nom} + ' ' + ${bulletin.personnel.prenom}">Nom</dd>
+</div>
+<div class="flex justify-between gap-md">
+<dt class="text-gray-500">Periode</dt>
+<dd th:text="${nomMois} + ' ' + ${bulletin.annee}">Periode</dd>
+</div>
+<div class="flex justify-between gap-md">
+<dt class="text-gray-500">Net a payer</dt>
+<dd class="font-bold" th:text="${#numbers.formatDecimal(bulletin.netAPayer, 0, 'WHITESPACE', 0, 'POINT')} + ' F'">0</dd>
+</div>
+<div class="flex justify-between gap-md">
+<dt class="text-gray-500">Paye le</dt>
+<dd th:text="${bulletin.datePaiement != null} ? ${#temporals.format(bulletin.datePaiement, 'dd/MM/yyyy')} : '—'">—</dd>
+</div>
+<div class="flex justify-between gap-md">
+<dt class="text-gray-500">Archive le</dt>
+<dd th:text="${bulletin.archiveHorodatage != null} ? ${#temporals.format(bulletin.archiveHorodatage, 'dd/MM/yyyy à HH:mm')} : '—'">—</dd>
+</div>
+</dl>
+<div class="px-lg pb-lg">
+<a class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
+   th:href="@{/rh/salaires/{id}/archive(id=${bulletin.id})}" target="_blank">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+Ouvrir l'archive
+</a>
+<p class="text-xs text-gray-500 mt-2">
+Comparez le document ouvert au papier presente : c'est l'archive qui fait foi, elle n'a
+pas ete recalculee depuis.
+</p>
+</div>
+</div>
+
+</main>
+</div>
+</body>
+</html>

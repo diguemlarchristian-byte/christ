@@ -67,6 +67,15 @@
 <button class="flex items-center gap-xs px-lg py-sm rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all shadow-md font-label-md text-label-md" onclick="window.print()" type="button">
 <span class="material-symbols-outlined">print</span> Imprimer le bulletin
 </button>
+<!-- L'archive prime sur l'impression : elle est le document tel qu'il a ete remis, quand
+     cette page, elle, est recalculee a chaque affichage avec les taux du jour. -->
+<a class="flex items-center gap-xs px-lg py-sm rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md"
+   th:if="${bulletin.archive}" th:href="@{/rh/salaires/{id}/archive(id=${bulletin.id})}" target="_blank">
+<span class="material-symbols-outlined">picture_as_pdf</span> Archive du paiement
+</a>
+<span class="text-label-sm text-on-surface-variant" th:if="${!bulletin.archive and bulletin.statut == 'PAYE'}">
+Ce bulletin a ete paye avant la mise en place de l'archivage.
+</span>
 </nav>
 
 <article class="print-area w-full max-w-[800px] bg-white border border-outline-variant p-xl flex flex-col gap-lg">

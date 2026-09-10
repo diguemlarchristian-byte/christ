@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title th:text="'Bulletin de paie - ' + ${personnel.nom} + ' ' + ${personnel.prenom}">Bulletin de paie</title>
+<style>
+    /* Rendu destine a openhtmltopdf : CSS simple, aucune police ni image distante, aucun JS.
+       Le document doit pouvoir etre produit sur une machine sans acces Internet. */
+    @page { size: A4; margin: 15mm 14mm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5pt; color: #1a1d2b; line-height: 1.4; }
+
+    .entete { border-bottom: 2px solid #00236f; padding-bottom: 8pt; margin-bottom: 12pt; }
+    .entete .ecole { font-size: 14pt; font-weight: bold; color: #00236f; }
+    .entete .coord { color: #5b6478; font-size: 8.5pt; }
+    .titre { font-size: 12pt; font-weight: bold; text-align: center; margin: 10pt 0 2pt; }
+    .periode { text-align: center; color: #5b6478; font-size: 9pt; margin-bottom: 12pt; }
+
+    .identite { width: 100%; border-collapse: collapse; margin-bottom: 12pt; }
+    .identite td { padding: 3pt 6pt; border: 0.5pt solid #d9dde8; vertical-align: top; }
+    .identite .cle { color: #5b6478; width: 22%; font-size: 8.5pt; }
+
+    table.lignes { width: 100%; border-collapse: collapse; margin-bottom: 10pt; }
+    table.lignes th { background: #00236f; color: #fff; text-align: left; padding: 4pt 6pt; font-size: 8pt; }
+    table.lignes td { padding: 3.5pt 6pt; border-bottom: 0.5pt solid #e4e7ee; }
+    table.lignes .m { text-align: right; white-space: nowrap; }
+    table.lignes tr.total td { font-weight: bold; border-top: 1pt solid #00236f; border-bottom: none; }
+    .section { font-weight: bold; color: #00236f; font-size: 9.5pt; margin: 10pt 0 3pt; }
+
+    .net { margin-top: 10pt; background: #eef1fa; border: 1pt solid #00236f; padding: 8pt 10pt; }
+    .net .libelle { font-size: 9pt; color: #00236f; }
+    .net .montant { font-size: 15pt; font-weight: bold; color: #00236f; text-align: right; }
+
+    .preuve { margin-top: 14pt; border: 0.5pt solid #d9dde8; padding: 7pt 9pt; font-size: 8pt; color: #5b6478; }
+    .preuve .code { font-family: monospace; font-size: 9.5pt; color: #1a1d2b; letter-spacing: 0.5pt; }
+    .signatures { width: 100%; margin-top: 18pt; }
+    .signatures td { width: 50%; padding-top: 24pt; border-top: 0.5pt solid #9aa1b4; font-size: 8pt; color: #5b6478; }
+    .pied { margin-top: 12pt; text-align: center; color: #9aa1b4; font-size: 7.5pt; }
+</style>
+</head>
+<body>
+
+<div class="entete">
+<div class="ecole" th:text="${nomEtab}">Etablissement</div>
+<div class="coord">
+<span th:if="${adresseEtab != null and !#strings.isEmpty(adresseEtab)}" th:text="${adresseEtab}">Adresse</span>
+<span th:if="${telEtab != null and !#strings.isEmpty(telEtab)}" th:text="' — Tel. ' + ${telEtab}">Tel</span>
+</div>
+</div>
+
+<div class="titre">BULLETIN DE PAIE</div>
+<div class="periode" th:text="${nomMois} + ' ' + ${bulletin.annee}">Periode</div>
+
+<table class="identite">
+<tr>
+<td class="cle">Nom et prenom</td>
+<td th:text="${personnel.nom} + ' ' + ${personnel.prenom}">Nom</td>
+<td class="cle">Matricule</td>
+<td th:text="${personnel.matricule != null and !#strings.isEmpty(personnel.matricule)} ? ${personnel.matricule} : '—'">—</td>
+</tr>
+<tr>
+<td class="cle">Fonction</td>
+<td th:text="${personnel.fonction != null} ? ${personnel.fonction} : '—'">—</td>
+<td class="cle">Anciennete</td>
+<td th:text="${anciennete != null} ? ${anciennete} + ' mois' : '—'">—</td>
+</tr>
+<tr>
+<td class="cle">Periode</td>
+<td th:text="${bulletin.periodeDebut != null and bulletin.periodeFin != null}
+             ? ${#temporals.format(bulletin.periodeDebut, 'dd/MM/yyyy')} + ' au ' + ${#temporals.format(bulletin.periodeFin, 'dd/MM/yyyy')}
+             : ${nomMois} + ' ' + ${bulletin.annee}">Periode</td>
+<td class="cle">Paye le</td>
+<td th:text="${bulletin.datePaiement != null} ? ${#temporals.format(bulletin.datePaiement, 'dd/MM/yyyy')} : '—'">—</td>
+</tr>
+</table>
+
+<div class="section">Gains</div>
+<table class="lignes">
+<tr><th>Libelle</th><th class="m">Base</th><th class="m">Taux</th><th class="m">Montant</th></tr>
+<tr th:each="l : ${lignesGains}">
+<td th:text="${l.libelle}">Libelle</td>
+<td class="m" th:text="${l.base != null} ? ${#numbers.formatDecimal(l.base, 0, 'WHITESPACE', 0, 'POINT')} : '—'">—</td>
+<td class="m" th:text="${l.taux != null and l.taux > 0} ? ${#numbers.formatDecimal(l.taux, 0, 2)} + ' %' : '—'">—</td>
+<td class="m" th:text="${#numbers.formatDecimal(l.montant, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+</tr>
+<tr class="total"><td colspan="3">Total brut</td>
+<td class="m" th:text="${#numbers.formatDecimal(bulletin.totalBrut, 0, 'WHITESPACE', 0, 'POINT')} + ' ' + ${monnaie}">0</td></tr>
+</table>
+
+<div class="section">Retenues salariales</div>
+<table class="lignes">
+<tr><th>Libelle</th><th class="m">Base</th><th class="m">Taux</th><th class="m">Montant</th></tr>
+<tr th:if="${#lists.isEmpty(lignesRetenues)}">
+<td colspan="4" style="color:#9aa1b4">Aucune retenue sur cette periode.</td>
+</tr>
+<tr th:each="l : ${lignesRetenues}">
+<td th:text="${l.libelle}">Libelle</td>
+<td class="m" th:text="${l.base != null} ? ${#numbers.formatDecimal(l.base, 0, 'WHITESPACE', 0, 'POINT')} : '—'">—</td>
+<td class="m" th:text="${l.taux != null and l.taux > 0} ? ${#numbers.formatDecimal(l.taux, 0, 2)} + ' %' : '—'">—</td>
+<td class="m" th:text="${#numbers.formatDecimal(l.montant, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+</tr>
+<tr class="total"><td colspan="3">Total des retenues</td>
+<td class="m" th:text="${#numbers.formatDecimal(bulletin.totalRetenuesSalariales, 0, 'WHITESPACE', 0, 'POINT')} + ' ' + ${monnaie}">0</td></tr>
+</table>
+
+<div class="net">
+<table style="width:100%"><tr>
+<td class="libelle">NET A PAYER</td>
+<td class="montant" th:text="${#numbers.formatDecimal(bulletin.netAPayer, 0, 'WHITESPACE', 0, 'POINT')} + ' ' + ${monnaie}">0</td>
+</tr></table>
+</div>
+
+<div class="section" th:if="${!#lists.isEmpty(lignesCharges)}">Charges patronales (a la charge de l'employeur)</div>
+<table class="lignes" th:if="${!#lists.isEmpty(lignesCharges)}">
+<tr><th>Libelle</th><th class="m">Base</th><th class="m">Taux</th><th class="m">Montant</th></tr>
+<tr th:each="l : ${lignesCharges}">
+<td th:text="${l.libelle}">Libelle</td>
+<td class="m" th:text="${l.base != null} ? ${#numbers.formatDecimal(l.base, 0, 'WHITESPACE', 0, 'POINT')} : '—'">—</td>
+<td class="m" th:text="${l.taux != null and l.taux > 0} ? ${#numbers.formatDecimal(l.taux, 0, 2)} + ' %' : '—'">—</td>
+<td class="m" th:text="${#numbers.formatDecimal(l.montant, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+</tr>
+<tr class="total"><td colspan="3">Total des charges patronales</td>
+<td class="m" th:text="${#numbers.formatDecimal(bulletin.totalChargesPatronales, 0, 'WHITESPACE', 0, 'POINT')} + ' ' + ${monnaie}">0</td></tr>
+</table>
+
+<!-- Ce bloc est la raison d'etre de l'archive : il fige ce qui a ete remis, a l'instant ou
+     ce bulletin est passe a « paye ». Reimprimer plus tard, apres un changement de taux, ne
+     redonnerait pas le meme document ; ce code permet de verifier qu'un papier presente
+     correspond bien a cette archive-la. -->
+<div class="preuve">
+<div>Document archive le <b th:text="${horodatage}">date</b>, au moment du paiement.</div>
+<div>Code de verification : <span class="code" th:text="${codeVerification}">CODE</span></div>
+<div>A verifier dans EduSystem Pro, Personnel &gt; Paie &gt; Verifier un bulletin.</div>
+</div>
+
+<table class="signatures">
+<tr>
+<td>Signature de l'employeur</td>
+<td>Signature de l'employe</td>
+</tr>
+</table>
+
+<div class="pied" th:text="${nomEtab} + ' — bulletin de paie ' + ${nomMois} + ' ' + ${bulletin.annee}">Pied</div>
+
+</body>
+</html>

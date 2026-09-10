@@ -6,12 +6,17 @@ import holyflame.administration.service.EtablissementService;
 import holyflame.administration.util.AnneeScolaireUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +43,9 @@ public class RHController {
     @Autowired private holyflame.administration.service.AnneeScolaireService anneeScolaireService;
     @Autowired private holyflame.administration.service.JournalService journalService;
     @Autowired private holyflame.administration.service.CloturePaieService cloturePaieService;
+    @Autowired private holyflame.administration.service.BulletinPaiePdfService bulletinPaiePdfService;
+    @Autowired private holyflame.administration.service.FileStorageService fileStorageService;
+    @Autowired private DocumentPersonnelRepository documentPersonnelRepository;
 
 
     @GetMapping
@@ -707,6 +715,115 @@ public class RHController {
         return "bulletin-paie";
     }
 
+    /**
+     * Fige le bulletin au moment ou il devient « paye ».
+     *
+     * L'archivage ne doit jamais empecher le paiement : le salaire est verse et comptabilise
+     * de toute facon, et un disque plein ou un dossier non inscriptible ne peut pas remettre
+     * cela en cause. En cas d'echec on le journalise, l'absence d'archive restant visible a
+     * l'ecran par le lien de telechargement qui ne s'affiche pas.
+     */
+    private void archiverLeBulletin(SalaireMensuel s, Personnel personnel) {
+        if (s.isArchive()) return;
+        try {
+            LocalDateTime horodatage = LocalDateTime.now();
+            String code = bulletinPaiePdfService.genererCode(s, horodatage);
+            byte[] pdf = bulletinPaiePdfService.genererPdf(s, code, horodatage);
+            String chemin = fileStorageService.storeBytes(pdf, "pdf", "bulletins-paie");
+
+            s.setArchiveChemin(chemin);
+            s.setArchiveHorodatage(horodatage);
+            s.setCodeVerification(code);
+            salaireRepository.save(s);
+
+            // Le bulletin rejoint les documents de l'employe : c'est la ou on ira le chercher
+            // des mois plus tard, sans avoir a savoir qu'il existe une archive de la paie.
+            DocumentPersonnel doc = new DocumentPersonnel();
+            doc.setPersonnel(personnel);
+            doc.setTypeDocument("BULLETIN_PAIE");
+            doc.setNomOriginal("Bulletin de paie " + nomDuMois(s.getMois()) + " " + s.getAnnee() + ".pdf");
+            doc.setNomFichier(chemin.substring(chemin.lastIndexOf('/') + 1));
+            doc.setCheminFichier(chemin);
+            doc.setContentType("application/pdf");
+            doc.setTaille((long) pdf.length);
+            doc.setDateUpload(horodatage);
+            documentPersonnelRepository.save(doc);
+        } catch (Exception e) {
+            journalService.log("ARCHIVE_BULLETIN_ECHEC", "RH",
+                personnel.getPrenom() + " " + personnel.getNom() + " — " + s.getMois() + "/" + s.getAnnee()
+                + " — le salaire est paye mais le PDF n'a pas pu etre archive : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Telecharge l'archive telle qu'elle a ete produite au paiement — jamais un bulletin
+     * recalcule : c'est tout l'interet de l'avoir figee.
+     */
+    @GetMapping("/salaires/{id}/archive")
+    public ResponseEntity<Resource> archiveBulletin(@PathVariable Long id) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        SalaireMensuel s = salaireRepository.findById(id)
+            .filter(sm -> sm.getPersonnel() != null && etabId != null
+                && etabId.equals(sm.getPersonnel().getEtablissementId()))
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Bulletin introuvable."));
+        return reponseArchive(s);
+    }
+
+    /** Meme document, cote auto-service : l'employe telecharge sa propre preuve. */
+    @GetMapping("/mes-bulletins/{id}/archive")
+    public ResponseEntity<Resource> monArchiveBulletin(@PathVariable Long id) {
+        Personnel personnel = personnelDeLUtilisateurConnecte();
+        SalaireMensuel s = salaireRepository.findById(id)
+            .filter(sm -> sm.getPersonnel() != null && personnel.getId().equals(sm.getPersonnel().getId()))
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.FORBIDDEN, "Bulletin introuvable."));
+        return reponseArchive(s);
+    }
+
+    private ResponseEntity<Resource> reponseArchive(SalaireMensuel s) {
+        if (!s.isArchive()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND,
+                "Ce bulletin n'a pas d'archive : elle n'est produite qu'au moment du paiement.");
+        }
+        try {
+            Resource fichier = fileStorageService.loadAsResource(s.getArchiveChemin());
+            String nom = "bulletin-paie-" + s.getAnnee() + "-" + String.format("%02d", s.getMois()) + ".pdf";
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nom + "\"")
+                .body(fichier);
+        } catch (java.io.IOException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Archive introuvable sur le disque.");
+        }
+    }
+
+    /**
+     * Verifie qu'un bulletin papier correspond bien a une archive.
+     *
+     * La recherche se fait dans le seul etablissement courant : un code valide ailleurs ne
+     * doit rien reveler ici.
+     */
+    @GetMapping("/salaires/verifier")
+    public String verifierBulletin(@RequestParam(required = false) String code, Model model) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        model.addAttribute("code", code);
+        model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
+
+        if (code != null && !code.isBlank()) {
+            SalaireMensuel trouve = salaireRepository.findByCodeVerification(code.trim().toUpperCase())
+                .filter(s -> s.getPersonnel() != null && etabId != null
+                    && etabId.equals(s.getPersonnel().getEtablissementId()))
+                .orElse(null);
+            model.addAttribute("bulletin", trouve);
+            model.addAttribute("nomMois", trouve != null ? nomDuMois(trouve.getMois()) : null);
+            model.addAttribute("recherche", true);
+        }
+        return "bulletin-paie-verification";
+    }
+
     private void remplirModeleBulletin(Model model, SalaireMensuel s, String retourUrl) {
         Long etabId = s.getPersonnel().getEtablissementId();
         List<LigneSalaire> lignes = ligneSalaireRepository.findBySalaireMensuelIdOrderByOrdreAsc(s.getId());
@@ -802,8 +919,11 @@ public class RHController {
             });
         }
 
+        archiverLeBulletin(s, personnel);
+
         journalService.log("SALAIRE_PAYE", "RH",
-            nomPersonnel + " — " + libellePeriode + " — " + s.getNetAPayer() + " F net, comptabilise automatiquement");
+            nomPersonnel + " — " + libellePeriode + " — " + s.getNetAPayer() + " F net, comptabilise automatiquement"
+            + (s.isArchive() ? ", archive sous " + s.getCodeVerification() : ""));
         return "redirect:/personnel/" + pid + "#rh-salaires";
     }
 
