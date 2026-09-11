@@ -67,6 +67,18 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!--
+			H2 en base de fichier, pour les installations ou l'on ne veut pas imposer MySQL a
+			l'ecole. La portee est "runtime" et non "test" : le profil local s'en sert pour de
+			vrai, avec des donnees qui doivent survivre a l'arret du serveur.
+			Voir application-local.properties, et la garde qui interdit le mode memoire.
+		-->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
