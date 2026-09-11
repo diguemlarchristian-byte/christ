@@ -19,7 +19,26 @@
 
 <main class="max-w-2xl mx-auto px-4 md:px-8 py-4 md:py-8">
 <div th:if="${erreurAuth}" class="mb-4 p-3 rounded-lg bg-red-100 text-red-800 text-sm" th:text="${erreurAuth}"></div>
-<div class="bg-white border border-gray-200 rounded-xl p-4 md:p-8">
+<!-- Un enseignant a qui aucune classe n'a encore ete attribuee voyait ce formulaire avec deux
+     menus deroulants vides : il pouvait tout remplir, cliquer, et se heurter a un refus sans
+     comprendre que le probleme n'etait pas sa saisie. Le formulaire n'est pas affiche tant
+     qu'il n'a rien a y choisir, et la marche a suivre est dite. -->
+<div class="bg-white border border-gray-200 rounded-xl p-4 md:p-8" th:if="${#lists.isEmpty(classes)}">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-600">info</span>
+<div>
+<p class="font-bold text-gray-900">Aucune classe ne vous est encore attribuee.</p>
+<p class="text-sm text-gray-600 mt-1">
+Un devoir se rattache toujours a une classe et a une matiere. Demandez a
+l'administration de vous affecter vos classes et vos matieres : elles apparaitront
+ici aussitot.
+</p>
+<a class="inline-block mt-3 text-sm text-blue-900 hover:underline" href="/tableau-enseignant">Retour a mon tableau</a>
+</div>
+</div>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl p-4 md:p-8" th:unless="${#lists.isEmpty(classes)}">
 <form class="space-y-4" enctype="multipart/form-data" method="post" th:action="@{/tableau-enseignant/devoirs}">
 
 <div>
