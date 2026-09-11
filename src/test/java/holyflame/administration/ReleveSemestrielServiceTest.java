@@ -261,6 +261,66 @@ class ReleveSemestrielServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Le bilan annuel, pour la deliberation")
+    class BilanAnnuel {
+
+        private ReleveSemestrielService.Releve semestre(int numero, double moyenne, int credits) {
+            var unites = List.of(ue(numero, "UE" + numero, "Unite " + numero, credits, numero));
+            var elements = List.of(ec(numero, numero, "Cours", 10L + numero, 1.0));
+            var notes = List.of(note(10L + numero, moyenne));
+            return service.calculer(universite(false), etudiant(), numero, unites, elements, notes,
+                Map.of(10L + numero, "Cours"));
+        }
+
+        @Test
+        void lesCreditsDesDeuxSemestresSAdditionnent() {
+            var bilan = service.bilanAnnuel(etudiant(),
+                List.of(semestre(1, 14.0, 30), semestre(2, 12.0, 30)));
+
+            assertEquals(60, bilan.creditsAcquis(), "une annee de licence vaut soixante credits");
+            assertEquals(60, bilan.creditsPossibles());
+        }
+
+        @Test
+        void laMoyenneAnnuellePondereChaqueSemestreParSesCredits() {
+            var bilan = service.bilanAnnuel(etudiant(),
+                List.of(semestre(1, 16.0, 40), semestre(2, 10.0, 20)));
+
+            // (16 x 40 + 10 x 20) / 60 = 14
+            assertEquals(14.0, bilan.moyenneAnnuelle(), 0.001,
+                "un semestre plus charge pese davantage dans l'annee");
+        }
+
+        @Test
+        void unSemestreSansNoteNeTirePasLAnneeVersLeBas() {
+            var unites = List.of(ue(2, "UE2", "A venir", 30, 2));
+            var elements = List.of(ec(2, 2, "Cours", 99L, 1.0));
+            var vide = service.calculer(universite(false), etudiant(), 2, unites, elements,
+                List.of(), Map.of(99L, "Cours"));
+
+            var bilan = service.bilanAnnuel(etudiant(), List.of(semestre(1, 15.0, 30), vide));
+
+            assertEquals(15.0, bilan.moyenneAnnuelle(), 0.001,
+                "le second semestre n'est pas encore evalue : il ne compte pas encore");
+            assertEquals(30, bilan.creditsAcquis());
+            assertEquals(60, bilan.creditsPossibles(), "mais les credits en jeu restent annonces");
+        }
+
+        @Test
+        void uneAnneeSansAucuneNoteNAPasDeMoyenne() {
+            var unites = List.of(ue(1, "UE1", "Unite", 30, 1));
+            var elements = List.of(ec(1, 1, "Cours", 99L, 1.0));
+            var vide = service.calculer(universite(false), etudiant(), 1, unites, elements,
+                List.of(), Map.of(99L, "Cours"));
+
+            var bilan = service.bilanAnnuel(etudiant(), List.of(vide));
+
+            assertTrue(bilan.sansAucuneNote());
+            assertNull(bilan.moyenneAnnuelle());
+        }
+    }
+
     @Test
     void lesElementsDUneUniteNeRemontentPasDansUneAutre() {
         var unites = List.of(

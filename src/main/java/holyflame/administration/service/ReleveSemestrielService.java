@@ -61,6 +61,53 @@ public class ReleveSemestrielService {
         }
     }
 
+    /**
+     * Les deux semestres d'une annee, reunis pour la deliberation.
+     *
+     * Un jury ne statue pas semestre par semestre : il regarde l'annee. Les credits des deux
+     * semestres s'additionnent, et la moyenne annuelle les pondere — un semestre ou l'etudiant
+     * a valide trente credits ne pese pas comme un semestre a demi evalue.
+     */
+    public record BilanAnnuel(Eleve eleve,
+                              List<Releve> semestres,
+                              Double moyenneAnnuelle,
+                              int creditsAcquis,
+                              int creditsPossibles) {
+
+        /** Vrai quand aucun des deux semestres n'a recu la moindre note. */
+        public boolean sansAucuneNote() { return moyenneAnnuelle == null; }
+    }
+
+    /**
+     * Reunit des releves deja calcules. La moyenne annuelle pondere chaque semestre par les
+     * credits qui y ont ete evalues : un semestre encore vide ne compte pas, et ne tire donc
+     * pas l'annee vers le bas.
+     */
+    public BilanAnnuel bilanAnnuel(Eleve eleve, List<Releve> semestres) {
+        double sommePonderee = 0;
+        double sommePoids = 0;
+        int creditsAcquis = 0;
+        int creditsPossibles = 0;
+
+        for (Releve r : semestres) {
+            creditsAcquis += r.creditsAcquis();
+            creditsPossibles += r.creditsPossibles();
+            if (r.moyenneSemestre() == null) continue;
+
+            // Le poids d'un semestre est le nombre de credits qu'il a reellement evalues.
+            int evalues = r.unites().stream()
+                .filter(LigneUnite::estEvaluee)
+                .mapToInt(u -> u.unite().getCredits() != null ? u.unite().getCredits() : 0)
+                .sum();
+            if (evalues <= 0) continue;
+            sommePonderee += r.moyenneSemestre() * evalues;
+            sommePoids += evalues;
+        }
+
+        Double moyenne = sommePoids > 0 ? sommePonderee / sommePoids : null;
+        return new BilanAnnuel(eleve, semestres, moyenne, creditsAcquis, creditsPossibles);
+    }
+
     private final RegimeAcademiqueService regime;
 
     public ReleveSemestrielService(RegimeAcademiqueService regime) {

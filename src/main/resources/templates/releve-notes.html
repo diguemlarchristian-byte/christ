@@ -68,7 +68,15 @@ credits et leurs elements constitutifs viendront de la <b>Structure academique</
 <span th:text="${classe.nom}">Classe</span>
 <span class="text-gray-500 font-normal" th:if="${parcours != null}" th:text="' — ' + ${parcours.libelle}">Parcours</span>
 </h2>
+<div class="flex items-center gap-3">
 <p class="text-sm text-gray-500" th:text="'Semestre ' + ${semestre} + ' · ' + ${#lists.size(unites)} + ' unite(s)'">Semestre</p>
+<!-- Un jury delibere sur un tableau, pas devant un ecran : une ligne par etudiant, une
+     colonne par unite d'enseignement. -->
+<a class="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+   th:href="@{/export/releve-notes/excel(classeId=${classe.id}, semestre=${semestre})}">
+<span class="material-symbols-outlined text-[18px]">download</span> Tableau de deliberation
+</a>
+</div>
 </div>
 
 <!-- Un element sans matiere ne peut pas trouver de notes : la moyenne de son unite serait

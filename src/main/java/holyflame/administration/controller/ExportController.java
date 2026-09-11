@@ -2,6 +2,11 @@ package holyflame.administration.controller;
 
 import holyflame.administration.model.ArticleInventaire;
 import holyflame.administration.model.CategorieComptable;
+import holyflame.administration.model.Classe;
+import holyflame.administration.model.ElementConstitutif;
+import holyflame.administration.model.Etablissement;
+import holyflame.administration.model.Matiere;
+import holyflame.administration.model.UniteEnseignement;
 import holyflame.administration.model.Depense;
 import holyflame.administration.model.Eleve;
 import holyflame.administration.model.Note;
@@ -11,6 +16,10 @@ import holyflame.administration.model.SalaireMensuel;
 import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.ArticleInventaireRepository;
 import holyflame.administration.repository.CategorieComptableRepository;
+import holyflame.administration.repository.ClasseRepository;
+import holyflame.administration.repository.ElementConstitutifRepository;
+import holyflame.administration.repository.MatiereRepository;
+import holyflame.administration.repository.UniteEnseignementRepository;
 import holyflame.administration.repository.DepenseRepository;
 import holyflame.administration.repository.EleveRepository;
 import holyflame.administration.repository.EnseignantAutorisationRepository;
@@ -19,6 +28,7 @@ import holyflame.administration.repository.PaiementRepository;
 import holyflame.administration.repository.SalaireMensuelRepository;
 import holyflame.administration.service.EtablissementService;
 import holyflame.administration.service.InventaireRegles;
+import holyflame.administration.service.ReleveSemestrielService;
 import holyflame.administration.util.AnneeScolaireUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
@@ -32,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +59,11 @@ public class ExportController {
     @Autowired private CategorieComptableRepository categorieComptableRepository;
     @Autowired private ArticleInventaireRepository articleInventaireRepository;
     @Autowired private SalaireMensuelRepository salaireMensuelRepository;
+    @Autowired private ClasseRepository classeRepository;
+    @Autowired private UniteEnseignementRepository uniteEnseignementRepository;
+    @Autowired private ElementConstitutifRepository elementConstitutifRepository;
+    @Autowired private MatiereRepository matiereRepository;
+    @Autowired private ReleveSemestrielService releveSemestrielService;
     @Autowired private EtablissementService etablissementService;
 
     // ── Styles partagés ──────────────────────────────────────────
@@ -191,6 +207,111 @@ public class ExportController {
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"eleves.xlsx\"");
+        wb.write(response.getOutputStream()); wb.close();
+    }
+
+    // ── Export du tableau de deliberation ────────────────────────
+    // Un jury ne delibere pas devant un ecran : il travaille sur un tableau imprime ou partage,
+    // ou chaque etudiant tient sur une ligne. L'ecran des releves montrait les resultats sans
+    // permettre de les sortir.
+    @GetMapping("/releve-notes/excel")
+    public void exportReleveNotes(@RequestParam Long classeId,
+                                  @RequestParam(defaultValue = "1") int semestre,
+                                  HttpServletResponse response) throws IOException {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        Classe classe = classeRepository.findById(classeId)
+            .filter(c -> etabId != null && etabId.equals(c.getEtablissementId()))
+            .orElse(null);
+        if (classe == null || classe.getParcoursId() == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                "Classe introuvable, ou non rattachee a un parcours.");
+            return;
+        }
+
+        List<UniteEnseignement> unites = uniteEnseignementRepository
+            .findByParcoursIdAndSemestreOrderByIntituleAsc(classe.getParcoursId(), semestre);
+        List<ElementConstitutif> elements = new ArrayList<>();
+        for (UniteEnseignement ue : unites) {
+            elements.addAll(elementConstitutifRepository.findByUniteEnseignementIdOrderByIntituleAsc(ue.getId()));
+        }
+        Map<Long, String> matieres = elements.stream()
+            .map(ElementConstitutif::getMatiereId).filter(id -> id != null).distinct().toList().isEmpty()
+            ? Map.of()
+            : matiereRepository.findAllById(elements.stream()
+                .map(ElementConstitutif::getMatiereId).filter(id -> id != null).distinct().toList()).stream()
+                .collect(Collectors.toMap(Matiere::getId, Matiere::getNom, (a, b) -> a));
+
+        Etablissement etab = etablissementService.getCurrentEtablissement();
+        String annee = etablissementService.getAnneeScolaireActive();
+        List<Eleve> etudiants = eleveRepository.findByClasseIdOrderByNomAsc(classeId);
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("Deliberation S" + semestre);
+        XSSFCellStyle hStyle = makeHeaderStyle(wb, (byte)0, (byte)35, (byte)111);
+
+        Row titre = sheet.createRow(0);
+        Cell titreCell = titre.createCell(0);
+        titreCell.setCellValue("DELIBERATION — " + classe.getNom() + " — SEMESTRE " + semestre
+            + " — " + annee);
+        XSSFCellStyle titreStyle = wb.createCellStyle();
+        XSSFFont titreFont = wb.createFont(); titreFont.setBold(true); titreFont.setFontHeightInPoints((short)13);
+        titreStyle.setFont(titreFont); titreCell.setCellStyle(titreStyle);
+
+        // Une colonne par unite d'enseignement : c'est ainsi qu'un jury lit une promotion,
+        // en balayant une unite sur toute la classe avant de statuer.
+        List<String> entetes = new ArrayList<>(List.of("Matricule", "Nom", "Prenom"));
+        for (UniteEnseignement ue : unites) {
+            entetes.add((ue.getCode() != null ? ue.getCode() : ue.getIntitule())
+                + " (" + (ue.getCredits() != null ? ue.getCredits() : 0) + " cr.)");
+        }
+        entetes.addAll(List.of("Moyenne", "Credits acquis", "Credits en jeu", "Mention"));
+
+        Row hRow = sheet.createRow(2);
+        for (int i = 0; i < entetes.size(); i++) {
+            Cell c = hRow.createCell(i); c.setCellValue(entetes.get(i)); c.setCellStyle(hStyle);
+        }
+
+        int row = 3;
+        for (Eleve e : etudiants) {
+            List<Note> notes = noteRepository.findByEleveAndAnneeScolaire(e, annee);
+            var releve = releveSemestrielService.calculer(etab, e, semestre, unites, elements, notes, matieres);
+
+            Row r = sheet.createRow(row++);
+            r.createCell(0).setCellValue(e.getMatricule() != null ? e.getMatricule() : "");
+            r.createCell(1).setCellValue(e.getNom() != null ? e.getNom() : "");
+            r.createCell(2).setCellValue(e.getPrenom() != null ? e.getPrenom() : "");
+
+            int col = 3;
+            for (var u : releve.unites()) {
+                Cell c = r.createCell(col++);
+                // Une unite sans note reste vide : un zero ferait echouer un etudiant sur une
+                // saisie qui n'a pas encore eu lieu, et un jury lit une cellule vide comme telle.
+                if (u.moyenne() == null) {
+                    c.setCellValue("");
+                } else {
+                    c.setCellValue(Math.round(u.moyenne() * 100) / 100.0);
+                }
+            }
+
+            Cell moyenne = r.createCell(col++);
+            if (releve.moyenneSemestre() != null) {
+                moyenne.setCellValue(Math.round(releve.moyenneSemestre() * 100) / 100.0);
+            }
+            r.createCell(col++).setCellValue(releve.creditsAcquis());
+            r.createCell(col++).setCellValue(releve.creditsPossibles());
+            r.createCell(col).setCellValue(releve.mention() != null ? releve.mention() : "");
+        }
+
+        if (unites.isEmpty()) {
+            sheet.createRow(row + 1).createCell(0).setCellValue(
+                "Aucune unite d'enseignement n'est declaree pour ce semestre du parcours.");
+        }
+        for (int i = 0; i < entetes.size(); i++) sheet.autoSizeColumn(i);
+
+        String nomFichier = "deliberation-" + classe.getNom().replaceAll("[^A-Za-z0-9-]", "-")
+            + "-S" + semestre + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + nomFichier + "\"");
         wb.write(response.getOutputStream()); wb.close();
     }
 
