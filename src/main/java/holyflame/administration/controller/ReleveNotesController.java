@@ -94,10 +94,17 @@ public class ReleveNotesController {
         List<UniteEnseignement> unites =
             uniteRepository.findByParcoursIdAndSemestreOrderByIntituleAsc(classe.getParcoursId(), semestre);
         model.addAttribute("unites", unites);
-        model.addAttribute("elementsSansMatiere", elementsSansMatiere(unites));
+
+        // La maquette est la meme pour toute la classe : la charger une fois, et non a chaque
+        // etudiant. Sans cela, une promotion de cinquante etudiants declenchait plusieurs
+        // centaines de requetes pour relire les memes elements et les memes intitules.
+        List<ElementConstitutif> elements = elementsDe(unites);
+        Map<Long, String> matieres = nomsDesMatieres(elements);
+        model.addAttribute("elementsSansMatiere",
+            elements.stream().filter(e -> e.getMatiereId() == null).toList());
 
         model.addAttribute("releves", eleves.stream()
-            .map(e -> calculer(etab, e, semestre, unites))
+            .map(e -> calculer(etab, e, semestre, unites, elements, matieres))
             .toList());
         return "releve-notes";
     }
@@ -130,20 +137,24 @@ public class ReleveNotesController {
         model.addAttribute("nbSemestres", nbSemestresMax(etabId));
         model.addAttribute("nomEtab", etab != null && etab.getNom() != null ? etab.getNom() : "");
         model.addAttribute("anneeScolaire", etablissementService.getAnneeScolaireActive());
-        model.addAttribute("releve", calculer(etab, eleve, semestre, unites));
+        List<ElementConstitutif> elements = elementsDe(unites);
+        model.addAttribute("releve",
+            calculer(etab, eleve, semestre, unites, elements, nomsDesMatieres(elements)));
         return "releve-notes-etudiant";
     }
 
     // ── Calcul ──────────────────────────────────────────────────────────
 
+    /** La maquette — unites, elements, matieres — est fournie deja chargee : elle ne depend
+     *  pas de l'etudiant, seules ses notes changent d'un releve a l'autre. */
     private ReleveSemestrielService.Releve calculer(Etablissement etab, Eleve eleve, int semestre,
-                                                    List<UniteEnseignement> unites) {
-        List<ElementConstitutif> elements = elementsDe(unites);
-
+                                                    List<UniteEnseignement> unites,
+                                                    List<ElementConstitutif> elements,
+                                                    Map<Long, String> matieres) {
         List<Note> notes = noteRepository.findByEleveAndAnneeScolaire(
             eleve, etablissementService.getAnneeScolaireActive());
 
-        return releveService.calculer(etab, eleve, semestre, unites, elements, notes, nomsDesMatieres(elements));
+        return releveService.calculer(etab, eleve, semestre, unites, elements, notes, matieres);
     }
 
     private List<ElementConstitutif> elementsDe(List<UniteEnseignement> unites) {
@@ -152,11 +163,6 @@ public class ReleveNotesController {
             elements.addAll(elementRepository.findByUniteEnseignementIdOrderByIntituleAsc(ue.getId()));
         }
         return elements;
-    }
-
-    /** Les elements qui n'ont pas encore de matiere : leurs notes ne peuvent pas etre trouvees. */
-    private List<ElementConstitutif> elementsSansMatiere(List<UniteEnseignement> unites) {
-        return elementsDe(unites).stream().filter(e -> e.getMatiereId() == null).toList();
     }
 
     private Map<Long, String> nomsDesMatieres(List<ElementConstitutif> elements) {

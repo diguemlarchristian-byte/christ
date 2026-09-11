@@ -29,6 +29,10 @@
 <span class="material-symbols-outlined mr-md">account_tree</span>
 <span class="font-body-md text-body-md">Structure academique</span>
 </a>
+<a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/releve-notes}" th:if="${estUniversite == true}">
+<span class="material-symbols-outlined mr-md">workspace_premium</span>
+<span class="font-body-md text-body-md">Releves de notes</span>
+</a>
 <a class="flex items-center px-md py-sm rounded transition-all duration-200 text-on-tertiary-container/70 hover:text-on-tertiary hover:bg-tertiary-container/50" th:href="@{/passage}" th:if="${estUniversite != true}">
 <span class="material-symbols-outlined mr-md">moving</span>
 <span class="font-body-md text-body-md">Passage de classe</span>

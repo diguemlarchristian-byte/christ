@@ -55,6 +55,24 @@ class CoherenceRegimeUniversitaireTest {
     }
 
     @Test
+    void leReleveEstAtteignableDepuisLesDeuxMenusQuiLeConcernent() throws IOException {
+        // Un ecran sans porte est une capacite invisible. Le releve a failli rester joignable
+        // par la seule adresse : il a ete construit, securise, teste, et oublie des menus.
+        String admin = lire(TEMPLATES.resolve("fragments/nav-links-admin.html"));
+        assertTrue(admin.contains("href=\"/releve-notes\""),
+            "le menu de l'administration doit ouvrir le releve en regime LMD");
+
+        int lien = admin.indexOf("href=\"/releve-notes\"");
+        String bloc = admin.substring(Math.max(0, lien - 800), lien);
+        assertTrue(bloc.contains("estUniversite == true"),
+            "il n'a de sens qu'en regime universitaire");
+
+        String coordination = lire(TEMPLATES.resolve("fragments/nav-links-coordination.html"));
+        assertTrue(coordination.contains("/releve-notes"),
+            "le coordonnateur suit la pedagogie : les resultats le concernent au premier chef");
+    }
+
+    @Test
     void leMenuNeMontreQueDesEcransQueLeRegimeJustifie() throws IOException {
         String menu = lire(TEMPLATES.resolve("fragments/nav-links-admin.html"));
 

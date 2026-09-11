@@ -32,6 +32,12 @@
 <span class="material-symbols-outlined">menu_book</span>
 <span class="font-label-md text-label-md">Matieres</span>
 </a>
+<!-- Les resultats du regime universitaire : c'est l'equivalent des Bulletins en regime
+     scolaire, et il lui faut donc sa propre entree. -->
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'releve-notes'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${estUniversite == true and utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR' or utilisateurConnecte.role == 'COORDONNATEUR' or utilisateurConnecte.role == 'SECRETAIRE')}" href="/releve-notes">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span class="font-label-md text-label-md">Releves de notes</span>
+</a>
 <a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'direction-suivi'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${utilisateurConnecte != null and (utilisateurConnecte.role == 'ADMIN' or utilisateurConnecte.role == 'DIRECTEUR')}" href="/direction/suivi">
 <span class="material-symbols-outlined">fact_check</span>
 <span class="font-label-md text-label-md">Suivi des saisies</span>
