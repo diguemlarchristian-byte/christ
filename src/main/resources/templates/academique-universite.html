@@ -199,13 +199,23 @@
             </table>
 
             <!-- Ajout d'un element -->
-            <form action="/academique-universite/elements" method="post" class="grid gap-sm sm:grid-cols-5 items-end">
+            <form action="/academique-universite/elements" method="post" class="grid gap-sm sm:grid-cols-6 items-end">
               <input type="hidden" name="uniteId" th:value="${ue.id}"/>
               <input type="hidden" name="parcoursId" th:value="${parcoursSelectionne.id}"/>
               <label class="sm:col-span-2 space-y-1">
                 <span class="text-label-sm text-on-surface-variant">Nouvel element</span>
                 <input name="intitule" required placeholder="Travaux diriges"
                        class="w-full px-sm py-2 border border-outline-variant rounded-lg text-body-md"/>
+              </label>
+              <!-- Sans matiere, cet element reste un intitule libre : aucune note ne peut le
+                   rejoindre, et son unite se calcule sans lui. C'est le lien qui manquait. -->
+              <label class="space-y-1">
+                <span class="text-label-sm text-on-surface-variant">Matiere</span>
+                <select name="matiereId"
+                        class="w-full px-sm py-2 border border-outline-variant rounded-lg text-body-md">
+                  <option value="">A rattacher</option>
+                  <option th:each="m : ${matieres}" th:value="${m.id}" th:text="${m.nom}">Matiere</option>
+                </select>
               </label>
               <label class="space-y-1">
                 <span class="text-label-sm text-on-surface-variant">Coefficient</span>

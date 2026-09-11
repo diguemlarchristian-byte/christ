@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Releve de notes - EduSystem Pro</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    /* Le releve se remet en main propre : a l'impression, il ne reste que le document. */
+    @media print {
+      .sans-impression { display: none !important; }
+      body { background: #fff; }
+      .feuille { border: none !important; box-shadow: none !important; padding: 0 !important; }
+    }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<div class="max-w-4xl mx-auto px-4 md:px-8 py-4 md:py-8">
+
+<div class="flex flex-wrap items-center justify-between gap-3 mb-lg sans-impression">
+<a class="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-blue-900"
+   th:href="@{/releve-notes(classeId=${classe.id}, semestre=${semestre})}">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span> Retour a la classe
+</a>
+<div class="flex items-center gap-2">
+<form method="get" th:action="@{/releve-notes/{id}(id=${eleve.id})}">
+<select class="p-2 border border-gray-300 rounded-lg text-sm" name="semestre" onchange="this.form.submit()">
+<option th:each="s : ${#numbers.sequence(1, nbSemestres)}" th:value="${s}"
+        th:text="'Semestre ' + ${s}" th:selected="${s == semestre}">Semestre</option>
+</select>
+</form>
+<button class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span> Imprimer
+</button>
+</div>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl p-6 md:p-10 feuille">
+
+<div class="border-b-2 border-blue-900 pb-3 mb-6">
+<p class="text-lg font-bold text-blue-900" th:text="${nomEtab}">Etablissement</p>
+<p class="text-xs text-gray-500" th:text="'Annee ' + ${anneeScolaire}">Annee</p>
+</div>
+
+<h1 class="text-xl font-bold text-center mb-1">RELEVE DE NOTES</h1>
+<p class="text-center text-gray-500 text-sm mb-6" th:text="'Semestre ' + ${semestre}">Semestre</p>
+
+<table class="w-full text-sm mb-6">
+<tr>
+<td class="py-1 text-gray-500 w-1/4">Etudiant</td>
+<td class="py-1 font-medium" th:text="${eleve.nom} + ' ' + ${eleve.prenom}">Nom</td>
+<td class="py-1 text-gray-500 w-1/6">Matricule</td>
+<td class="py-1" th:text="${eleve.matricule != null and !#strings.isEmpty(eleve.matricule)} ? ${eleve.matricule} : '—'">—</td>
+</tr>
+<tr>
+<td class="py-1 text-gray-500">Classe</td>
+<td class="py-1" th:text="${classe.nom}">Classe</td>
+<td class="py-1 text-gray-500">Parcours</td>
+<td class="py-1" th:text="${parcours != null} ? ${parcours.libelle} : '—'">Parcours</td>
+</tr>
+</table>
+
+<div class="border border-amber-200 bg-amber-50 rounded-lg p-3 mb-5 text-sm text-amber-900"
+     th:if="${releve.sansAucuneNote()}">
+Aucune note n'a encore ete saisie pour ce semestre. Les moyennes et les credits
+apparaitront des les premieres evaluations : ce releve ne conclut rien aujourd'hui.
+</div>
+
+<table class="w-full text-sm border-collapse mb-6" th:if="${!releve.estVide()}">
+<thead>
+<tr class="bg-blue-900 text-white text-xs">
+<th class="px-3 py-2 text-left">Unite d'enseignement</th>
+<th class="px-3 py-2 text-center">Credits</th>
+<th class="px-3 py-2 text-right">Moyenne</th>
+<th class="px-3 py-2 text-left">Obtention</th>
+<th class="px-3 py-2 text-center">Acquis</th>
+</tr>
+</thead>
+<tbody>
+<th:block th:each="u : ${releve.unites}">
+<tr class="border-b border-gray-200">
+<td class="px-3 py-2 font-medium">
+<span th:text="${u.unite.code}">UE</span> — <span th:text="${u.unite.intitule}">Intitule</span>
+</td>
+<td class="px-3 py-2 text-center" th:text="${u.unite.credits != null} ? ${u.unite.credits} : '—'">0</td>
+<td class="px-3 py-2 text-right font-medium">
+<span th:if="${u.moyenne != null}" th:text="${#numbers.formatDecimal(u.moyenne, 1, 2)}">0</span>
+<span th:if="${u.moyenne == null}" class="text-gray-400">—</span>
+</td>
+<td class="px-3 py-2">
+<span th:if="${u.obtention == null}" class="text-gray-400 text-xs">Non evaluee</span>
+<span th:if="${u.obtention != null}" class="px-2 py-0.5 rounded-full text-xs font-medium"
+      th:classappend="${u.obtention.name() == 'ACQUISE'} ? 'bg-green-100 text-green-800'
+                      : (${u.obtention.name() == 'COMPENSEE'} ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')"
+      th:text="${u.obtention.name() == 'ACQUISE'} ? 'Acquise'
+               : (${u.obtention.name() == 'COMPENSEE'} ? 'Compensee' : 'Non validee')">Statut</span>
+</td>
+<td class="px-3 py-2 text-center" th:text="${u.creditsAcquis}">0</td>
+</tr>
+<tr th:each="e : ${u.elements}">
+<td class="px-3 py-1 pl-8 text-gray-600 text-xs" colspan="2">
+<span th:text="${e.element.intitule}">Element</span>
+<span class="text-gray-400" th:if="${e.matiere != null}" th:text="' (' + ${e.matiere} + ')'"></span>
+<span class="text-amber-700" th:if="${e.matiere == null}"> — aucune matiere rattachee</span>
+</td>
+<td class="px-3 py-1 text-right text-gray-600 text-xs">
+<span th:if="${e.moyenne != null}" th:text="${#numbers.formatDecimal(e.moyenne, 1, 2)}">0</span>
+<span th:if="${e.moyenne == null}" class="text-gray-400">—</span>
+</td>
+<td class="px-3 py-1 text-gray-400 text-xs" colspan="2"
+    th:text="${e.nbNotes} + ' note(s) · coefficient ' + ${e.element.coefficient}">notes</td>
+</tr>
+</th:block>
+</tbody>
+</table>
+
+<div class="bg-blue-50 border border-blue-900 rounded-lg p-4" th:if="${!releve.estVide()}">
+<table class="w-full text-sm">
+<tr>
+<td class="py-1 text-blue-900">Moyenne du semestre</td>
+<td class="py-1 text-right font-bold text-lg text-blue-900">
+<span th:if="${releve.moyenneSemestre != null}" th:text="${#numbers.formatDecimal(releve.moyenneSemestre, 1, 2)} + ' / 20'">0</span>
+<span th:if="${releve.moyenneSemestre == null}" class="text-gray-400 text-base">—</span>
+</td>
+</tr>
+<tr>
+<td class="py-1 text-blue-900">Credits acquis</td>
+<td class="py-1 text-right font-bold" th:text="${releve.creditsAcquis} + ' sur ' + ${releve.creditsPossibles}">0</td>
+</tr>
+<tr th:if="${releve.mention != null}">
+<td class="py-1 text-blue-900">Mention</td>
+<td class="py-1 text-right font-bold" th:text="${releve.mention}">Mention</td>
+</tr>
+</table>
+</div>
+
+<div class="text-center text-gray-500 py-8" th:if="${releve.estVide()}">
+Aucune unite d'enseignement n'est declaree pour ce semestre du parcours.
+</div>
+
+<p class="text-[10px] text-gray-400 mt-8 pt-3 border-t border-gray-200">
+Une unite est acquise lorsque sa moyenne atteint le seuil de validation. Elle peut etre
+compensee par la moyenne du semestre lorsque l'etablissement l'autorise, sauf si sa note
+tombe sous la note eliminatoire.
+</p>
+
+</div>
+</div>
+</body>
+</html>

@@ -420,6 +420,15 @@ Aucune matiere enregistree pour l'instant. Cliquez sur « Nouvelle Matiere » po
 <label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Capacite maximale</label>
 <input class="w-full p-2 border border-outline-variant rounded-lg" id="input-capacite-classe" min="1" name="capacite" type="number"/>
 </div>
+<!-- En regime universitaire, la classe est une promotion : son parcours decide des unites
+     d'enseignement de ses etudiants, et donc de leur releve de notes. -->
+<div th:if="${estUniversite == true}">
+<label class="text-xs text-gray-500 block mb-1">Parcours suivi</label>
+<select class="w-full p-2 border border-outline-variant rounded-lg" id="input-parcours-classe" name="parcoursId">
+<option value="">Aucun parcours</option>
+<option th:each="p : ${parcoursDisponibles}" th:value="${p.id}" th:text="${p.libelle}">Parcours</option>
+</select>
+</div>
 <div>
 <label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Salle attitree</label>
 <input class="w-full p-2 border border-outline-variant rounded-lg" id="input-salle-classe" name="salle" type="text"/>

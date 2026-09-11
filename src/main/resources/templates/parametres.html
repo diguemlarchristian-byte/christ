@@ -233,11 +233,8 @@
 <option th:selected="${etablissement == null or etablissement.regimeAcademique == null or etablissement.regimeAcademique == 'SCOLAIRE'}" value="SCOLAIRE">Scolaire — trimestres, matieres a coefficient, bulletins</option>
 <option th:selected="${etablissement != null and etablissement.regimeAcademique == 'LMD'}" value="LMD">Universitaire (LMD) — semestres, unites d'enseignement, credits</option>
 </select>
-<!-- Cette phrase annoncait des releves de notes semestriels et une validation unite par unite.
-     Ni l'un ni l'autre n'existe encore : un administrateur basculait donc son etablissement
-     sur la foi d'une promesse, et perdait au passage les ecrans propres au trimestre. Elle dit
-     desormais ce que la bascule change reellement aujourd'hui. -->
-<p class="text-label-sm text-on-surface-variant">Le mode universitaire fait travailler l'etablissement en semestres, unites d'enseignement et credits. Il ouvre l'ecran <b>Structure academique</b>, ou se declarent les parcours, leurs unites et leurs elements constitutifs, et masque les reglages propres au trimestre. Les seuils de validation et de compensation s'enregistrent ci-dessous. Les notes deja saisies ne sont pas modifiees, et les bulletins restent disponibles.</p>
+<p class="text-label-sm text-on-surface-variant">Le mode universitaire fait travailler l'etablissement en semestres, unites d'enseignement et credits. Il ouvre l'ecran <b>Structure academique</b>, ou se declarent les parcours, leurs unites et leurs elements constitutifs, et masque les reglages propres au trimestre. Les notes deja saisies ne sont pas modifiees, et les bulletins restent disponibles.</p>
+<p class="text-label-sm text-on-surface-variant mt-sm">Les resultats se lisent alors dans <b>Releves de notes</b>, unite par unite, selon les seuils ci-dessous : chaque unite y est acquise, compensee ou non validee, et les credits obtenus sont totalises. Pour qu'un releve se construise, une classe doit indiquer le parcours qu'elle suit, et chaque element constitutif la matiere qui porte ses notes.</p>
 </div>
 
 <!-- Regles de deliberation : n'ont de sens qu'en LMD -->

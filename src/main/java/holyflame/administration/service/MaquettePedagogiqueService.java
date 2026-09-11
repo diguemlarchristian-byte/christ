@@ -140,7 +140,8 @@ public class MaquettePedagogiqueService {
 
     @Transactional
     public ElementConstitutif ajouterElement(Long uniteId, String intitule, Double coefficient,
-                                             Integer volumeHoraire, Long enseignantId, Long etablissementId) {
+                                             Integer volumeHoraire, Long enseignantId,
+                                             Long matiereId, Long etablissementId) {
         ueRepository.findById(uniteId)
             .orElseThrow(() -> new MaquetteRefusee("Unite d'enseignement introuvable."));
         if (intitule == null || intitule.isBlank()) {
@@ -154,6 +155,10 @@ public class MaquettePedagogiqueService {
         ec.setIntitule(intitule.trim());
         ec.setCoefficient(coefficient);
         ec.setVolumeHoraire(volumeHoraire);
+        // La matiere reste facultative : on declare souvent la maquette avant que les matieres
+        // de l'annee existent. Un element sans matiere est signale a l'ecran du releve plutot
+        // que refuse ici, pour ne pas bloquer la construction du programme.
+        ec.setMatiereId(matiereId);
         ec.setEnseignantId(enseignantId);
         ec.setUniteEnseignementId(uniteId);
         ec.setEtablissementId(etablissementId);

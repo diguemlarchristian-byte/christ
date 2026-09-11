@@ -145,7 +145,7 @@ class MaquettePedagogiqueTest {
         void supprimerUneUniteEmporteSesElements() {
             Parcours p = licenceGestion();
             UniteEnseignement ue = maquette.ajouterUnite(p.getId(), null, "A supprimer", 6, 1, null, universite.getId());
-            maquette.ajouterElement(ue.getId(), "Cours magistral", 2.0, 30, null, universite.getId());
+            maquette.ajouterElement(ue.getId(), "Cours magistral", 2.0, 30, null, null, universite.getId());
             assertEquals(1, maquette.elementsDe(ue.getId()).size());
 
             maquette.supprimerUnite(ue.getId());
@@ -248,9 +248,9 @@ class MaquettePedagogiqueTest {
 
             Long moi = 4001L;
             Long collegue = 4002L;
-            maquette.ajouterElement(ue.getId(), "Comptabilite - CM", 2.0, 30, moi, universite.getId());
-            maquette.ajouterElement(ue.getId(), "Comptabilite - TD", 1.0, 20, moi, universite.getId());
-            maquette.ajouterElement(ue.getId(), "Comptabilite - TP", 1.0, 10, collegue, universite.getId());
+            maquette.ajouterElement(ue.getId(), "Comptabilite - CM", 2.0, 30, moi, null, universite.getId());
+            maquette.ajouterElement(ue.getId(), "Comptabilite - TD", 1.0, 20, moi, null, universite.getId());
+            maquette.ajouterElement(ue.getId(), "Comptabilite - TP", 1.0, 10, collegue, null, universite.getId());
 
             List<ElementConstitutif> miens = maquette.elementsDeLEnseignant(moi);
             assertEquals(2, miens.size());
@@ -263,7 +263,7 @@ class MaquettePedagogiqueTest {
             // La maquette se construit avant la rentree : l'affectation vient souvent plus tard.
             Parcours p = licenceGestion();
             UniteEnseignement ue = maquette.ajouterUnite(p.getId(), null, "Droit", 6, 1, null, universite.getId());
-            ElementConstitutif ec = maquette.ajouterElement(ue.getId(), "Droit civil", 1.0, 30, null, universite.getId());
+            ElementConstitutif ec = maquette.ajouterElement(ue.getId(), "Droit civil", 1.0, 30, null, null, universite.getId());
 
             assertEquals(1, maquette.elementsDe(ue.getId()).size());
             assertTrue(ec.getEnseignantId() == null);
@@ -275,7 +275,7 @@ class MaquettePedagogiqueTest {
             UniteEnseignement ue = maquette.ajouterUnite(p.getId(), null, "Compta", 6, 1, null, universite.getId());
 
             assertThrows(MaquetteRefusee.class,
-                () -> maquette.ajouterElement(ue.getId(), "Sans poids", 0.0, 30, null, universite.getId()));
+                () -> maquette.ajouterElement(ue.getId(), "Sans poids", 0.0, 30, null, null, universite.getId()));
         }
     }
 
@@ -328,8 +328,8 @@ class MaquettePedagogiqueTest {
                     "Algorithmique S" + semestre, 18, semestre, "FONDAMENTALE", universite.getId());
                 UniteEnseignement b = maquette.ajouterUnite(p.getId(), "UE-S" + semestre + "-B",
                     "Anglais S" + semestre, 12, semestre, "TRANSVERSALE", universite.getId());
-                maquette.ajouterElement(a.getId(), "Cours S" + semestre, 2.0, 40, null, universite.getId());
-                maquette.ajouterElement(b.getId(), "Anglais S" + semestre, 1.0, 20, null, universite.getId());
+                maquette.ajouterElement(a.getId(), "Cours S" + semestre, 2.0, 40, null, null, universite.getId());
+                maquette.ajouterElement(b.getId(), "Anglais S" + semestre, 1.0, 20, null, null, universite.getId());
             }
 
             assertTrue(maquette.controlerCredits(p, universite).stream().allMatch(EtatSemestre::estComplet));

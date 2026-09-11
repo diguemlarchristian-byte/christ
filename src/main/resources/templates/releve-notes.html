@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Releves de notes - EduSystem Pro</title>
+<link rel="stylesheet" href="/css/fonts.css">
+<script src="/js/tailwind.js"></script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<div th:replace="~{fragments/sidebar-admin :: admin('releve-notes')}"></div>
+<div th:replace="~{fragments/mobile-nav-admin :: nav('releve-notes')}"></div>
+<div class="ml-0 md:ml-sidebar-width">
+
+<header class="bg-white border-b border-gray-200 px-4 md:px-8 py-4">
+<h1 class="text-xl font-bold text-blue-900">Releves de notes</h1>
+<p class="text-gray-500 text-sm">
+Resultats d'un semestre, unite par unite : moyenne, credits acquis et mode d'obtention.
+</p>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-8">
+
+<form class="bg-white border border-gray-200 rounded-xl p-md mb-lg flex flex-col md:flex-row gap-3 md:items-end" method="get" th:action="@{/releve-notes}">
+<div class="flex-1">
+<label class="text-xs text-gray-500 block mb-1">Classe</label>
+<select class="w-full p-2 border border-gray-300 rounded-lg" name="classeId" required="required">
+<option value="">Choisir une classe</option>
+<option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nom}"
+        th:selected="${classeId != null and classeId == c.id}">Classe</option>
+</select>
+</div>
+<div>
+<label class="text-xs text-gray-500 block mb-1">Semestre</label>
+<select class="w-full md:w-40 p-2 border border-gray-300 rounded-lg" name="semestre">
+<option th:each="s : ${#numbers.sequence(1, nbSemestres)}" th:value="${s}"
+        th:text="'Semestre ' + ${s}" th:selected="${s == semestre}">Semestre</option>
+</select>
+</div>
+<button class="px-5 py-2 bg-blue-900 text-white rounded-lg font-medium" type="submit">Afficher</button>
+</form>
+
+<div class="bg-white border border-amber-200 rounded-xl p-lg" th:if="${sansParcours}">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-600">info</span>
+<div>
+<p class="font-bold text-gray-900">
+Cette classe n'est rattachee a aucun parcours.
+</p>
+<p class="text-sm text-gray-600 mt-1">
+Un releve se construit a partir des unites d'enseignement du parcours suivi par la
+classe. Ouvrez la fiche de la classe et choisissez son parcours : les unites, leurs
+credits et leurs elements constitutifs viendront de la <b>Structure academique</b>.
+</p>
+<a class="inline-block mt-3 text-sm text-blue-900 hover:underline" href="/gestion-academique">Fiches des classes</a>
+</div>
+</div>
+</div>
+
+<div th:if="${classe != null and !sansParcours}">
+
+<div class="flex flex-wrap items-baseline justify-between gap-2 mb-md">
+<h2 class="text-lg font-bold text-gray-900">
+<span th:text="${classe.nom}">Classe</span>
+<span class="text-gray-500 font-normal" th:if="${parcours != null}" th:text="' — ' + ${parcours.libelle}">Parcours</span>
+</h2>
+<p class="text-sm text-gray-500" th:text="'Semestre ' + ${semestre} + ' · ' + ${#lists.size(unites)} + ' unite(s)'">Semestre</p>
+</div>
+
+<!-- Un element sans matiere ne peut pas trouver de notes : la moyenne de son unite serait
+     calculee sans lui, et personne ne le verrait. On le dit avant d'afficher les resultats. -->
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-md mb-lg" th:if="${!#lists.isEmpty(elementsSansMatiere)}">
+<p class="font-medium text-amber-900 text-sm">
+<span th:text="${#lists.size(elementsSansMatiere)}">0</span> element(s) constitutif(s) ne sont
+rattaches a aucune matiere : leurs notes ne peuvent pas etre trouvees et n'entrent donc pas
+dans les moyennes ci-dessous.
+</p>
+<p class="text-xs text-amber-800 mt-1">
+<span th:each="e,i : ${elementsSansMatiere}" th:text="${e.intitule} + (${i.last} ? '' : ', ')">Element</span>
+</p>
+<a class="inline-block mt-2 text-sm text-blue-900 hover:underline" href="/academique-universite">Rattacher dans la Structure academique</a>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden" th:if="${!#lists.isEmpty(unites)}">
+<table class="w-full text-left text-sm">
+<thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+<tr>
+<th class="px-5 py-3">Etudiant</th>
+<th class="px-5 py-3 text-right">Moyenne</th>
+<th class="px-5 py-3 text-right">Credits</th>
+<th class="px-5 py-3">Mention</th>
+<th class="px-5 py-3 text-right">Releve</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100">
+<tr th:if="${#lists.isEmpty(releves)}">
+<td class="px-5 py-8 text-center text-gray-500" colspan="5">Aucun etudiant inscrit dans cette classe.</td>
+</tr>
+<tr th:each="r : ${releves}">
+<td class="px-5 py-3 font-medium" th:text="${r.eleve.nom} + ' ' + ${r.eleve.prenom}">Etudiant</td>
+<td class="px-5 py-3 text-right">
+<span th:if="${r.moyenneSemestre != null}" class="font-bold"
+      th:classappend="${r.moyenneSemestre >= 10} ? 'text-green-700' : 'text-red-600'"
+      th:text="${#numbers.formatDecimal(r.moyenneSemestre, 1, 2)} + ' / 20'">0</span>
+<span th:if="${r.moyenneSemestre == null}" class="text-gray-400 text-xs">Pas encore de note</span>
+</td>
+<td class="px-5 py-3 text-right" th:text="${r.creditsAcquis} + ' / ' + ${r.creditsPossibles}">0</td>
+<td class="px-5 py-3 text-gray-600" th:text="${r.mention != null} ? ${r.mention} : '—'">—</td>
+<td class="px-5 py-3 text-right">
+<a class="text-blue-900 hover:underline text-xs"
+   th:href="@{/releve-notes/{id}(id=${r.eleve.id}, semestre=${semestre})}">Ouvrir</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-xl p-lg text-center text-gray-500" th:if="${#lists.isEmpty(unites)}">
+Aucune unite d'enseignement n'est declaree pour le semestre <span th:text="${semestre}">1</span>
+de ce parcours.
+<a class="block mt-2 text-sm text-blue-900 hover:underline" href="/academique-universite">Completer la Structure academique</a>
+</div>
+
+</div>
+
+</main>
+</div>
+</body>
+</html>

@@ -18,6 +18,12 @@ public class Classe {
     private String niveau;
     private String anneeScolaire;
     private Long etablissementId;
+    // Parcours suivi par cette classe, en regime universitaire. Une classe y tient lieu de
+    // promotion : « L1 Gestion A » suit la Licence Gestion. C'est ce qui permet de savoir, pour
+    // un etudiant, quelles unites d'enseignement le concernent — un eleve appartient deja a une
+    // classe, il n'y a donc rien a rattacher eleve par eleve.
+    private Long parcoursId;
+
     private Long professeurTitulaireId;
     private Integer capacite;
     private String salle;
@@ -61,6 +67,9 @@ public class Classe {
 
     public Long getEtablissementId() { return etablissementId; }
     public void setEtablissementId(Long etablissementId) { this.etablissementId = etablissementId; }
+    public Long getParcoursId() { return parcoursId; }
+    public void setParcoursId(Long parcoursId) { this.parcoursId = parcoursId; }
+
     public Long getProfesseurTitulaireId() { return professeurTitulaireId; }
     public void setProfesseurTitulaireId(Long professeurTitulaireId) { this.professeurTitulaireId = professeurTitulaireId; }
     public Integer getCapacite() { return capacite; }

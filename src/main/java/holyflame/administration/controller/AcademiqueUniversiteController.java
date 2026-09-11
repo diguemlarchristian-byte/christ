@@ -46,6 +46,8 @@ public class AcademiqueUniversiteController {
 
     @Autowired private MaquettePedagogiqueService maquetteService;
     @Autowired private ParcoursRepository parcoursRepository;
+
+    @Autowired private holyflame.administration.repository.MatiereRepository matiereRepository;
     @Autowired private UtilisateurRepository utilisateurRepository;
     @Autowired private EtablissementService etablissementService;
 
@@ -116,6 +118,10 @@ public class AcademiqueUniversiteController {
 
         model.addAttribute("creditsAttendus", etablissement != null && etablissement.getCreditsParSemestre() != null
             ? etablissement.getCreditsParSemestre() : 30);
+        // Les matieres alimentent le rattachement d'un element constitutif : c'est par elles que
+        // les notes des enseignants rejoignent les unites d'enseignement.
+        model.addAttribute("matieres", etabId != null
+            ? matiereRepository.findByEtablissementIdOrderByNomAsc(etabId) : java.util.List.of());
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
         return "academique-universite";
     }
@@ -179,6 +185,7 @@ public class AcademiqueUniversiteController {
                                  @RequestParam(required = false) Double coefficient,
                                  @RequestParam(required = false) Integer volumeHoraire,
                                  @RequestParam(required = false) Long enseignantId,
+                                 @RequestParam(required = false) Long matiereId,
                                  RedirectAttributes ra) {
         Long etabId = etablissementService.getCurrentEtablissementId();
         if (!appartientALEtablissement(parcoursId, etabId)) {
@@ -186,7 +193,7 @@ public class AcademiqueUniversiteController {
             return "redirect:/academique-universite";
         }
         try {
-            maquetteService.ajouterElement(uniteId, intitule, coefficient, volumeHoraire, enseignantId, etabId);
+            maquetteService.ajouterElement(uniteId, intitule, coefficient, volumeHoraire, enseignantId, matiereId, etabId);
             ra.addFlashAttribute("succes", "Element constitutif ajoute.");
         } catch (MaquetteRefusee e) {
             ra.addFlashAttribute("erreur", e.getMessage());

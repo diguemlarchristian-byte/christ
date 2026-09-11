@@ -26,6 +26,9 @@ import java.util.stream.Collectors;
 public class GestionAcademiqueController {
 
     @Autowired private ClasseRepository classeRepository;
+
+
+    @Autowired private holyflame.administration.repository.ParcoursRepository parcoursRepository;
     @Autowired private MatiereRepository matiereRepository;
     @Autowired private EleveRepository eleveRepository;
     @Autowired private UtilisateurRepository utilisateurRepository;
@@ -93,6 +96,10 @@ public class GestionAcademiqueController {
         model.addAttribute("enseignants", enseignants);
         model.addAttribute("nbClasses", classes.size());
         model.addAttribute("nbMatieres", matieres.size());
+        // Parcours proposables a une classe en regime universitaire.
+        model.addAttribute("parcoursDisponibles", etabId != null
+            ? parcoursRepository.findByEtablissementIdAndActifTrueOrderByLibelleAsc(etabId)
+            : java.util.List.of());
         model.addAttribute("utilisateurConnecte", etablissementService.getCurrentUtilisateur());
         return "gestion-academique";
     }

@@ -92,6 +92,10 @@ public class ClasseGestionController {
             @RequestParam(required = false) Integer capacite,
             @RequestParam(required = false) String salle,
             @RequestParam(required = false) String notes,
+            // En regime universitaire, la classe tient lieu de promotion : son parcours dit
+            // quelles unites d'enseignement concernent ses etudiants, et sans lui aucun releve
+            // de notes ne peut etre construit.
+            @RequestParam(required = false) Long parcoursId,
             RedirectAttributes ra) {
 
         Long etabId = etablissementService.getCurrentEtablissementId();
@@ -120,6 +124,7 @@ public class ClasseGestionController {
         classe.setAnneeScolaire(anneeResolue);
         classe.setProfesseurTitulaireId(professeurTitulaireId);
         classe.setCapacite(capacite);
+        classe.setParcoursId(parcoursId);
         classe.setSalle(salle);
         classe.setNotes(notes);
         classe.setEtablissementId(etabId);
@@ -137,6 +142,10 @@ public class ClasseGestionController {
             @RequestParam(required = false) Integer capacite,
             @RequestParam(required = false) String salle,
             @RequestParam(required = false) String notes,
+            // En regime universitaire, la classe tient lieu de promotion : son parcours dit
+            // quelles unites d'enseignement concernent ses etudiants, et sans lui aucun releve
+            // de notes ne peut etre construit.
+            @RequestParam(required = false) Long parcoursId,
             RedirectAttributes ra) {
 
         Long etabId = etablissementService.getCurrentEtablissementId();
@@ -169,6 +178,7 @@ public class ClasseGestionController {
         classe.setAnneeScolaire(anneeScolaire);
         classe.setProfesseurTitulaireId(professeurTitulaireId);
         classe.setCapacite(capacite);
+        classe.setParcoursId(parcoursId);
         classe.setSalle(salle);
         classe.setNotes(notes);
         classeRepository.save(classe);

@@ -156,6 +156,9 @@ public class SecurityConfig {
                 // Maquette pedagogique universitaire (parcours, unites, elements) : pendant de
                 // /gestion-academique en regime LMD. Le COORDONNATEUR y accede car il suit la
                 // maquette de sa filiere ; le DIRECTEUR non, comme sur les autres ecrans academiques.
+                // Releve de notes semestriel : meme public que les bulletins en regime scolaire —
+                // ceux qui editent et remettent les resultats aux etudiants.
+                .requestMatchers("/releve-notes", "/releve-notes/**").hasAnyRole("ADMIN", "DIRECTEUR", "COORDONNATEUR", "SECRETAIRE")
                 .requestMatchers("/academique-universite/**").hasAnyRole("ADMIN", "COORDONNATEUR")
                 .requestMatchers("/gestion-classes/**").hasAnyRole("ADMIN", "DIRECTEUR")
                 .requestMatchers("/gestion-salles/**").hasAnyRole("ADMIN", "DIRECTEUR")

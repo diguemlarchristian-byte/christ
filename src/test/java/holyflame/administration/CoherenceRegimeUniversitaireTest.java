@@ -68,22 +68,36 @@ class CoherenceRegimeUniversitaireTest {
     }
 
     @Test
-    void lEcranDeParametresNePrometPasUnReleveQuiNExistePas() throws IOException {
+    void lEcranDeParametresNAnnonceQueDesEcransQuiExistent() throws IOException {
         String parametres = lire(TEMPLATES.resolve("parametres.html"));
 
         int regime = parametres.indexOf("Le mode universitaire");
         assertTrue(regime > 0, "la description du regime doit rester lisible d'un bloc");
-        String description = parametres.substring(regime, Math.min(parametres.length(), regime + 700));
+        String description = parametres.substring(regime, Math.min(parametres.length(), regime + 1400));
 
-        // Tant qu'aucun ecran ne produit de releve semestriel, la description ne doit pas
-        // l'annoncer. Quand il existera, remplacer cette assertion par sa reciproque.
-        assertFalse(releveSemestrielExiste(),
-            "un releve de notes semestriel existe maintenant : remettez-le dans la description "
-            + "du regime et retirez cette garde");
-        assertFalse(description.contains("releves de notes semestriels"),
-            "l'ecran promettait un releve semestriel qui n'est produit nulle part");
-        assertFalse(description.contains("valider les etudiants unite par unite"),
-            "les regles de validation sont enregistrees, mais appliquees a aucun etudiant");
+        // Cette assertion etait longtemps l'inverse : la description promettait un releve
+        // semestriel que rien ne produisait, et la garde interdisait de l'annoncer. Le releve
+        // existe desormais, la garde a donc ete retournee — l'ecran doit le nommer.
+        assertTrue(releveSemestrielExiste(),
+            "le releve semestriel a disparu : la description du regime le promet toujours");
+        assertTrue(description.contains("Releves de notes"),
+            "la bascule en LMD doit dire ou les resultats se lisent");
+        assertTrue(description.contains("acquise, compensee ou non validee"),
+            "et ce que le releve etablit pour chaque unite");
+    }
+
+    @Test
+    void laDescriptionDitCeQuIlFautRenseignerPourQuUnReleveExiste() throws IOException {
+        String parametres = lire(TEMPLATES.resolve("parametres.html"));
+        int regime = parametres.indexOf("Le mode universitaire");
+        String description = parametres.substring(regime, Math.min(parametres.length(), regime + 1400));
+
+        // Les deux maillons de la chaine sont invisibles depuis cet ecran : sans eux le releve
+        // reste vide, et l'administrateur n'a aucune raison de deviner lesquels remplir.
+        assertTrue(description.contains("le parcours qu'elle suit"),
+            "une classe sans parcours ne renvoie a aucune unite d'enseignement");
+        assertTrue(description.contains("la matiere qui porte ses notes"),
+            "un element sans matiere ne peut recevoir aucune note");
     }
 
     @Test

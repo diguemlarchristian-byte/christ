@@ -27,6 +27,15 @@ public class ElementConstitutif {
     /** Volume horaire annonce dans la maquette, a titre indicatif. */
     private Integer volumeHoraire;
 
+    // Matiere qui porte les notes de cet element constitutif. Sans ce lien, un element n'etait
+    // qu'un intitule libre : « Algebre lineaire » dans la maquette et la matiere « Mathematiques »
+    // ou les enseignants saisissent restaient deux lignes etrangeres l'une a l'autre, et aucune
+    // note ne pouvait remonter jusqu'a l'unite d'enseignement.
+    //
+    // Facultative : on declare souvent la maquette avant que les matieres de l'annee existent.
+    // Un element sans matiere est signale au releve plutot que refuse a la saisie.
+    private Long matiereId;
+
     @Column(nullable = false)
     private Long uniteEnseignementId;
 
@@ -46,6 +55,9 @@ public class ElementConstitutif {
     public void setCoefficient(Double coefficient) { this.coefficient = coefficient; }
     public Integer getVolumeHoraire() { return volumeHoraire; }
     public void setVolumeHoraire(Integer volumeHoraire) { this.volumeHoraire = volumeHoraire; }
+    public Long getMatiereId() { return matiereId; }
+    public void setMatiereId(Long matiereId) { this.matiereId = matiereId; }
+
     public Long getUniteEnseignementId() { return uniteEnseignementId; }
     public void setUniteEnseignementId(Long uniteEnseignementId) { this.uniteEnseignementId = uniteEnseignementId; }
     public Long getEnseignantId() { return enseignantId; }
