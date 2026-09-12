@@ -47,9 +47,8 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
 
         // 1. SUPER_ADMIN (aucun établissement)
-        if (utilisateurRepository.findByEmail("superadmin@holyflame.com").isEmpty()) {
-            saveUser("Super", "Admin", "superadmin@holyflame.com", "super123", "SUPER_ADMIN", null);
-        }
+        saveAdmin("Super", "Admin", "SUPER_ADMIN_EMAIL", "superadmin@holyflame.com",
+            "SUPER_ADMIN_PASSWORD", "SUPER_ADMIN", null);
 
         // 2. Établissement par défaut
         Etablissement defEtab = etablissementRepository.findByCodeAcces("HF-DEMO-001")
@@ -68,8 +67,8 @@ public class DataInitializer implements CommandLineRunner {
         Long etabId = defEtab.getId();
 
         // 3. Utilisateurs démo liés à l'établissement par défaut (chaque vérification est indépendante)
-        if (utilisateurRepository.findByEmail("admin@holyflame.com").isEmpty())
-            saveUser("Admin",   "HolyFlame", "admin@holyflame.com",      "admin123",  "ADMIN",      defEtab);
+        saveAdmin("Admin", "HolyFlame", "ADMIN_EMAIL", "admin@holyflame.com",
+            "ADMIN_PASSWORD", "ADMIN", defEtab);
         if (utilisateurRepository.findByEmail("directeur@holyflame.com").isEmpty())
             saveUser("Kone",    "Ibrahim",   "directeur@holyflame.com",  "direct123", "DIRECTEUR",  defEtab);
         if (utilisateurRepository.findByEmail("secretaire@holyflame.com").isEmpty())
@@ -430,6 +429,65 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Inventaire : " + orphelins + " article(s) sans etablissement laisse(s)"
                 + " de cote (" + etablissements.size() + " etablissements en base, rattachement"
                 + " a faire a la main).");
+        }
+    }
+
+    /**
+     * Adresse et mot de passe d'un compte d'administration, lus dans l'environnement.
+     *
+     * Les comptes de demonstration livres avec l'application ont des mots de passe ecrits dans
+     * ce fichier. C'est commode pour decouvrir le logiciel sur sa propre machine ; c'est
+     * inacceptable des que l'adresse devient publique, puisque le code est lisible par
+     * quiconque ouvre le depot.
+     *
+     * Les deux comptes qui donnent tout pouvoir — le super-administrateur et l'administrateur
+     * de l'etablissement — se reglent donc par variables d'environnement. Et si l'on n'en
+     * fournit aucune, le mot de passe n'est pas un defaut connu : il est tire au hasard et
+     * affiche une seule fois dans le journal de demarrage. Personne ne peut deviner un compte
+     * qui n'existait pas avant le premier lancement.
+     */
+    private String valeurOuDefaut(String variable, String defaut) {
+        String v = System.getenv(variable);
+        return v != null && !v.isBlank() ? v.trim() : defaut;
+    }
+
+    /** Mot de passe imprevisible, lisible et transcriptible : pas de caracteres ambigus. */
+    private String motDePasseTireAuHasard() {
+        final String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#@%+=?";
+        java.security.SecureRandom hasard = new java.security.SecureRandom();
+        StringBuilder sb = new StringBuilder(20);
+        for (int i = 0; i < 20; i++) sb.append(alphabet.charAt(hasard.nextInt(alphabet.length())));
+        return sb.toString();
+    }
+
+    /**
+     * Cree un compte d'administration, et annonce ses identifiants si on ne les a pas choisis.
+     *
+     * L'annonce tient en plusieurs lignes encadrees : dans un journal de demarrage qui defile,
+     * un mot de passe glisse au fil du texte se perd, et il ne sera plus jamais affiche.
+     */
+    private void saveAdmin(String nom, String prenom, String varEmail, String emailDefaut,
+                           String varMotDePasse, String role, Etablissement etab) {
+        String email = valeurOuDefaut(varEmail, emailDefaut);
+        if (utilisateurRepository.findByEmail(email).isPresent()) return;
+
+        String fourni = System.getenv(varMotDePasse);
+        boolean tireAuHasard = fourni == null || fourni.isBlank();
+        String motDePasse = tireAuHasard ? motDePasseTireAuHasard() : fourni.trim();
+
+        saveUser(nom, prenom, email, motDePasse, role, etab);
+
+        if (tireAuHasard) {
+            System.out.println();
+            System.out.println("==========================================================");
+            System.out.println("  COMPTE " + role + " CREE");
+            System.out.println("  Adresse      : " + email);
+            System.out.println("  Mot de passe : " + motDePasse);
+            System.out.println();
+            System.out.println("  Notez-le maintenant : il ne sera plus jamais affiche.");
+            System.out.println("  Pour le choisir vous-meme, definissez " + varMotDePasse + ".");
+            System.out.println("==========================================================");
+            System.out.println();
         }
     }
 
