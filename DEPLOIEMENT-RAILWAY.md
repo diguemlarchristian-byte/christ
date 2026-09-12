@@ -19,6 +19,23 @@ fin sur `Unable to access jarfile`.
 La première construction prend une dizaine de minutes : Maven télécharge ses dépendances,
 puis compile. Les suivantes sont plus rapides.
 
+## 1 bis. Vérifier que Railway construit bien depuis le Dockerfile
+
+C'est le point qui a coûté le plus de temps, et il ne se voit pas.
+
+Railway choisit seul un constructeur. S'il retient **Railpack**, il ignore le `Dockerfile`,
+devine qu'il a affaire à un projet Maven et fabrique la commande
+`java -jar target/administration.jar`. Or `target/` n'existe que pendant la compilation :
+l'image finale ne contient que `/app/app.jar`. Le conteneur redémarre alors indéfiniment
+sur `Unable to access jarfile`, tout en affichant « Online » — puisque « Online » ne dit
+que « le conteneur tourne », pas « le programme fonctionne ».
+
+Dans **Settings → Build**, le chemin du Dockerfile doit être renseigné (`Dockerfile`). Et
+dans **Settings → Deploy**, le champ **Custom Start Command** doit rester **vide** :
+l'`ENTRYPOINT` de l'image sait démarrer l'application. Un `Procfile` recopié une fois dans
+ce champ y reste même après avoir été supprimé du dépôt — le vider est un geste à faire
+dans le tableau de bord, le retirer du dépôt n'y suffit pas.
+
 ## 2. Ajouter la base de données
 
 Dans le projet Railway : **New → Database → Add MySQL**.
