@@ -3,8 +3,13 @@
 Une fois l'hébergement en place, le logiciel tourne chez Railway. Vous n'avez plus besoin
 de votre machine : l'école se connecte à une adresse sur Internet, depuis n'importe où.
 
-Ce document décrit ce qu'il faut faire une seule fois. Le dépôt contient déjà tout ce que
-Railway attend — `Dockerfile` pour la construction, `Procfile` en secours.
+Ce document décrit ce qu'il faut faire une seule fois. Le dépôt contient déjà ce que
+Railway attend : un `Dockerfile`, qui construit l'image et lance le jar.
+
+Il n'y a **pas** de `Procfile`, et il ne faut pas en remettre un. Railway lui donne la
+priorité sur le `Dockerfile` : la commande du `Procfile` s'exécutait alors hors de l'image
+construite, où `target/administration.jar` n'existe pas, et le conteneur redémarrait sans
+fin sur `Unable to access jarfile`.
 
 ## 1. Créer le projet
 
@@ -31,6 +36,9 @@ Dans le service de l'application, onglet **Variables**, ajoutez :
 | `SPRING_DATASOURCE_USERNAME` | `${{MySQL.MYSQLUSER}}` |
 | `SPRING_DATASOURCE_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
 | `APP_BASE_URL` | l'adresse publique que Railway vous attribue |
+| `APP_UPLOAD_DIR` | `/app/donnees/fichiers` — voir le volume, plus bas |
+| `SUPER_ADMIN_EMAIL` | l'adresse de la personne qui administre le logiciel |
+| `ADMIN_EMAIL` | l'adresse de la direction de l'établissement |
 
 La syntaxe `${{MySQL.…}}` est celle de Railway : elle référence le service MySQL sans
 recopier de mot de passe à la main, et suit automatiquement une éventuelle rotation.
@@ -50,10 +58,14 @@ C'est celle que l'école utilisera.
 
 **Les fichiers téléversés.** Justificatifs, photos, bulletins de paie archivés sont écrits
 sur le disque du conteneur. Railway redéploie à chaque mise à jour du code, et **ce disque
-est alors remis à zéro**. Ajoutez un **Volume** monté sur le dossier de téléversement, et
-pointez `APP_UPLOAD_DIR` dessus. Sans ce volume, les pièces justificatives disparaîtraient
-à la première mise à jour — la base, elle, est préservée puisqu'elle vit dans le service
-MySQL.
+est alors remis à zéro**. Sur le service de l'application : **Settings → Volumes → Add
+Volume**, chemin de montage `/app/donnees`, puis la variable `APP_UPLOAD_DIR` à
+`/app/donnees/fichiers`. Sans ce volume, les pièces justificatives disparaîtraient à la
+première mise à jour — la base, elle, est préservée puisqu'elle vit dans le service MySQL,
+qui a son propre volume.
+
+Ce volume est à poser **avant** la première utilisation réelle. Posé plus tard, il masque
+le dossier existant : ce qui avait déjà été téléversé ne serait plus visible.
 
 **Les sauvegardes.** Railway sauvegarde la base selon le plan souscrit, mais un
 hébergement n'est pas une sauvegarde : gardez l'habitude d'exporter régulièrement, depuis
@@ -61,8 +73,14 @@ l'application, la paie du mois et les documents comptables. Un export que vous d
 dépend d'aucun fournisseur.
 
 **La première connexion.** Au premier démarrage, le logiciel crée le compte
-super-administrateur et un établissement de démonstration. Changez ces mots de passe avant
-d'ouvrir l'adresse à quiconque.
+super-administrateur et celui de la direction. Leurs mots de passe ne sont plus écrits dans
+le dépôt : à défaut de `SUPER_ADMIN_PASSWORD` et `ADMIN_PASSWORD`, chacun est tiré au
+hasard et **affiché une seule fois dans les Deploy Logs**, dans un encadré. Relevez-le à ce
+moment-là ; il ne réapparaîtra pas.
+
+Définir ces deux variables à la main fonctionne aussi, mais inscrit le mot de passe dans la
+configuration Railway. Le laisser tirer au hasard et le relever dans les journaux évite
+qu'il traîne quelque part.
 
 ## L'installation locale reste possible
 
