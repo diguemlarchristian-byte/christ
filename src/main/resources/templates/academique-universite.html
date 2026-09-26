@@ -277,13 +277,17 @@
                  class="w-full px-sm py-2 border border-outline-variant rounded-lg text-body-md nombre"/>
         </label>
         <label class="space-y-1">
-          <span class="text-label-sm text-on-surface-variant">Type</span>
+          <span class="text-label-sm text-on-surface-variant">Bloc de compétences</span>
           <select name="type" class="w-full px-sm py-2 border border-outline-variant rounded-lg text-body-md">
-            <option value="FONDAMENTALE">Fondamentale</option>
-            <option value="METHODOLOGIQUE">Methodologique</option>
-            <option value="DECOUVERTE">Decouverte</option>
-            <option value="TRANSVERSALE">Transversale</option>
+            <option value="FONDAMENTALE">Fondamentale — bloc disciplinaire</option>
+            <option value="METHODOLOGIQUE">Méthodologique — bloc transversal</option>
+            <option value="DECOUVERTE">Découverte — bloc transversal</option>
+            <option value="TRANSVERSALE">Transversale — bloc transversal</option>
           </select>
+          <span class="block text-label-sm text-on-surface-variant">
+            Décide les compensations : une note du bloc transversal ne rachète jamais
+            un échec du bloc disciplinaire.
+          </span>
         </label>
         <div>
           <button type="submit" class="w-full px-md py-2 bg-primary text-on-primary rounded-lg text-label-md">

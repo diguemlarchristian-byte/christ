@@ -140,7 +140,36 @@ public class ReleveNotesController {
         List<ElementConstitutif> elements = elementsDe(unites);
         model.addAttribute("releve",
             calculer(etab, eleve, semestre, unites, elements, nomsDesMatieres(elements)));
+
+        // Le jury ne statue pas semestre par semestre : il regarde l'annee. Un bloc passe
+        // sous dix a un semestre et se rattrape a l'autre, et les credits perdus reviennent.
+        // Ce cumul existait, calcule et teste, mais n'etait affiche nulle part : l'etudiant
+        // lisait un semestre ajourne sans voir que son annee le rattrapait.
+        int[] paire = semestresDeLAnnee(semestre);
+        List<ReleveSemestrielService.Releve> releves = new ArrayList<>();
+        for (int s : paire) {
+            List<UniteEnseignement> u = uniteRepository
+                .findByParcoursIdAndSemestreOrderByIntituleAsc(classe.getParcoursId(), s);
+            if (u.isEmpty()) continue;
+            List<ElementConstitutif> e = elementsDe(u);
+            releves.add(calculer(etab, eleve, s, u, e, nomsDesMatieres(e)));
+        }
+        model.addAttribute("bilan", releveService.bilanAnnuel(etab, eleve, releves));
+        model.addAttribute("semestresDeLAnnee", paire);
+
         return "releve-notes-etudiant";
+    }
+
+    /**
+     * Les deux semestres de l'annee qui contient celui-ci.
+     *
+     * Une annee universitaire vaut soixante credits repartis sur deux semestres : S1 et S2
+     * pour la premiere annee, S3 et S4 pour la deuxieme, et ainsi de suite. Le semestre
+     * affiche suffit donc a designer sa paire, sans nouvelle donnee a saisir.
+     */
+    private int[] semestresDeLAnnee(int semestre) {
+        int impair = semestre % 2 == 1 ? semestre : semestre - 1;
+        return new int[]{impair, impair + 1};
     }
 
     // ── Calcul ──────────────────────────────────────────────────────────

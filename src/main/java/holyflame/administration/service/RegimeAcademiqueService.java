@@ -96,15 +96,28 @@ public class RegimeAcademiqueService {
     }
 
     /**
-     * Sort d'une unite, une fois la moyenne du semestre connue.
+     * Vrai lorsque cette moyenne d'ensemble rachete une unite restee sous le seuil.
      *
-     * @param moyenneSemestre moyenne du semestre ponderee par les credits.
+     * L'ensemble en question est un bloc de competences, et non le semestre entier : la
+     * compensation ne traverse pas les blocs. Un etudiant excellent en langues et en
+     * methodologie ne rachete pas, avec elles, un echec dans la matiere qui fonde son
+     * diplome — c'est tout l'objet de la separation en deux blocs.
+     *
+     * La note eliminatoire, si l'etablissement en declare une, garde le dernier mot : sous
+     * ce plancher, plus rien ne rachete l'unite.
      */
-    public ModeObtention statuer(Etablissement etab, double moyenneUE, double moyenneSemestre) {
+    public boolean compensePar(Etablissement etab, double moyenneUE, double moyenneEnsemble) {
+        return moyenneEnsemble >= seuilValidation(etab) && peutEtreCompensee(etab, moyenneUE);
+    }
+
+    /**
+     * Sort d'une unite, une fois connue la moyenne du bloc auquel elle appartient.
+     *
+     * @param moyenneBloc moyenne du bloc de competences, ponderee par les credits.
+     */
+    public ModeObtention statuer(Etablissement etab, double moyenneUE, double moyenneBloc) {
         if (estAcquise(etab, moyenneUE)) return ModeObtention.ACQUISE;
-        if (moyenneSemestre >= seuilValidation(etab) && peutEtreCompensee(etab, moyenneUE)) {
-            return ModeObtention.COMPENSEE;
-        }
+        if (compensePar(etab, moyenneUE, moyenneBloc)) return ModeObtention.COMPENSEE;
         return ModeObtention.NON_VALIDEE;
     }
 

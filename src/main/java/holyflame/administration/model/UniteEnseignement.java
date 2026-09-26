@@ -42,6 +42,36 @@ public class UniteEnseignement {
     /** FONDAMENTALE, METHODOLOGIQUE, DECOUVERTE, TRANSVERSALE. */
     private String type = "FONDAMENTALE";
 
+    /** Bloc disciplinaire : les unites du coeur de metier de la formation. */
+    public static final String CATEGORIE_FONDAMENTALE = "A";
+    /** Blocs transversal, linguistique et preprofessionnel, reunis. */
+    public static final String CATEGORIE_TRANSVERSALE = "B";
+
+    /**
+     * Le bloc de competences auquel cette unite appartient.
+     *
+     * La compensation ne traverse pas les blocs : une excellente note de langue ne rachete
+     * pas un echec dans la matiere qui fonde le diplome. Un etudiant peut donc avoir la
+     * moyenne au semestre et ne capitaliser qu'une partie de ses credits, parce qu'un des
+     * deux blocs reste sous dix.
+     *
+     * Les quatre types declares se ramenent a deux blocs : fondamentale d'un cote,
+     * methodologique, decouverte et transversale de l'autre. Regrouper ainsi allege la
+     * deliberation sans rien perdre — c'est la seule frontiere qui change un resultat.
+     */
+    @jakarta.persistence.Transient
+    public String getCategorie() {
+        return "FONDAMENTALE".equalsIgnoreCase(type == null ? "" : type.trim())
+            ? CATEGORIE_FONDAMENTALE : CATEGORIE_TRANSVERSALE;
+    }
+
+    /** Intitule du bloc, pour le releve et le tableau de deliberation. */
+    @jakarta.persistence.Transient
+    public String getLibelleCategorie() {
+        return CATEGORIE_FONDAMENTALE.equals(getCategorie())
+            ? "Unités fondamentales" : "Unités transversales";
+    }
+
     /** Parcours d'appartenance : une unite n'existe jamais hors d'un parcours. */
     @Column(nullable = false)
     private Long parcoursId;

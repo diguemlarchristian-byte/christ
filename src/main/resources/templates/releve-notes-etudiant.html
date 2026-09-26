@@ -127,6 +127,24 @@ apparaitront des les premieres evaluations : ce releve ne conclut rien aujourd'h
 <span th:if="${releve.moyenneSemestre == null}" class="text-gray-400 text-base">—</span>
 </td>
 </tr>
+<!--
+  Les moyennes de bloc decident des compensations, et ce sont elles qu'un jury regarde
+  en premier : un semestre peut afficher plus de dix et laisser un bloc sous la barre,
+  auquel cas ses unites ne sont pas capitalisees. Ne montrer que la moyenne du semestre
+  rendrait le resultat incomprehensible.
+-->
+<tr th:if="${releve.moyenneCategorie('A') != null}">
+<td class="py-1 text-blue-900 pl-3">— dont unités fondamentales</td>
+<td class="py-1 text-right"
+    th:classappend="${releve.moyenneCategorie('A') < 10} ? 'font-bold text-red-700' : 'font-bold'"
+    th:text="${#numbers.formatDecimal(releve.moyenneCategorie('A'), 1, 2)} + ' / 20'">0</td>
+</tr>
+<tr th:if="${releve.moyenneCategorie('B') != null}">
+<td class="py-1 text-blue-900 pl-3">— dont unités transversales</td>
+<td class="py-1 text-right"
+    th:classappend="${releve.moyenneCategorie('B') < 10} ? 'font-bold text-red-700' : 'font-bold'"
+    th:text="${#numbers.formatDecimal(releve.moyenneCategorie('B'), 1, 2)} + ' / 20'">0</td>
+</tr>
 <tr>
 <td class="py-1 text-blue-900">Credits acquis</td>
 <td class="py-1 text-right font-bold" th:text="${releve.creditsAcquis} + ' sur ' + ${releve.creditsPossibles}">0</td>
@@ -136,6 +154,46 @@ apparaitront des les premieres evaluations : ce releve ne conclut rien aujourd'h
 <td class="py-1 text-right font-bold" th:text="${releve.mention}">Mention</td>
 </tr>
 </table>
+</div>
+
+<!--
+  L'annee, qui est l'unite de deliberation. Un bloc passe sous dix a un semestre et se
+  rattrape a l'autre : les credits perdus reviennent. Ce cumul etait calcule sans etre
+  affiche nulle part, si bien qu'un etudiant lisait un semestre ajourne sans voir que
+  son annee le rattrapait.
+-->
+<div class="bg-gray-50 border border-gray-300 rounded-lg p-4 mt-4"
+     th:if="${bilan != null and !bilan.sansAucuneNote()}">
+<!--
+  Le texte reste en clair : dans un litteral Thymeleaf, doubler une apostrophe ne
+  l'echappe pas — cette astuce ne vaut qu'a l'interieur de ${...}. Ecrite ici, elle
+  casse le rendu de la page entiere.
+-->
+<p class="text-sm font-bold text-gray-800 mb-2">Cumul de l'année — semestres
+<span th:text="${semestresDeLAnnee[0]}">1</span> et <span th:text="${semestresDeLAnnee[1]}">2</span></p>
+<table class="w-full text-sm">
+<tr>
+<td class="py-1 text-gray-700">Moyenne annuelle</td>
+<td class="py-1 text-right font-bold" th:text="${#numbers.formatDecimal(bilan.moyenneAnnuelle, 1, 2)} + ' / 20'">0</td>
+</tr>
+<tr th:if="${bilan.moyenneAnnuelleCategorie('A') != null}">
+<td class="py-1 text-gray-700 pl-3">— unités fondamentales</td>
+<td class="py-1 text-right font-bold"
+    th:text="${#numbers.formatDecimal(bilan.moyenneAnnuelleCategorie('A'), 1, 2)} + ' / 20'">0</td>
+</tr>
+<tr th:if="${bilan.moyenneAnnuelleCategorie('B') != null}">
+<td class="py-1 text-gray-700 pl-3">— unités transversales</td>
+<td class="py-1 text-right font-bold"
+    th:text="${#numbers.formatDecimal(bilan.moyenneAnnuelleCategorie('B'), 1, 2)} + ' / 20'">0</td>
+</tr>
+<tr>
+<td class="py-1 text-gray-700">Credits acquis sur l'année</td>
+<td class="py-1 text-right font-bold" th:text="${bilan.creditsAcquis} + ' sur ' + ${bilan.creditsPossibles}">0</td>
+</tr>
+</table>
+<p class="text-xs text-gray-600 mt-2" th:if="${bilan.compensationAnnuelleAJoue()}"
+   th:text="'La compensation annuelle rend ' + ${bilan.creditsRattrapesSurLAnnee} + ' crédit(s) perdus au semestre.'">
+</p>
 </div>
 
 <div class="text-center text-gray-500 py-8" th:if="${releve.estVide()}">

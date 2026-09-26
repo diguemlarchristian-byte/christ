@@ -60,6 +60,13 @@ class ReleveSemestrielServiceTest {
         return u;
     }
 
+    /** Une unite d'un bloc donne : "FONDAMENTALE" pour le bloc A, autre chose pour le B. */
+    private UniteEnseignement ue(long id, String code, String intitule, int credits, int semestre, String type) {
+        UniteEnseignement u = ue(id, code, intitule, credits, semestre);
+        u.setType(type);
+        return u;
+    }
+
     private ElementConstitutif ec(long id, long ueId, String intitule, Long matiereId, double coef) {
         ElementConstitutif e = new ElementConstitutif();
         e.setId(id); e.setUniteEnseignementId(ueId); e.setIntitule(intitule);
@@ -275,7 +282,7 @@ class ReleveSemestrielServiceTest {
 
         @Test
         void lesCreditsDesDeuxSemestresSAdditionnent() {
-            var bilan = service.bilanAnnuel(etudiant(),
+            var bilan = service.bilanAnnuel(universite(false), etudiant(),
                 List.of(semestre(1, 14.0, 30), semestre(2, 12.0, 30)));
 
             assertEquals(60, bilan.creditsAcquis(), "une annee de licence vaut soixante credits");
@@ -284,7 +291,7 @@ class ReleveSemestrielServiceTest {
 
         @Test
         void laMoyenneAnnuellePondereChaqueSemestreParSesCredits() {
-            var bilan = service.bilanAnnuel(etudiant(),
+            var bilan = service.bilanAnnuel(universite(false), etudiant(),
                 List.of(semestre(1, 16.0, 40), semestre(2, 10.0, 20)));
 
             // (16 x 40 + 10 x 20) / 60 = 14
@@ -299,7 +306,7 @@ class ReleveSemestrielServiceTest {
             var vide = service.calculer(universite(false), etudiant(), 2, unites, elements,
                 List.of(), Map.of(99L, "Cours"));
 
-            var bilan = service.bilanAnnuel(etudiant(), List.of(semestre(1, 15.0, 30), vide));
+            var bilan = service.bilanAnnuel(universite(false), etudiant(), List.of(semestre(1, 15.0, 30), vide));
 
             assertEquals(15.0, bilan.moyenneAnnuelle(), 0.001,
                 "le second semestre n'est pas encore evalue : il ne compte pas encore");
@@ -314,7 +321,7 @@ class ReleveSemestrielServiceTest {
             var vide = service.calculer(universite(false), etudiant(), 1, unites, elements,
                 List.of(), Map.of(99L, "Cours"));
 
-            var bilan = service.bilanAnnuel(etudiant(), List.of(vide));
+            var bilan = service.bilanAnnuel(universite(false), etudiant(), List.of(vide));
 
             assertTrue(bilan.sansAucuneNote());
             assertNull(bilan.moyenneAnnuelle());
@@ -338,5 +345,148 @@ class ReleveSemestrielServiceTest {
         assertEquals(2.0, releve.unites().get(1).moyenne(), 0.001);
         assertEquals(1, releve.unites().get(0).elements().size(),
             "chaque unite ne porte que ses propres elements");
+    }
+
+    /**
+     * Les trois situations du document « Regles de progression des etudiants dans le systeme
+     * LMD » (ESU, septembre 2020), reproduites a l'identique.
+     *
+     * Ce document sert de reference aux jurys : ses tableaux disent, chiffres a l'appui, ce
+     * qu'un etudiant capitalise dans trois cas types. Si le logiciel s'en ecarte, il accorde
+     * ou refuse des credits qu'un jury referait a la main — et c'est le logiciel qu'on
+     * cessera d'utiliser, pas le document.
+     *
+     * Le bloc A rassemble les unites fondamentales, le bloc B les unites transversales,
+     * linguistiques et preprofessionnelles. La compensation ne traverse pas cette frontiere.
+     */
+    @Nested
+    @DisplayName("Les tableaux du document de reference (ESU, RDC)")
+    class DocumentDeReference {
+
+        /** L'etablissement du document : compensation active, aucune note eliminatoire. */
+        private Etablissement esu() {
+            Etablissement e = universite(true);
+            e.setNoteEliminatoire(null);
+            return e;
+        }
+
+        /** Une unite a note unique : le document ne detaille pas les elements constitutifs. */
+        private void poser(List<UniteEnseignement> unites, List<ElementConstitutif> elements,
+                           List<Note> notes, Map<Long, String> matieres,
+                           long id, String code, String bloc, double note, int credits, int semestre) {
+            unites.add(ue(id, code, code, credits, semestre, bloc));
+            elements.add(ec(id, id, code, id, 1.0));
+            notes.add(note(id, note));
+            matieres.put(id, code);
+        }
+
+        /** Le premier semestre du document, avec la note de EDU102 en parametre. */
+        private ReleveSemestrielService.Releve semestreUn(double noteEdu102) {
+            List<UniteEnseignement> unites = new ArrayList<>();
+            List<ElementConstitutif> elements = new ArrayList<>();
+            List<Note> notes = new ArrayList<>();
+            Map<Long, String> matieres = new java.util.LinkedHashMap<>();
+
+            poser(unites, elements, notes, matieres, 1, "FRA121", "TRANSVERSALE", 8, 4, 1);
+            poser(unites, elements, notes, matieres, 2, "EDU101", "TRANSVERSALE", 12, 3, 1);
+            poser(unites, elements, notes, matieres, 3, "EDU102", "TRANSVERSALE", noteEdu102, 6, 1);
+            poser(unites, elements, notes, matieres, 4, "ANG121", "TRANSVERSALE", 14, 3, 1);
+            poser(unites, elements, notes, matieres, 5, "CHI101", "FONDAMENTALE", 12, 6, 1);
+            poser(unites, elements, notes, matieres, 6, "MAT192", "FONDAMENTALE", 8, 6, 1);
+            poser(unites, elements, notes, matieres, 7, "CHI102", "FONDAMENTALE", 15, 2, 1);
+
+            return service.calculer(esu(), etudiant(), 1, unites, elements, notes, matieres);
+        }
+
+        /** Le second semestre du document. */
+        private ReleveSemestrielService.Releve semestreDeux() {
+            List<UniteEnseignement> unites = new ArrayList<>();
+            List<ElementConstitutif> elements = new ArrayList<>();
+            List<Note> notes = new ArrayList<>();
+            Map<Long, String> matieres = new java.util.LinkedHashMap<>();
+
+            poser(unites, elements, notes, matieres, 11, "INF121", "TRANSVERSALE", 10.7, 6, 2);
+            poser(unites, elements, notes, matieres, 12, "EDU103", "TRANSVERSALE", 11, 3, 2);
+            poser(unites, elements, notes, matieres, 13, "CHI103", "FONDAMENTALE", 12, 4, 2);
+            poser(unites, elements, notes, matieres, 14, "MAT121", "TRANSVERSALE", 11.5, 3, 2);
+            poser(unites, elements, notes, matieres, 15, "CHI104", "FONDAMENTALE", 9, 6, 2);
+            poser(unites, elements, notes, matieres, 16, "CHI105", "FONDAMENTALE", 9.3, 4, 2);
+            poser(unites, elements, notes, matieres, 17, "PHY198", "FONDAMENTALE", 10, 4, 2);
+
+            return service.calculer(esu(), etudiant(), 2, unites, elements, notes, matieres);
+        }
+
+        @Test
+        @DisplayName("Tableau 1 : les deux blocs ont la moyenne, tout est capitalise")
+        void tableauUn() {
+            var r = semestreUn(10);
+
+            assertEquals(10.714, r.moyenneCategorie(UniteEnseignement.CATEGORIE_FONDAMENTALE), 0.001,
+                "moyenne du bloc A : 150 points sur 14 credits");
+            assertEquals(10.625, r.moyenneCategorie(UniteEnseignement.CATEGORIE_TRANSVERSALE), 0.001,
+                "moyenne du bloc B : 170 points sur 16 credits");
+            assertEquals(10.667, r.moyenneSemestre(), 0.001, "moyenne du semestre : 320 sur 30");
+
+            // Les deux blocs atteignent dix : MAT192 (8) et FRA121 (8) sont rachetees par
+            // leur propre bloc, et l'etudiant emporte les trente credits.
+            assertEquals(30, r.creditsAcquis(), "les sept unites sont capitalisees");
+        }
+
+        @Test
+        @DisplayName("Tableau 2 : un bloc sous dix, malgre la moyenne du semestre")
+        void tableauDeux() {
+            var r = semestreUn(7);
+
+            assertEquals(10.714, r.moyenneCategorie(UniteEnseignement.CATEGORIE_FONDAMENTALE), 0.001);
+            assertEquals(9.5, r.moyenneCategorie(UniteEnseignement.CATEGORIE_TRANSVERSALE), 0.001,
+                "le bloc B tombe a 9.5 : 152 points sur 16 credits");
+            assertEquals(10.067, r.moyenneSemestre(), 0.001,
+                "le semestre reste au-dessus de dix, et cela ne suffit pas");
+
+            // C'est tout l'interet de la separation en blocs : sans elle, la moyenne du
+            // semestre a 10.07 aurait rendu les trente credits, dont ceux d'un bloc echoue.
+            assertEquals(20, r.creditsAcquis(),
+                "14 credits du bloc A compense, plus EDU101 et ANG121 acquises seules");
+
+            assertEquals(ModeObtention.NON_VALIDEE, statut(r, "FRA121"),
+                "son bloc ne la rachete pas");
+            assertEquals(ModeObtention.NON_VALIDEE, statut(r, "EDU102"), "ni celle-ci");
+            assertEquals(ModeObtention.COMPENSEE, statut(r, "MAT192"),
+                "mais le bloc A rachete la sienne");
+            assertEquals(ModeObtention.ACQUISE, statut(r, "ANG121"),
+                "et ce qui depasse dix seul est acquis sans rien devoir a personne");
+        }
+
+        @Test
+        @DisplayName("Tableau 3 : l'annee rattrape ce que le semestre avait perdu")
+        void tableauTrois() {
+            var s1 = semestreUn(7);
+            var s2 = semestreDeux();
+
+            assertEquals(9.956, s2.moyenneCategorie(UniteEnseignement.CATEGORIE_FONDAMENTALE), 0.001,
+                "au second semestre, c'est le bloc A qui passe sous dix");
+            assertEquals(20, s2.creditsAcquis(), "vingt credits la aussi");
+
+            var bilan = service.bilanAnnuel(esu(), etudiant(), List.of(s1, s2));
+
+            assertEquals(10.288, bilan.moyenneAnnuelleCategorie(UniteEnseignement.CATEGORIE_FONDAMENTALE), 0.001,
+                "sur l'annee, le bloc A repasse au-dessus de dix");
+            assertEquals(10.132, bilan.moyenneAnnuelleCategorie(UniteEnseignement.CATEGORIE_TRANSVERSALE), 0.001,
+                "et le bloc B aussi");
+            assertEquals(10.215, bilan.moyenneAnnuelle(), 0.001, "moyenne annuelle : 612.9 sur 60");
+
+            // Chaque semestre pris seul ne rendait que vingt credits. L'annee, qui est
+            // l'unite de deliberation, les rend tous.
+            assertEquals(60, bilan.creditsAcquis(),
+                "les deux blocs ont la moyenne sur l'annee : soixante credits capitalises");
+            assertTrue(bilan.compensationAnnuelleAJoue(),
+                "et l'etudiant doit pouvoir lire que c'est l'annee qui l'a rattrape");
+        }
+
+        private ModeObtention statut(ReleveSemestrielService.Releve r, String code) {
+            return r.unites().stream()
+                .filter(l -> code.equals(l.unite().getCode()))
+                .findFirst().orElseThrow().obtention();
+        }
     }
 }
