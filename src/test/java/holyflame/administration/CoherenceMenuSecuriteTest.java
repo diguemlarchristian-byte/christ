@@ -17,18 +17,22 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Un lien de menu propose a un role que la securite refuse est la pire des incoherences :
- * l'utilisateur voit son ecran, clique, et recoit un acces refuse sans comprendre. Il en
- * conclut que le logiciel est casse, pas qu'il n'a pas le droit.
+ * Un lien de menu qui mene a un acces refuse est la pire des incoherences : l'utilisateur
+ * voit son ecran, clique, et recoit un refus sans comprendre. Il en conclut que le logiciel
+ * est casse, pas qu'il n'a pas le droit. L'inverse est aussi fautif depuis que les acces se
+ * cochent : une case activee qui ne fait apparaitre aucun lien donne un droit invisible,
+ * donc inutilisable.
  *
- * Ce test lit chaque entree du menu, releve les roles nommes dans sa condition d'affichage,
- * et verifie que la regle de securite du chemin vise les accepte tous. Il travaille dans ce
- * sens uniquement : un role autorise sans lien de menu n'est pas forcement un defaut — il
- * atteint parfois l'ecran depuis une autre page, comme l'emploi du temps depuis le tableau
- * de bord.
+ * Les deux cotes nomment desormais la meme chose — une fonctionnalite du registre. Le menu
+ * ecrit peutFaire.contains('MATIERES'), la securite ecrit peut(Fonctionnalites.MATIERES).
+ * Ce test verifie que ce sont bien les memes codes, chemin par chemin.
+ *
+ * C'est une garantie plus forte qu'avant : on ne verifie plus qu'une liste de roles est
+ * incluse dans une autre, mais que les deux cotes disent exactement la meme chose.
  */
 @DisplayName("Coherence entre menu et securite")
 class CoherenceMenuSecuriteTest {
@@ -39,95 +43,114 @@ class CoherenceMenuSecuriteTest {
         Paths.get("src", "main", "java", "holyflame", "administration", "config", "SecurityConfig.java");
 
     /**
-     * Chemins dont la regle depend d'autre chose que du role — un module financier, un module
-     * optionnel du Directeur — et que ce test ne sait donc pas trancher.
+     * Entrees dont la condition d'affichage ne peut pas se resumer a un code unique.
+     *
+     * « Finances » mene a une page a onglets dont chacun suit sa propre fonctionnalite :
+     * le menu s'affiche des qu'une seule porte est ouverte, et c'est voulu.
      */
-    private static final Set<String> HORS_PORTEE = Set.of("/finances", "/inventaire", "/surveillant",
-        "/infirmerie", "/coordination", "/marketing", "/secretariat", "/secretariat/absences",
-        "/secretariat/cartes", "/academique-universite", "/direction/suivi");
+    private static final Set<String> HORS_PORTEE = Set.of("/finances");
 
     @Test
-    void aucuneEntreeDeMenuNeMeneAUnAccesRefuse() throws IOException {
-        Map<String, Set<String>> entrees = entreesDuMenu();
-        Map<String, Set<String>> regles = reglesDeSecurite();
+    void chaqueLienDeMenuExigeExactementCeQueLaSecuriteExige() throws IOException {
+        Map<String, String> menu = codesDuMenu();
+        Map<String, String> securite = codesDeLaSecurite();
 
-        assertTrue(entrees.size() > 10, "l'extraction du menu a echoue : " + entrees.size() + " entree(s)");
+        assertTrue(menu.size() > 10, "l'extraction du menu a echoue : " + menu.size() + " entree(s)");
 
         List<String> fautes = new ArrayList<>();
-        for (var entree : entrees.entrySet()) {
+        for (var entree : menu.entrySet()) {
             String chemin = entree.getKey();
             if (HORS_PORTEE.contains(chemin)) continue;
 
-            Set<String> autorises = regleApplicable(regles, chemin);
-            if (autorises == null || autorises.isEmpty()) continue; // couverture testee ailleurs
+            String attendu = regleApplicable(securite, chemin);
+            if (attendu == null) continue; // couverture des routes testee ailleurs
 
-            for (String role : entree.getValue()) {
-                if (!autorises.contains(role)) {
-                    fautes.add(chemin + " est propose au role " + role
-                        + " que la securite refuse (elle admet " + autorises + ")");
-                }
+            if (!attendu.equals(entree.getValue())) {
+                fautes.add(chemin + " : le menu demande " + entree.getValue()
+                    + ", la securite demande " + attendu);
             }
         }
 
         assertTrue(fautes.isEmpty(),
-            "Ces entrees de menu menent a un acces refuse. Alignez la condition d'affichage sur "
-            + "la regle, ou la regle sur l'usage voulu :\n  " + String.join("\n  ", fautes));
+            "Menu et securite ne nomment pas la meme fonctionnalite. L'un des deux donne un "
+            + "acces que l'autre refuse :\n  " + String.join("\n  ", fautes));
+    }
+
+    @Test
+    void toutLienDeMenuNommeUneFonctionnaliteConnue() throws IOException {
+        Set<String> codesConnus = codesDuRegistre();
+        List<String> inconnus = new ArrayList<>();
+
+        for (var entree : codesDuMenu().entrySet()) {
+            if (HORS_PORTEE.contains(entree.getKey())) continue;
+            if (!codesConnus.contains(entree.getValue())) {
+                inconnus.add(entree.getKey() + " nomme " + entree.getValue());
+            }
+        }
+
+        assertTrue(inconnus.isEmpty(),
+            "Une condition de menu cite une fonctionnalite qui n'existe pas dans le registre. "
+            + "Elle sera toujours fausse, et le lien ne s'affichera jamais :\n  "
+            + String.join("\n  ", inconnus));
     }
 
     @Test
     void lesBulletinsSontAtteignablesParLaDirection() throws IOException {
-        Set<String> roles = entreesDuMenu().getOrDefault("/bulletins", Set.of());
-
-        assertTrue(roles.contains("ADMIN") && roles.contains("DIRECTEUR"),
-            "la securite les autorise sur les bulletins, mais aucune page ne leur en ouvrait la "
-            + "porte : en fin de trimestre, un directeur n'avait aucun moyen d'y acceder");
+        // La direction edite les bulletins en fin de trimestre. Le lien doit suivre la
+        // fonctionnalite BULLETINS, que le role DIRECTEUR recoit par defaut.
+        assertEquals("BULLETINS", codesDuMenu().get("/bulletins"),
+            "sans ce lien, un directeur n'a aucun moyen d'atteindre les bulletins");
     }
 
     // ── Extraction ──────────────────────────────────────────────────────
 
-    /** Chaque lien du menu, avec les roles nommes dans sa condition d'affichage. */
-    private Map<String, Set<String>> entreesDuMenu() throws IOException {
-        Map<String, Set<String>> entrees = new LinkedHashMap<>();
-        Pattern role = Pattern.compile("role == '([A-Z_]+)'");
+    /** Chaque lien du menu, avec la fonctionnalite nommee dans sa condition d'affichage. */
+    private Map<String, String> codesDuMenu() throws IOException {
+        Map<String, String> entrees = new LinkedHashMap<>();
+        Pattern code = Pattern.compile("peutFaire\\.contains\\('([A-Z_]+)'\\)");
 
         for (String ligne : Files.readAllLines(MENU, StandardCharsets.UTF_8)) {
             if (!ligne.contains("<a ")) continue;
 
             Matcher h = Pattern.compile("href=\"(/[a-z0-9/-]*)\"").matcher(ligne);
             if (!h.find()) continue;
-            String chemin = h.group(1);
 
             Matcher c = Pattern.compile("th:if=\"([^\"]*)\"").matcher(ligne);
-            if (!c.find()) continue; // sans condition, l'entree s'adresse a qui voit ce menu
-            Set<String> roles = new LinkedHashSet<>();
-            Matcher r = role.matcher(c.group(1));
-            while (r.find()) roles.add(r.group(1));
-            if (!roles.isEmpty()) entrees.put(chemin, roles);
+            if (!c.find()) continue;
+            Matcher r = code.matcher(c.group(1));
+            if (r.find()) entrees.put(h.group(1), r.group(1));
         }
         return entrees;
     }
 
-    /** Chaque requestMatchers(...).hasAnyRole(...) : le chemin vise et les roles admis. */
-    private Map<String, Set<String>> reglesDeSecurite() throws IOException {
+    /** Chaque requestMatchers(...).access(peut(Fonctionnalites.X)) : le chemin et le code. */
+    private Map<String, String> codesDeLaSecurite() throws IOException {
         String source = Files.readString(CONFIG, StandardCharsets.UTF_8);
-        Map<String, Set<String>> regles = new LinkedHashMap<>();
+        Map<String, String> regles = new LinkedHashMap<>();
 
         Matcher m = Pattern.compile(
-            "requestMatchers\\(([^)]*?)\\)\\s*\\.has(?:Any)?Role\\(([^)]*?)\\)", Pattern.DOTALL)
-            .matcher(source);
+            "requestMatchers\\(([^)]*?)\\)\\s*\\.access\\(peut\\(Fonctionnalites\\.([A-Z_]+)\\)\\)",
+            Pattern.DOTALL).matcher(source);
         while (m.find()) {
-            Set<String> roles = new LinkedHashSet<>();
-            Matcher r = Pattern.compile("\"([A-Z_]+)\"").matcher(m.group(2));
-            while (r.find()) roles.add(r.group(1));
-
+            String code = m.group(2);
             Matcher chemins = Pattern.compile("\"(/[A-Za-z0-9/*_.-]*)\"").matcher(m.group(1));
-            while (chemins.find()) regles.putIfAbsent(chemins.group(1), roles);
+            while (chemins.find()) regles.putIfAbsent(chemins.group(1), code);
         }
         return regles;
     }
 
+    /** Les codes declares dans le registre, lus a la source. */
+    private Set<String> codesDuRegistre() throws IOException {
+        String source = Files.readString(Paths.get("src", "main", "java", "holyflame",
+            "administration", "service", "Fonctionnalites.java"), StandardCharsets.UTF_8);
+        Set<String> codes = new LinkedHashSet<>();
+        Matcher m = Pattern.compile("public static final String [A-Z_]+ = \"([A-Z_]+)\";").matcher(source);
+        while (m.find()) codes.add(m.group(1));
+        return codes;
+    }
+
     /** La premiere regle dont le motif couvre ce chemin — l'ordre de declaration fait foi. */
-    private Set<String> regleApplicable(Map<String, Set<String>> regles, String chemin) {
+    private String regleApplicable(Map<String, String> regles, String chemin) {
         for (var regle : regles.entrySet()) {
             String motif = regle.getKey();
             String base = motif.endsWith("/**") ? motif.substring(0, motif.length() - 3)

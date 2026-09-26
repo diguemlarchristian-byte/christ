@@ -72,7 +72,8 @@ class CloturePaieTemplateTest {
         ctx.setVariable("nbEnAttente", 0L);
         ctx.setVariable("nomsMois", List.of("Janvier","Fevrier","Mars","Avril","Mai","Juin",
             "Juillet","Aout","Septembre","Octobre","Novembre","Decembre"));
-        ctx.setVariable("modulesFinanceActifs", Set.of("PAIE_PREPARATION", "PAIE_PAIEMENT"));
+        ctx.setVariable("peutFaire", Set.of(holyflame.administration.service.Fonctionnalites.FIN_PAIE_PREPARATION, holyflame.administration.service.Fonctionnalites.FIN_PAIE_PAIEMENT));
+        ctx.setVariable("peutFinance", true);
 
         ctx.setVariable("moisCloture", moisCloture);
         ctx.setVariable("cloture", cloture);

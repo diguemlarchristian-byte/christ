@@ -17,6 +17,7 @@ public class GlobalModelAttributes {
     private static final String COULEUR_PAR_DEFAUT = "#00236f";
 
     @Autowired private EtablissementService etablissementService;
+    @Autowired private holyflame.administration.repository.UtilisateurRepository utilisateurRepository;
 
     @ModelAttribute("accentColor")
     public String accentColor() {
@@ -48,5 +49,55 @@ public class GlobalModelAttributes {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    /**
+     * Ce que la personne connectee peut faire, pour que les menus n'affichent que cela.
+     *
+     * Les menus testaient auparavant le role, parfois double d'un test sur les anciens
+     * modules optionnels. Des lors que l'acces se coche fonctionnalite par fonctionnalite,
+     * ces tests ne pouvaient plus tomber juste : une case cochee ouvrait la page sans faire
+     * apparaitre le lien, et l'utilisateur se retrouvait avec un droit qu'il ne voyait pas.
+     *
+     * Menus et securite lisent maintenant la meme chose. Dans un gabarit :
+     * th:if="${peutFaire.contains('SECRETARIAT')}"
+     *
+     * Ce n'est qu'un affichage : cacher un lien ne protege rien. La vraie porte reste
+     * SecurityConfig, qui verifie exactement le meme ensemble.
+     */
+    @ModelAttribute("peutFaire")
+    public java.util.Set<String> peutFaire() {
+        try {
+            org.springframework.security.core.Authentication auth =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) return java.util.Set.of();
+            return utilisateurRepository.findByEmail(auth.getName())
+                .map(holyflame.administration.service.Fonctionnalites::effectives)
+                .orElseGet(java.util.Set::of);
+        } catch (Exception ignored) {
+            // Page publique, ou compte introuvable : aucun menu a afficher.
+            return java.util.Set.of();
+        }
+    }
+
+    /**
+     * Vrai des que la personne a une porte d'entree dans les finances.
+     *
+     * L'entree de menu « Finances » mene a une page a onglets dont chacun suit sa propre
+     * fonctionnalite. Ecrire la liste complete dans le gabarit la rendrait illisible et,
+     * surtout, la ferait diverger de SecurityConfig des la premiere fonctionnalite ajoutee.
+     */
+    @ModelAttribute("peutFinance")
+    public boolean peutFinance() {
+        java.util.Set<String> f = peutFaire();
+        return f.contains(holyflame.administration.service.Fonctionnalites.FIN_CAISSE)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_DEPENSES)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_PAIE_PREPARATION)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_PAIE_PAIEMENT)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_BUDGET)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_RAPPORTS)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_FRAIS)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_COMPTABILITE)
+            || f.contains(holyflame.administration.service.Fonctionnalites.FIN_SUIVI_FAMILLES);
     }
 }

@@ -124,7 +124,10 @@ class MaquetteUniversitaireEcranTest {
         ctx.setVariable("accentColor", "#00236f");
         ctx.setVariable("estUniversite", true);
         ctx.setVariable("activePage", "academique-universite");
+        // Le menu lit ce que la personne peut faire, jamais son role : on lui donne donc
+        // exactement ce que la production lui donnerait pour ce role.
         ctx.setVariable("utilisateurConnecte", utilisateur("ADMIN"));
+        ctx.setVariable("peutFaire", holyflame.administration.service.Fonctionnalites.defautsPourRole("ADMIN"));
         ctx.setVariable("nomEtablissement", "Universite de test");
         ctx.setVariable("creditsAttendus", 30);
         ctx.setVariable("parcoursListe", List.of(p));
@@ -186,6 +189,7 @@ class MaquetteUniversitaireEcranTest {
             ctx.setVariable("activePage", "academique-universite");
             ctx.setVariable("estUniversite", estUniversite);
             ctx.setVariable("utilisateurConnecte", utilisateur(role));
+            ctx.setVariable("peutFaire", holyflame.administration.service.Fonctionnalites.defautsPourRole(role));
             return moteur().process("fragments/nav-links-admin", ctx);
         }
 
@@ -227,6 +231,7 @@ class MaquetteUniversitaireEcranTest {
             WebContext ctx = contexteWeb();
             ctx.setVariable("activePage", "dashboard");
             ctx.setVariable("utilisateurConnecte", utilisateur("ADMIN"));
+            ctx.setVariable("peutFaire", holyflame.administration.service.Fonctionnalites.defautsPourRole("ADMIN"));
 
             String html = moteur().process("fragments/nav-links-admin", ctx);
 

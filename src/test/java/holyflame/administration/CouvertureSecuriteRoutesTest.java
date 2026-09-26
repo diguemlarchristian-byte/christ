@@ -88,14 +88,25 @@ class CouvertureSecuriteRoutesTest {
                 route + " affiche des donnees de tout l'etablissement : il lui faut une regle propre");
         }
 
-        // La regle qui les porte ne doit nommer ni PARENT ni ELEVE.
-        Matcher m = Pattern.compile(
-            "requestMatchers\\(\"/dashboard\"[^;]*?\\)\\s*\\n?\\s*\\.hasAnyRole\\(([^;]*?)\\)",
-            Pattern.DOTALL).matcher(securite);
-        assertTrue(m.find(), "la regle du tableau de bord doit rester lisible d'un bloc");
-        String roles = m.group(1);
-        assertTrue(!roles.contains("\"PARENT\""), "un parent n'a pas a voir le budget de l'ecole");
-        assertTrue(!roles.contains("\"ELEVE\""), "un eleve non plus");
+        // Ces trois ecrans suivent desormais une fonctionnalite du registre, et non plus une
+        // liste de roles ecrite dans la regle. On interroge donc le registre lui-meme :
+        // c'est une classe ordinaire, sans Spring, et sa reponse est celle qui fera foi a
+        // l'execution — pas une chaine de caracteres qui lui ressemble.
+        assertTrue(securite.contains("requestMatchers(\"/dashboard\").access(peut(Fonctionnalites.TABLEAU_BORD))"),
+            "le tableau de bord doit suivre une fonctionnalite, pour que la regle et le menu "
+            + "ne puissent plus diverger");
+
+        for (String famille : List.of("PARENT", "ELEVE")) {
+            var acces = holyflame.administration.service.Fonctionnalites.defautsPourRole(famille);
+            assertTrue(!acces.contains(holyflame.administration.service.Fonctionnalites.TABLEAU_BORD),
+                famille.equals("PARENT")
+                    ? "un parent n'a pas a voir le budget de l'ecole"
+                    : "un eleve non plus");
+            assertTrue(!acces.contains(holyflame.administration.service.Fonctionnalites.RECHERCHE),
+                "ni a parcourir l'annuaire des eleves et du personnel");
+            assertTrue(!acces.contains(holyflame.administration.service.Fonctionnalites.JOURNAL),
+                "ni le journal d'activite de l'etablissement");
+        }
     }
 
     // ── Extraction ──────────────────────────────────────────────────────

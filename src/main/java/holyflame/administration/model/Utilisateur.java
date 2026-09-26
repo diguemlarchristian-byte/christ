@@ -43,11 +43,24 @@ public class Utilisateur {
     // Personnalisation des acces financiers pour un compte TRESORIER ou COMPTABLE
     // (codes CSV : CAISSE, DEPENSES, PAIE_PREPARATION, PAIE_PAIEMENT, BUDGET_PARAMETRAGE,
     // RAPPORTS). null = pas encore personnalise, le compte utilise les droits par defaut
-    // de son role (voir FinanceModules) ; une valeur non-nulle (meme vide) signifie que
+    // de son role ; une valeur non-nulle (meme vide) signifiait que
     // l'ADMIN a explicitement restreint ce compte a exactement ces modules.
     @Column(length = 500)
     private String modulesFinance;
     private boolean modulesFinancePersonnalises = false;
+
+    // Ce que ce compte peut faire, coche a coche, depuis Parametres > Roles > Acces
+    // (codes CSV du registre holyflame.administration.service.Fonctionnalites). Ces deux
+    // champs remplacent les deux listes ci-dessus, qui ne couvraient qu'un role chacune :
+    // un etablissement superieur a des postes — doyen, chef de departement, president de
+    // jury, apparitorat — qu'aucune liste figee ne decrit correctement.
+    //
+    // Tant que accesPersonnalise vaut false, c'est le role qui decide seul. Les deux
+    // anciennes listes restent lues une derniere fois par MigrationAcces, au demarrage,
+    // pour que les comptes deja personnalises ne perdent rien.
+    @Column(length = 2000)
+    private String fonctionnalites;
+    private boolean accesPersonnalise = false;
 
     @Column(unique = true)
     private String resetToken;
@@ -145,6 +158,34 @@ public class Utilisateur {
 
     public boolean isModulesFinancePersonnalises() {
         return modulesFinancePersonnalises;
+    }
+
+    /** Les fonctionnalites cochees pour ce compte. Vide tant que rien n'a ete personnalise. */
+    public java.util.Set<String> getFonctionnalitesActives() {
+        if (fonctionnalites == null || fonctionnalites.isBlank()) return java.util.Set.of();
+        return java.util.Arrays.stream(fonctionnalites.split(","))
+            .map(String::trim).filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+    }
+
+    /**
+     * Enregistre exactement cet ensemble, et marque le compte comme personnalise — y
+     * compris pour un ensemble vide, qui veut dire « cette personne ne peut rien faire »
+     * et non « revenir aux droits du role ». Pour cela, voir reinitialiserAcces().
+     */
+    public void setFonctionnalitesActives(java.util.Set<String> codes) {
+        this.accesPersonnalise = true;
+        this.fonctionnalites = (codes == null || codes.isEmpty()) ? "" : String.join(",", codes);
+    }
+
+    /** Revient a ce que le role permet, et oublie toute personnalisation. */
+    public void reinitialiserAcces() {
+        this.accesPersonnalise = false;
+        this.fonctionnalites = null;
+    }
+
+    public boolean isAccesPersonnalise() {
+        return accesPersonnalise;
     }
 
     public Etablissement getEtablissement() {

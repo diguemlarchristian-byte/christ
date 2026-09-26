@@ -20,6 +20,15 @@ import java.util.stream.Collectors;
 @Table(name = "profils_acces")
 public class ProfilAcces {
 
+    /**
+     * Profil applicable à n'importe quel compte.
+     *
+     * Les types DIRECTEUR et FINANCE d'avant restent lisibles et applicables tels quels :
+     * un profil n'est qu'une liste de fonctionnalités, et rien n'oblige à reprendre
+     * l'existant pour continuer à s'en servir.
+     */
+    public static final String TYPE_GENERAL = "GENERAL";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +37,11 @@ public class ProfilAcces {
     private String nom;
 
     @Column(nullable = false)
-    private String type; // DIRECTEUR ou FINANCE — doit correspondre au typeAcces du compte cible
+    // Anciennement DIRECTEUR ou FINANCE, du temps ou les acces se reglaient par deux listes
+    // separees. Un profil porte desormais n importe quel jeu de fonctionnalites et s applique
+    // a n importe quel compte : c est ce qui permet de nommer un poste — « Chef de
+    // departement », « President de jury », « Apparitorat » — plutot qu un type technique.
+    private String type;
 
     @Column(length = 500)
     private String modules; // codes CSV (memes codes que Utilisateur.modulesOptionnels/modulesFinance)

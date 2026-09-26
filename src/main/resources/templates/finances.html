@@ -61,7 +61,7 @@
 <span class="font-headline-sm text-headline-sm font-bold text-primary">Comptabilite</span>
 </div>
 <div class="flex items-center gap-md md:gap-lg">
-<a class="hidden sm:flex bg-primary-container text-on-primary-container px-md py-sm rounded font-label-md hover:opacity-90 transition-all items-center gap-xs" th:href="@{/export/paiements/excel}" th:if="${modulesFinanceActifs.contains('RAPPORTS')}">
+<a class="hidden sm:flex bg-primary-container text-on-primary-container px-md py-sm rounded font-label-md hover:opacity-90 transition-all items-center gap-xs" th:href="@{/export/paiements/excel}" th:if="${peutFaire.contains('FIN_RAPPORTS')}">
 <span class="material-symbols-outlined text-[18px]">download</span>
 Exporter
 </a>
@@ -78,35 +78,35 @@ Exporter
 
 <!-- Barre d'onglets -->
 <div class="no-print flex gap-lg border-b border-outline-variant overflow-x-auto">
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="journal" onclick="finSwitchTab('journal')" type="button" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="journal" onclick="finSwitchTab('journal')" type="button" th:if="${peutFaire.contains('FIN_CAISSE')}">
 <span class="material-symbols-outlined text-[16px]">receipt_long</span> Journal de caisse
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="scolarite" onclick="finSwitchTab('scolarite')" type="button" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="scolarite" onclick="finSwitchTab('scolarite')" type="button" th:if="${peutFaire.contains('FIN_CAISSE')}">
 <span class="material-symbols-outlined text-[16px]">school</span> Scolarite &amp; Arrieres
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="depenses" onclick="finSwitchTab('depenses')" type="button" th:if="${modulesFinanceActifs.contains('DEPENSES')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="depenses" onclick="finSwitchTab('depenses')" type="button" th:if="${peutFaire.contains('FIN_DEPENSES')}">
 <span class="material-symbols-outlined text-[16px]">shopping_cart</span> Depenses
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="budget" onclick="finSwitchTab('budget')" type="button" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="budget" onclick="finSwitchTab('budget')" type="button" th:if="${peutFaire.contains('FIN_BUDGET')}">
 <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span> Budget
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="rapports" onclick="finSwitchTab('rapports')" type="button" th:if="${modulesFinanceActifs.contains('RAPPORTS')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="rapports" onclick="finSwitchTab('rapports')" type="button" th:if="${peutFaire.contains('FIN_RAPPORTS')}">
 <span class="material-symbols-outlined text-[16px]">description</span> Rapports
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="statistiques" onclick="finSwitchTab('statistiques')" type="button" th:if="${modulesFinanceActifs.contains('RAPPORTS')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="statistiques" onclick="finSwitchTab('statistiques')" type="button" th:if="${peutFaire.contains('FIN_RAPPORTS')}">
 <span class="material-symbols-outlined text-[16px]">bar_chart</span> Statistiques
 </button>
-<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="parametrage" onclick="finSwitchTab('parametrage')" type="button" th:if="${modulesFinanceActifs.contains('CAISSE') or modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<button class="fin-tab-btn px-xs pb-sm border-b-2 border-transparent text-on-surface-variant font-label-md whitespace-nowrap transition-colors flex items-center gap-xs" data-tab="parametrage" onclick="finSwitchTab('parametrage')" type="button" th:if="${peutFaire.contains('FIN_CAISSE') or peutFaire.contains('FIN_BUDGET')}">
 <span class="material-symbols-outlined text-[16px]">tune</span> Parametrage
 </button>
 </div>
 <p class="no-print text-label-sm text-secondary mt-xs" id="fin-tab-aide">Enregistrez ici les paiements des eleves et les depenses du jour.</p>
-<div class="p-lg rounded-lg bg-surface-container-low text-on-surface-variant font-body-md text-body-md" th:if="${modulesFinanceActifs.isEmpty()}">
+<div class="p-lg rounded-lg bg-surface-container-low text-on-surface-variant font-body-md text-body-md" th:if="${!peutFinance}">
 Aucun module financier ne vous a ete confie pour l'instant. Contactez votre administrateur (Parametres &gt; Roles &gt; Acces aux interfaces).
 </div>
 
 <!-- ================= ONGLET JOURNAL DE CAISSE ================= -->
-<div class="fin-tab-panel space-y-lg" data-panel="journal" id="panel-journal" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<div class="fin-tab-panel space-y-lg" data-panel="journal" id="panel-journal" th:if="${peutFaire.contains('FIN_CAISSE')}">
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
 <div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
@@ -314,7 +314,7 @@ Le reste a encaisser est estime sur les revenus prevus au budget de l'annee.
 </div>
 
 <!-- ================= ONGLET SCOLARITE & ARRIERES ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="scolarite" id="panel-scolarite" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="scolarite" id="panel-scolarite" th:if="${peutFaire.contains('FIN_CAISSE')}">
 
 <div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg no-print">
 <h4 class="font-headline-sm text-on-surface mb-md">Enregistrer un arriere reporte</h4>
@@ -436,7 +436,7 @@ Le reste a encaisser est estime sur les revenus prevus au budget de l'annee.
 </div>
 
 <!-- ================= ONGLET DEPENSES ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="depenses" id="panel-depenses" th:if="${modulesFinanceActifs.contains('DEPENSES')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="depenses" id="panel-depenses" th:if="${peutFaire.contains('FIN_DEPENSES')}">
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
 <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant">
@@ -577,7 +577,7 @@ Rapport detaille
 </div>
 
 <!-- ================= ONGLET BUDGET ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="budget" id="panel-budget" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="budget" id="panel-budget" th:if="${peutFaire.contains('FIN_BUDGET')}">
 
 <div class="flex justify-between items-end flex-wrap gap-md">
 <div>
@@ -676,7 +676,7 @@ Rapport detaille
 </div>
 
 <!-- ================= ONGLET RAPPORTS ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="rapports" id="panel-rapports" th:if="${modulesFinanceActifs.contains('RAPPORTS')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="rapports" id="panel-rapports" th:if="${peutFaire.contains('FIN_RAPPORTS')}">
 
 <div class="no-print flex justify-between items-center">
 <h3 class="font-headline-sm text-on-surface">Rapport detaille de la tresorerie</h3>
@@ -696,10 +696,10 @@ Rapport detaille
 <div>
 <p class="text-label-sm text-secondary uppercase tracking-wider">Solde initial de caisse (debut d'annee)</p>
 <p class="font-bold text-headline-sm text-on-surface" th:text="${#numbers.formatDecimal(soldeInitialCaisse, 0, 'COMMA', 0, 'POINT')} + ' F'">0 F</p>
-<a class="text-label-sm text-primary hover:underline" th:if="${modulesFinanceActifs.contains('CAISSE')}" th:href="@{/finances(tab='parametrage')}">Modifier dans Parametrage</a>
+<a class="text-label-sm text-primary hover:underline" th:if="${peutFaire.contains('FIN_CAISSE')}" th:href="@{/finances(tab='parametrage')}">Modifier dans Parametrage</a>
 </div>
 </div>
-<form class="flex flex-wrap items-end gap-sm mb-lg" method="post" th:action="@{/finances/comptages}" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<form class="flex flex-wrap items-end gap-sm mb-lg" method="post" th:action="@{/finances/comptages}" th:if="${peutFaire.contains('FIN_CAISSE')}">
 <input id="comptage-solde-brut" name="soldeCompte" type="hidden"/>
 <div class="flex flex-col gap-xs">
 <label class="text-label-sm text-secondary">Nouveau comptage — solde compte</label>
@@ -995,7 +995,7 @@ Rapport detaille
 </div>
 </div>
 
-<p class="text-label-sm text-secondary" th:if="${!categoriesCharges.isEmpty() and modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<p class="text-label-sm text-secondary" th:if="${!categoriesCharges.isEmpty() and peutFaire.contains('FIN_BUDGET')}">
 La classification des postes comptables (utilisee pour ce rapport trimestriel) se configure desormais dans
 <a class="text-primary hover:underline" th:href="@{/finances(tab='parametrage')}">l'onglet Parametrage</a>.
 </p>
@@ -1003,7 +1003,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- ================= ONGLET STATISTIQUES ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="statistiques" id="panel-statistiques" th:if="${modulesFinanceActifs.contains('RAPPORTS')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="statistiques" id="panel-statistiques" th:if="${peutFaire.contains('FIN_RAPPORTS')}">
 
 <div>
 <h3 class="font-headline-sm text-on-surface">Vue d'ensemble visuelle</h3>
@@ -1110,7 +1110,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- ================= ONGLET PARAMETRAGE ================= -->
-<div class="fin-tab-panel hidden space-y-lg" data-panel="parametrage" id="panel-parametrage" th:if="${modulesFinanceActifs.contains('CAISSE') or modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<div class="fin-tab-panel hidden space-y-lg" data-panel="parametrage" id="panel-parametrage" th:if="${peutFaire.contains('FIN_CAISSE') or peutFaire.contains('FIN_BUDGET')}">
 
 <div>
 <h3 class="font-headline-sm text-on-surface">Parametrage de la tresorerie</h3>
@@ -1118,7 +1118,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- Solde initial de caisse -->
-<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${modulesFinanceActifs.contains('CAISSE')}">
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${peutFaire.contains('FIN_CAISSE')}">
 <h4 class="font-headline-sm text-on-surface mb-xs">Solde initial de caisse</h4>
 <p class="text-label-sm text-secondary mb-md">Le montant en caisse au tout debut de l'annee scolaire, utilise comme point de depart pour calculer le solde theorique dans l'onglet Rapports.</p>
 <form class="flex flex-wrap items-end gap-sm" method="post" th:action="@{/finances/parametres/solde-initial}">
@@ -1133,7 +1133,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- Plan comptable : creation/modification/desactivation libres, import CSV, modele SYSCOHADA -->
-<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${peutFaire.contains('FIN_BUDGET')}">
 <h4 class="font-headline-sm text-on-surface mb-xs">Plan comptable (postes de charges/produits)</h4>
 <p class="text-label-sm text-secondary mb-md">Codifiez vos postes comptables selon les besoins reels de l'etablissement — creation libre, import depuis un fichier deja fourni par votre expert-comptable, ou modele SYSCOHADA simplifie pour demarrer avec des codes officiels. Desactiver un poste le retire des listes de saisie sans toucher aux depenses/budgets deja enregistres.</p>
 
@@ -1230,7 +1230,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- Taux de paie par defaut -->
-<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${peutFaire.contains('FIN_BUDGET')}">
 <h4 class="font-headline-sm text-on-surface mb-xs">Taux de paie par defaut</h4>
 <p class="text-label-sm text-secondary mb-md">Pre-remplissent automatiquement chaque nouveau bulletin de paie (Personnel &gt; Salaires). A ajuster si la reglementation CNPS/IRPP change — sinon, ils restent modifiables au cas par cas sur chaque bulletin.</p>
 <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg" method="post" th:action="@{/finances/parametres/taux-paie}">
@@ -1267,7 +1267,7 @@ La classification des postes comptables (utilisee pour ce rapport trimestriel) s
 </div>
 
 <!-- Clotures mensuelles : verrouillage comptable independant de la cloture d'annee scolaire -->
-<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${modulesFinanceActifs.contains('BUDGET_PARAMETRAGE')}">
+<div class="bg-white border border-outline-variant rounded-xl shadow-sm p-lg" th:if="${peutFaire.contains('FIN_BUDGET')}">
 <h4 class="font-headline-sm text-on-surface mb-xs">Clotures mensuelles</h4>
 <p class="text-label-sm text-secondary mb-md">Un mois cloture verrouille toutes les depenses datees dans ce mois (creation, modification, suppression) — evite qu'une ecriture deja verifiee soit modifiee apres coup.</p>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">

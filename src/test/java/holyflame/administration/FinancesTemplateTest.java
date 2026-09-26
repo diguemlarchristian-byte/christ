@@ -53,7 +53,9 @@ class FinancesTemplateTest {
         ctx.setVariable("utilisateurConnecte", u);
         ctx.setVariable("accentColor", "#00236f");
         ctx.setVariable("annee", "2025-2026");
-        ctx.setVariable("modulesFinanceActifs", Set.of("CAISSE"));
+        // Le gabarit lit desormais peutFaire, la meme source que la securite et les menus.
+        ctx.setVariable("peutFaire", Set.of(holyflame.administration.service.Fonctionnalites.FIN_CAISSE));
+        ctx.setVariable("peutFinance", true);
 
         // Journal de caisse
         ctx.setVariable("journalSolde", 850_000.0);

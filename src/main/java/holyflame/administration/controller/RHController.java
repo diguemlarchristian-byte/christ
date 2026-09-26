@@ -240,7 +240,6 @@ public class RHController {
             "Juillet","Aout","Septembre","Octobre","Novembre","Decembre"));
         var utilisateurConnecte = etablissementService.getCurrentUtilisateur();
         model.addAttribute("utilisateurConnecte", utilisateurConnecte);
-        model.addAttribute("modulesFinanceActifs", holyflame.administration.service.FinanceModules.effectifs(utilisateurConnecte));
 
         boolean moisCloture = cloturePaieService.estCloture(moisFiltre, anneeFiltre, etabId);
         model.addAttribute("moisCloture", moisCloture);

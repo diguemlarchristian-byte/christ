@@ -2,6 +2,7 @@ package holyflame.administration.config;
 
 import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.UtilisateurRepository;
+import holyflame.administration.service.Fonctionnalites;
 import holyflame.administration.service.UtilisateurDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -38,67 +39,48 @@ public class SecurityConfig {
     private UtilisateurRepository utilisateurRepository;
 
     /**
-     * Autorise les roles classiques passes en parametre, OU un compte DIRECTEUR
-     * auquel l'ADMIN a explicitement active le module operationnel donne depuis
-     * Parametres > Roles (cf. Utilisateur.modulesOptionnels). Permet a un
-     * etablissement sous-effectif de confier ponctuellement un module operationnel
-     * (secretariat, surveillance, infirmerie, marketing, inventaire, coordination)
-     * a son Directeur, sans jamais toucher aux modules financiers.
+     * Autorise la requete si la personne connectee dispose de cette fonctionnalite.
+     *
+     * Une seule regle remplace les trois qui coexistaient ici : celle du role, celle des
+     * « modules optionnels » du Directeur, et celle des modules financiers du Tresorier et
+     * du Comptable. Ce que chacun peut faire se lit desormais au meme endroit — le registre
+     * Fonctionnalites — et se modifie au meme endroit : le tableau des acces.
+     *
+     * Le compte est relu en base a chaque requete plutot que d'etre fige dans la session a
+     * la connexion. C'est une requete indexee par courriel, et elle achete une chose qui
+     * vaut plus que ce qu'elle coute : un acces retire l'est immediatement, sans attendre
+     * que la personne se deconnecte.
      */
-    private AuthorizationManager<RequestAuthorizationContext> roleOuModuleDirecteur(String moduleCode, String... rolesClassiques) {
-        return (authentication, context) -> {
-            Authentication auth = authentication.get();
-            if (auth == null || !auth.isAuthenticated()) return new AuthorizationDecision(false);
-            boolean roleOk = Arrays.stream(rolesClassiques).anyMatch(r -> hasRole(auth, r));
-            if (roleOk) return new AuthorizationDecision(true);
-            if (!hasRole(auth, "DIRECTEUR")) return new AuthorizationDecision(false);
-            Utilisateur u = utilisateurRepository.findByEmail(auth.getName()).orElse(null);
-            boolean autorise = u != null && u.getModulesOptionnelsActifs().contains(moduleCode);
-            return new AuthorizationDecision(autorise);
-        };
+    private AuthorizationManager<RequestAuthorizationContext> peut(String code) {
+        return peutUnDe(code);
     }
 
     /**
-     * Autorise l'ADMIN, ou un compte TRESORIER/COMPTABLE dont les modules financiers
-     * effectifs (personnalises par l'ADMIN depuis Parametres > Roles > Acces aux
-     * interfaces, ou par defaut de son role sinon) incluent le module donne.
-     * Voir holyflame.administration.service.FinanceModules.
+     * Autorise si la personne dispose d'AU MOINS UNE des fonctionnalites citees.
+     *
+     * Sert aux ecrans partages : un export d'eleves s'ouvre depuis le secretariat, depuis
+     * la direction et depuis la comptabilite, et chacun y arrive par sa propre porte.
      */
-    private AuthorizationManager<RequestAuthorizationContext> financeAccess(String moduleCode) {
+    private AuthorizationManager<RequestAuthorizationContext> peutUnDe(String... codes) {
         return (authentication, context) -> {
             Authentication auth = authentication.get();
             if (auth == null || !auth.isAuthenticated()) return new AuthorizationDecision(false);
-            if (hasRole(auth, "ADMIN")) return new AuthorizationDecision(true);
-            if (!hasRole(auth, "TRESORIER") && !hasRole(auth, "COMPTABLE")) return new AuthorizationDecision(false);
             Utilisateur u = utilisateurRepository.findByEmail(auth.getName()).orElse(null);
-            boolean autorise = u != null && holyflame.administration.service.FinanceModules.autorise(u, moduleCode);
-            return new AuthorizationDecision(autorise);
-        };
-    }
-
-    /**
-     * Inscription d'un nouvel eleve : Secretariat classique (ou Directeur avec le module
-     * SECRETARIAT), OU Tresorier/Comptable avec le module CAISSE — l'inscription et le premier
-     * versement se font souvent au meme guichet, sans repasser par le Secretariat.
-     */
-    private AuthorizationManager<RequestAuthorizationContext> inscriptionEleveAccess() {
-        return (authentication, context) -> {
-            Authentication auth = authentication.get();
-            if (auth == null || !auth.isAuthenticated()) return new AuthorizationDecision(false);
-            if (hasRole(auth, "ADMIN") || hasRole(auth, "SECRETAIRE")) return new AuthorizationDecision(true);
-            Utilisateur u = null;
-            if (hasRole(auth, "DIRECTEUR") || hasRole(auth, "TRESORIER") || hasRole(auth, "COMPTABLE")) {
-                u = utilisateurRepository.findByEmail(auth.getName()).orElse(null);
-            }
-            if (u != null && hasRole(auth, "DIRECTEUR") && u.getModulesOptionnelsActifs().contains("SECRETARIAT")) {
-                return new AuthorizationDecision(true);
-            }
-            if (u != null && (hasRole(auth, "TRESORIER") || hasRole(auth, "COMPTABLE"))
-                    && holyflame.administration.service.FinanceModules.autorise(u, holyflame.administration.service.FinanceModules.CAISSE)) {
-                return new AuthorizationDecision(true);
+            if (u == null) return new AuthorizationDecision(false);
+            java.util.Set<String> effectives = Fonctionnalites.effectives(u);
+            for (String code : codes) {
+                if (effectives.contains(code)) return new AuthorizationDecision(true);
             }
             return new AuthorizationDecision(false);
         };
+    }
+
+    /** Les ecrans d'accueil de la finance : il suffit d'avoir une porte d'entree. */
+    private AuthorizationManager<RequestAuthorizationContext> peutFinance() {
+        return peutUnDe(Fonctionnalites.FIN_CAISSE, Fonctionnalites.FIN_DEPENSES,
+            Fonctionnalites.FIN_PAIE_PREPARATION, Fonctionnalites.FIN_PAIE_PAIEMENT,
+            Fonctionnalites.FIN_BUDGET, Fonctionnalites.FIN_RAPPORTS, Fonctionnalites.FIN_FRAIS,
+            Fonctionnalites.FIN_COMPTABILITE, Fonctionnalites.FIN_SUIVI_FAMILLES);
     }
 
     private boolean hasRole(Authentication auth, String role) {
@@ -129,155 +111,112 @@ public class SecurityConfig {
                     "/ecole/**",
                     "/h2-console/**", "/css/**", "/js/**", "/fonts/**", "/images/**", "/uploads/**", "/webjars/**", "/assets/**").permitAll()
                 .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
-                // Assistant de cloture de fin d'annee : reserve a l'ADMIN (action irreversible +
-                // bilan financier affiche a l'etape finale — le Directeur ne doit jamais voir de
-                // donnees financieres, meme en lecture, donc pas d'acces plus large ici).
-                .requestMatchers("/passage/assistant/**").hasRole("ADMIN")
-                // Inscription d'un nouvel eleve : ouverte au Secretariat classique, mais aussi au
-                // Tresorier/Comptable ayant le module CAISSE — l'inscription et le premier versement
-                // se font souvent au meme guichet, sans repasser par le Secretariat.
-                .requestMatchers("/secretariat/eleves/nouveau", "/secretariat/eleves/nouveau/**")
-                    .access(inscriptionEleveAccess())
-                // Secretariat : role classique, ou DIRECTEUR si l'ADMIN lui a active le module SECRETARIAT
-                .requestMatchers("/secretariat/**").access(roleOuModuleDirecteur("SECRETARIAT", "ADMIN", "SECRETAIRE"))
-                .requestMatchers("/passage/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE", "COORDONNATEUR")
-                // Le Directeur ne dirige jamais la finance : ni tresorerie, ni budget, ni depenses.
-                // Simple coquille de redirection vers /finances (voir TresorerieController) : la
-                // vraie segmentation Tresorier/Comptable se joue sur les routes /finances/** ci-dessous.
-                .requestMatchers("/tresorerie/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                // Les frais de scolarite quittent Parametres, qui est reserve a l'ADMIN : c'est
-                // le travail quotidien de la comptable, et les tarifs changent en cours d'annee.
-                .requestMatchers("/frais/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                // Grand livre et balance : documents de lecture, sans effet sur les donnees.
-                .requestMatchers("/comptabilite/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                // Remises et echeanciers : suivi financier des familles, coeur du poste comptable.
-                .requestMatchers("/suivi-familles/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                .requestMatchers("/gestion-academique/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                // Maquette pedagogique universitaire (parcours, unites, elements) : pendant de
-                // /gestion-academique en regime LMD. Le COORDONNATEUR y accede car il suit la
-                // maquette de sa filiere ; le DIRECTEUR non, comme sur les autres ecrans academiques.
-                // Releve de notes semestriel : meme public que les bulletins en regime scolaire —
-                // ceux qui editent et remettent les resultats aux etudiants.
-                .requestMatchers("/releve-notes", "/releve-notes/**").hasAnyRole("ADMIN", "DIRECTEUR", "COORDONNATEUR", "SECRETAIRE")
-                .requestMatchers("/academique-universite/**").hasAnyRole("ADMIN", "COORDONNATEUR")
-                .requestMatchers("/gestion-classes/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                .requestMatchers("/gestion-salles/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                .requestMatchers("/matieres/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                // Le secretariat peut enregistrer un nouveau personnel (creation uniquement,
-                // pas de modification/suppression/documents/comptes des fiches existantes)
-                .requestMatchers("/personnel/nouveau", "/personnel/nouveau/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE")
-                // Le tresorier et le secretariat consultent les fiches personnel (lecture seule),
-                // sans acces a la modification/documents/comptes du personnel
-                .requestMatchers(HttpMethod.GET, "/personnel", "/personnel/*").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "TRESORIER", "COMPTABLE", "SECRETAIRE", "COORDONNATEUR")
-                // Gestion complete du personnel (fiches, contrats, conges) pour le Directeur — hors salaires (regle dediee ci-dessous)
-                .requestMatchers("/personnel/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                // Le surveillant peut signaler/consulter des absences, mais pas gerer les programmes de cours
-                .requestMatchers("/surveillance/programmes/**").hasAnyRole("ADMIN", "ENSEIGNANT")
-                .requestMatchers("/surveillance", "/surveillance/absences/**").access(roleOuModuleDirecteur("SURVEILLANCE", "ADMIN", "ENSEIGNANT", "SURVEILLANT"))
-                .requestMatchers("/surveillance/**").hasAnyRole("ADMIN", "ENSEIGNANT")
-                .requestMatchers("/surveillant/**").access(roleOuModuleDirecteur("SURVEILLANCE", "ADMIN", "SURVEILLANT"))
-                .requestMatchers("/infirmerie/**").access(roleOuModuleDirecteur("INFIRMERIE", "ADMIN", "INFIRMIER"))
-                .requestMatchers("/notes/**").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
-                .requestMatchers("/examens/**").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
-                .requestMatchers("/bulletins/**").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "PARENT")
-                .requestMatchers("/portail-parent/**").hasAnyRole("ADMIN", "PARENT")
-                .requestMatchers("/messagerie/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE", "ENSEIGNANT", "TRESORIER", "COMPTABLE", "COORDONNATEUR")
-                // Chaque export est restreint aux roles qui l'utilisent reellement dans l'interface :
-                // l'export des paiements suit le module financier RAPPORTS (Tresorier/Comptable selon
-                // ce que l'ADMIN leur a confie), notes/eleves sont aussi utilises depuis les pages
-                // Examens (enseignant) et Secretariat (secretaire).
-                .requestMatchers("/export/paiements/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
-                .requestMatchers("/export/rapports/excel").access(financeAccess(holyflame.administration.service.FinanceModules.RAPPORTS))
-                .requestMatchers("/export/eleves/excel").hasAnyRole("ADMIN", "DIRECTEUR", "TRESORIER", "COMPTABLE", "SECRETAIRE")
-                .requestMatchers("/export/notes/excel").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE")
-                // Le tableau de deliberation suit exactement l'ecran des releves, et doit rester
-                // avant la regle /export/** generique pour etre atteint.
-                .requestMatchers("/export/releve-notes/excel").hasAnyRole("ADMIN", "DIRECTEUR", "COORDONNATEUR", "SECRETAIRE")
-                // L'export de la paie expose tous les salaires : il suit le module de la paie et non
-                // la regle /export/** generique, qui l'aurait ouvert a un Comptable a qui l'ADMIN n'a
-                // justement pas confie la paie. Meme regle que /rh/salaires/**.
-                .requestMatchers("/export/paie/excel").access(financeAccess(holyflame.administration.service.FinanceModules.PAIE_PREPARATION))
-                // L'export de l'inventaire suit exactement l'ecran d'ou son bouton est clique.
-                // Cette ligne doit rester avant la regle /export/** qui suit, sinon elle ne serait
-                // jamais atteinte et le Directeur comme la secretaire recevraient un 403.
-                .requestMatchers("/export/inventaire/excel").access(roleOuModuleDirecteur("INVENTAIRE", "ADMIN", "SECRETAIRE"))
-                .requestMatchers("/export/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                // Comptes/roles et securite restent strictement reserves a l'ADMIN, y compris pour le
-                // Directeur : sinon un Directeur pourrait s'auto-attribuer l'acces finance.
-                .requestMatchers("/parametres/**").hasRole("ADMIN")
+
+                // ── Espaces personnels ───────────────────────────────────────────────
+                // Ils ne passent pas par le registre : un eleve, un parent, un enseignant
+                // n'y consultent que leurs propres donnees, deduites de leur compte. Il n'y
+                // a rien a doser, donc rien a cocher.
                 .requestMatchers("/tableau-enseignant/**").hasAnyRole("ADMIN", "ENSEIGNANT")
                 .requestMatchers("/tableau-eleve/**").hasAnyRole("ADMIN", "ELEVE")
-                // Simple coquille de redirection vers /finances?tab=budget (voir BudgetController) :
-                // la vraie segmentation se joue sur /finances/budget/** ci-dessous.
-                .requestMatchers("/budget/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                // Le secretariat tient le materiel au quotidien — c'est lui qui range, sort et
-                // constate la casse. L'inventaire lui etait ferme, si bien que celui qui manipulait
-                // le materiel n'etait jamais celui qui pouvait l'enregistrer.
-                .requestMatchers("/inventaire/**").access(roleOuModuleDirecteur("INVENTAIRE", "ADMIN", "SECRETAIRE"))
-                // Paie : preparer/calculer un bulletin (module PAIE_PREPARATION, typiquement Comptable)
-                // est distinct de declencher son paiement reel — un acte de caisse qui comptabilise
-                // automatiquement une Depense (module PAIE_PAIEMENT, typiquement Tresorier). Le
-                // Directeur en est exclu comme le reste de la finance.
-                .requestMatchers("/rh/salaires/*/payer").access(financeAccess(holyflame.administration.service.FinanceModules.PAIE_PAIEMENT))
-                .requestMatchers("/rh/salaires/**").access(financeAccess(holyflame.administration.service.FinanceModules.PAIE_PREPARATION))
-                // Auto-service : chaque membre du personnel consulte uniquement ses propres bulletins
-                // (fiche deduite de son compte connecte, jamais transmise par le client)
-                .requestMatchers("/rh/mes-bulletins/**").hasAnyRole(
-                    "ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "COORDONNATEUR", "SURVEILLANT", "INFIRMIER", "MARKETING")
-                // Un enseignant peut demander/annuler son propre conge (fiche deduite de son compte,
-                // jamais transmise par le client) ; l'approbation reste reservee a l'ADMIN/DIRECTEUR
-                .requestMatchers("/rh/conges/demander", "/rh/conges/*/annuler").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT")
-                .requestMatchers("/rh/**").hasAnyRole("ADMIN", "DIRECTEUR")
-                .requestMatchers("/communication/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE")
-                // /direction/** ouvert à tout authentifié — contrôle fin dans le controller
-                .requestMatchers("/direction/**").authenticated()
-                .requestMatchers("/archives/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE")
-                .requestMatchers("/publications/**").hasAnyRole("ADMIN", "DIRECTEUR", "SECRETAIRE")
+                .requestMatchers("/portail-parent/**").hasAnyRole("ADMIN", "PARENT")
                 .requestMatchers("/portail/**").hasAnyRole("ADMIN", "ELEVE", "SECRETAIRE")
-                // Le secretariat peut consulter/renvoyer le recu d'un paiement qu'il vient d'enregistrer
-                // (ex: frais d'inscription lors de la creation d'un eleve), sans acces au reste du module Finances
+                // Controle fin cote controleur, selon ce que chaque role doit y voir.
+                .requestMatchers("/direction/**").authenticated()
+
+                // ── Scolarite ────────────────────────────────────────────────────────
+                .requestMatchers("/passage/assistant/**").access(peut(Fonctionnalites.PASSAGE_CLOTURE))
+                .requestMatchers("/secretariat/eleves/nouveau", "/secretariat/eleves/nouveau/**")
+                    .access(peut(Fonctionnalites.ELEVES_INSCRIRE))
+                .requestMatchers("/secretariat/**").access(peut(Fonctionnalites.SECRETARIAT))
+                .requestMatchers("/passage/**").access(peut(Fonctionnalites.PASSAGE))
+                .requestMatchers("/archives/**").access(peut(Fonctionnalites.ARCHIVES))
+
+                // ── Pedagogie ────────────────────────────────────────────────────────
+                .requestMatchers("/gestion-academique/**").access(peut(Fonctionnalites.ACADEMIQUE))
+                .requestMatchers("/gestion-classes/**").access(peut(Fonctionnalites.CLASSES))
+                .requestMatchers("/gestion-salles/**").access(peut(Fonctionnalites.SALLES))
+                .requestMatchers("/matieres/**").access(peut(Fonctionnalites.MATIERES))
+                .requestMatchers("/notes/**").access(peut(Fonctionnalites.NOTES))
+                .requestMatchers("/examens/**").access(peut(Fonctionnalites.EXAMENS))
+                .requestMatchers("/bulletins/**").access(peut(Fonctionnalites.BULLETINS))
+                .requestMatchers("/emploi-du-temps", "/emploi-du-temps/**").access(peut(Fonctionnalites.EMPLOI_DU_TEMPS))
+
+                // ── Enseignement superieur ───────────────────────────────────────────
+                // La maquette (parcours, unites, credits) et les releves semestriels sont
+                // deux metiers distincts a l'universite : la premiere se decide en conseil
+                // de departement, les seconds s'editent a l'apparitorat. Deux cases, donc.
+                .requestMatchers("/academique-universite/**").access(peut(Fonctionnalites.UNIV_MAQUETTE))
+                .requestMatchers("/releve-notes", "/releve-notes/**").access(peut(Fonctionnalites.UNIV_RELEVE))
+                .requestMatchers("/coordination/**").access(peut(Fonctionnalites.COORDINATION))
+
+                // ── Vie scolaire ─────────────────────────────────────────────────────
+                .requestMatchers("/surveillance/programmes/**").access(peut(Fonctionnalites.PROGRAMMES))
+                .requestMatchers("/surveillance", "/surveillance/absences/**").access(peut(Fonctionnalites.ABSENCES))
+                .requestMatchers("/surveillance/**").access(peut(Fonctionnalites.PROGRAMMES))
+                .requestMatchers("/surveillant/**").access(peut(Fonctionnalites.ABSENCES))
+                .requestMatchers("/infirmerie/**").access(peut(Fonctionnalites.INFIRMERIE))
+
+                // ── Personnel ────────────────────────────────────────────────────────
+                .requestMatchers("/personnel/nouveau", "/personnel/nouveau/**").access(peut(Fonctionnalites.PERSONNEL_ENREGISTRER))
+                .requestMatchers(HttpMethod.GET, "/personnel", "/personnel/*").access(peut(Fonctionnalites.PERSONNEL_CONSULTER))
+                .requestMatchers("/personnel/**").access(peut(Fonctionnalites.PERSONNEL_GERER))
+                // Preparer un bulletin de paie et declencher son paiement sont deux actes
+                // differents : le second sort de l'argent et comptabilise une depense.
+                .requestMatchers("/rh/salaires/*/payer").access(peut(Fonctionnalites.FIN_PAIE_PAIEMENT))
+                .requestMatchers("/rh/salaires/**").access(peut(Fonctionnalites.FIN_PAIE_PREPARATION))
+                .requestMatchers("/rh/mes-bulletins/**").access(peut(Fonctionnalites.MES_BULLETINS))
+                .requestMatchers("/rh/conges/demander", "/rh/conges/*/annuler").access(peut(Fonctionnalites.MON_CONGE))
+                .requestMatchers("/rh/**").access(peut(Fonctionnalites.PERSONNEL_GERER))
+
+                // ── Finances ─────────────────────────────────────────────────────────
+                .requestMatchers("/frais/**").access(peut(Fonctionnalites.FIN_FRAIS))
+                .requestMatchers("/comptabilite/**").access(peut(Fonctionnalites.FIN_COMPTABILITE))
+                .requestMatchers("/suivi-familles/**").access(peut(Fonctionnalites.FIN_SUIVI_FAMILLES))
+                .requestMatchers("/budget/**").access(peut(Fonctionnalites.FIN_BUDGET))
+                // Rendre un recu pour un paiement qu'on vient d'enregistrer, sans ouvrir le
+                // reste des finances — le secretariat encaisse parfois l'inscription.
                 .requestMatchers("/finances/paiements/*/recu", "/finances/paiements/*/renvoyer-email")
-                    .hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE", "SECRETAIRE")
-                // Segmentation Tresorier/Comptable : chaque groupe d'actions financieres suit son
-                // propre module (voir FinanceModules), personnalisable par compte depuis
-                // Parametres > Roles > Acces aux interfaces. Le module DEPENSES couvre aussi
-                // /finances/depenses/** (DepenseController, prefixe sous /finances).
-                .requestMatchers("/finances/paiements/**", "/finances/arrieres/**", "/finances/rappels", "/finances/comptages/**",
-                    "/finances/parametres/solde-initial", "/finances/frais-solde")
-                    .access(financeAccess(holyflame.administration.service.FinanceModules.CAISSE))
-                .requestMatchers("/finances/depenses/**")
-                    .access(financeAccess(holyflame.administration.service.FinanceModules.DEPENSES))
+                    .access(peutUnDe(Fonctionnalites.FIN_CAISSE, Fonctionnalites.FIN_RECU))
+                .requestMatchers("/finances/paiements/**", "/finances/arrieres/**", "/finances/rappels",
+                    "/finances/comptages/**", "/finances/parametres/solde-initial", "/finances/frais-solde")
+                    .access(peut(Fonctionnalites.FIN_CAISSE))
+                .requestMatchers("/finances/depenses/**").access(peut(Fonctionnalites.FIN_DEPENSES))
                 .requestMatchers("/finances/budget/**", "/finances/categories/**", "/finances/parametres/taux-paie")
-                    .access(financeAccess(holyflame.administration.service.FinanceModules.BUDGET_PARAMETRAGE))
-                // Page-onglets et redirections restantes : accessibles a tout Tresorier/Comptable,
-                // la visibilite fine de chaque onglet est geree cote controleur/template selon les
-                // modules effectifs de l'utilisateur (FinancesController.index()).
-                .requestMatchers("/finances/**").hasAnyRole("ADMIN", "TRESORIER", "COMPTABLE")
-                .requestMatchers("/coordination/**").access(roleOuModuleDirecteur("COORDINATION", "ADMIN", "COORDONNATEUR"))
-                // Espace MARKETING : pilote le site vitrine public de l'etablissement
-                // (actualites, galerie, evenements, page a propos) — n'a acces a aucune donnee
-                // d'eleve, de personnel ou de finances.
-                .requestMatchers("/marketing/**").access(roleOuModuleDirecteur("MARKETING", "ADMIN", "MARKETING"))
-                // Assistant conversationnel : ouvert a tous les roles rattaches a un
-                // etablissement, SAUF ELEVE. Chaque role ne voit que le sous-ensemble d'outils
-                // (donc de donnees) que ce role peut deja consulter ailleurs dans l'appli — voir
-                // la map OUTILS_PAR_ROLE dans AssistantService. Le PARENT a ses propres outils,
-                // strictement limites a ses enfants (jamais l'etablissement entier).
-                .requestMatchers("/assistant/**").hasAnyRole(
-                    "ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "COORDONNATEUR",
-                    "SURVEILLANT", "INFIRMIER", "PARENT", "SUPER_ADMIN", "MARKETING")
-                // Journal d'activite : reserve au personnel (chacun n'y voit que ses propres actions,
-                // sauf ADMIN qui voit tout) — un eleve ou un parent n'a aucune raison d'y acceder.
-                .requestMatchers("/journal/**").hasAnyRole("ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE", "COORDONNATEUR", "SURVEILLANT", "INFIRMIER", "MARKETING")
-                // Ces trois ecrans n'avaient aucune regle : ils tombaient sur anyRequest() et
-                // s'ouvraient donc a tout compte connecte, un parent ou un eleve compris. Le
-                // tableau de bord affiche le total encaisse, le budget et les effectifs de
-                // l'etablissement ; la recherche parcourt l'annuaire des eleves et du personnel.
-                // Ni l'un ni l'autre ne regarde une famille. Meme liste que le journal
-                // d'activite ci-dessus : le personnel, et lui seul.
-                .requestMatchers("/dashboard", "/recherche", "/emploi-du-temps", "/emploi-du-temps/**").hasAnyRole(
-                    "ADMIN", "DIRECTEUR", "ENSEIGNANT", "SECRETAIRE", "TRESORIER", "COMPTABLE",
-                    "COORDONNATEUR", "SURVEILLANT", "INFIRMIER", "MARKETING")
+                    .access(peut(Fonctionnalites.FIN_BUDGET))
+                // Pages d'onglets et redirections : la visibilite fine de chaque onglet est
+                // geree cote controleur, selon les fonctionnalites effectives du compte.
+                .requestMatchers("/finances/**").access(peutFinance())
+                .requestMatchers("/tresorerie/**").access(peutFinance())
+
+                // ── Exports ──────────────────────────────────────────────────────────
+                // Chaque export suit l'ecran d'ou son bouton est clique, et doit rester
+                // avant la regle /export/** generique pour etre atteint.
+                .requestMatchers("/export/paiements/excel", "/export/rapports/excel").access(peut(Fonctionnalites.FIN_RAPPORTS))
+                .requestMatchers("/export/eleves/excel").access(peutUnDe(Fonctionnalites.SECRETARIAT, Fonctionnalites.ACADEMIQUE, Fonctionnalites.FIN_RAPPORTS))
+                .requestMatchers("/export/notes/excel").access(peut(Fonctionnalites.NOTES))
+                .requestMatchers("/export/releve-notes/excel").access(peut(Fonctionnalites.UNIV_RELEVE))
+                // Cet export expose tous les salaires : il suit la paie, jamais la regle
+                // generique qui l'aurait ouvert a qui l'on a justement retire la paie.
+                .requestMatchers("/export/paie/excel").access(peut(Fonctionnalites.FIN_PAIE_PREPARATION))
+                .requestMatchers("/export/inventaire/excel").access(peut(Fonctionnalites.INVENTAIRE))
+                .requestMatchers("/export/**").access(peut(Fonctionnalites.FIN_RAPPORTS))
+
+                // ── Communication, logistique, pilotage ──────────────────────────────
+                .requestMatchers("/messagerie/**").access(peut(Fonctionnalites.MESSAGERIE))
+                .requestMatchers("/communication/**").access(peut(Fonctionnalites.COMMUNICATION))
+                .requestMatchers("/publications/**").access(peut(Fonctionnalites.PUBLICATIONS))
+                .requestMatchers("/marketing/**").access(peut(Fonctionnalites.MARKETING))
+                .requestMatchers("/inventaire/**").access(peut(Fonctionnalites.INVENTAIRE))
+                .requestMatchers("/assistant/**").access(peut(Fonctionnalites.ASSISTANT))
+                .requestMatchers("/journal/**").access(peut(Fonctionnalites.JOURNAL))
+                .requestMatchers("/dashboard").access(peut(Fonctionnalites.TABLEAU_BORD))
+                .requestMatchers("/recherche").access(peut(Fonctionnalites.RECHERCHE))
+
+                // ── Administration ───────────────────────────────────────────────────
+                // Ne se delegue pas : qui obtient les parametres peut ensuite s'attribuer
+                // tout le reste, finance comprise.
+                .requestMatchers("/parametres/**").access(peut(Fonctionnalites.PARAMETRES))
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

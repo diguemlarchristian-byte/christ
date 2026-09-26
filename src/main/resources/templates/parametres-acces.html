@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EduSystem Pro - Acces du compte Directeur</title>
+<title>EduSystem Pro - Acces du compte</title>
 <link rel="stylesheet" href="/css/fonts.css">
 <script src="/js/tailwind.js"></script>
 <script id="tailwind-config" th:inline="javascript">
@@ -55,7 +55,7 @@
 <span class="font-headline-sm text-headline-sm font-bold text-primary">Acces aux interfaces</span>
 </header>
 
-<main class="ml-0 md:ml-sidebar-width mt-16 p-md md:p-gutter max-w-3xl mx-auto">
+<main class="ml-0 md:ml-sidebar-width mt-16 p-md md:p-gutter max-w-5xl mx-auto">
 
 <div class="mb-lg">
 <a class="text-primary font-label-sm hover:underline flex items-center gap-xs" th:href="@{/parametres/roles}">
@@ -64,42 +64,32 @@ Retour a la gestion des roles
 </a>
 </div>
 
-<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mb-lg">
 <h2 class="font-headline-lg text-headline-lg text-primary mb-xs"
     th:text="'Acces de ' + ${compte.prenom} + ' ' + ${compte.nom}">Acces</h2>
 
-<div th:if="${typeAcces == 'DIRECTEUR'}">
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
-Ce compte porte le role <strong>Directeur</strong> : gestion pedagogique complete, RH (hors salaires),
-communication, archives et journal d'activite par defaut — <strong>aucun acces aux finances, a la tresorerie,
-au budget ou aux salaires</strong>, quels que soient les modules coches ci-dessous.
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+Cochez ce que cette personne peut faire. Le role
+<strong class="text-on-surface" th:text="${compte.role}">ROLE</strong>
+ne sert que de point de depart : ce tableau decide seul.
 </p>
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
-Pour un etablissement ne disposant pas d'assez de personnel, vous pouvez confier ponctuellement a ce Directeur
-un ou plusieurs modules operationnels supplementaires normalement geres par un autre role :
-</p>
+
+<div class="rounded-lg px-md py-sm font-body-md text-body-md mb-md"
+     th:classappend="${personnalise} ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-low text-on-surface-variant'">
+<span th:if="${!personnalise}">
+Ce compte suit aujourd'hui les acces <strong>par defaut de son role</strong>. Enregistrer ce tableau
+figera une liste propre a cette personne, qui ne bougera plus si les defauts du role changent.
+</span>
+<span th:if="${personnalise}">
+Ce compte a des acces <strong>personnalises</strong>. Le bouton en bas de page les ramene a ceux du role.
+</span>
 </div>
 
-<div th:if="${typeAcces == 'FINANCE'}">
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg">
-Ce compte porte le role <strong th:text="${compte.role == 'TRESORIER'} ? 'Tresorier' : 'Comptable'">Role</strong>.
-Cochez les modules financiers auxquels il a droit — caisse (encaissements), depenses, preparation et paiement
-de la paie, budget/plan comptable, rapports. Personnalisez cette repartition pour chaque etablissement selon
-son organisation (un seul agent qui gere tout, ou une separation caisse/comptabilite).
-</p>
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg" th:if="${!modulesPersonnalises}">
-Ce compte utilise actuellement les droits <strong>par defaut</strong> de son role (aucune personnalisation
-enregistree). Cocher puis enregistrer ci-dessous figera un ensemble de modules propre a ce compte.
-</p>
-<p class="font-body-md text-body-md text-on-surface-variant mb-lg" th:if="${modulesPersonnalises}">
-Ce compte a des acces <strong>personnalises</strong>, differents des droits par defaut de son role.
-</p>
-</div>
-
-<div class="mb-lg" th:if="${!profils.isEmpty()}">
-<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Profils reutilisables</h3>
+<div th:if="${!profils.isEmpty()}">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Postes enregistres</h3>
 <div class="flex flex-wrap gap-sm">
-<form class="flex items-center gap-xs" method="post" th:action="@{/parametres/roles/{id}/acces/appliquer-profil(id=${compte.id})}"
+<form class="flex items-center gap-xs" method="post"
+      th:action="@{/parametres/roles/{id}/acces/appliquer-profil(id=${compte.id})}"
       th:each="profil : ${profils}">
 <input name="profilId" th:value="${profil.id}" type="hidden"/>
 <button class="px-md py-2 border border-primary text-primary rounded-lg font-label-md text-label-sm hover:bg-primary-container/10 transition-colors flex items-center gap-xs" type="submit">
@@ -108,39 +98,89 @@ Ce compte a des acces <strong>personnalises</strong>, differents des droits par 
 </button>
 </form>
 </div>
-<p class="text-label-sm text-secondary mt-xs">Applique instantanement le jeu de modules du profil choisi a ce compte (a enregistrer ensuite si besoin d'ajustements).</p>
+<p class="text-label-sm text-secondary mt-xs">
+Applique d'un clic le jeu de cases de ce poste. Vous pourrez ensuite l'ajuster.
+</p>
+</div>
 </div>
 
-<form method="post" th:action="@{/parametres/roles/{id}/acces(id=${compte.id})}" class="space-y-md">
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-<label class="flex items-start gap-sm p-md border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low"
-       th:each="module : ${modulesOptionnels}">
-<input type="checkbox" name="modules" class="mt-1" th:value="${module.key}"
-       th:checked="${modulesActifs.contains(module.key)}"/>
-<span class="font-body-md text-body-md" th:text="${module.value}">Module</span>
+<form method="post" th:action="@{/parametres/roles/{id}/acces(id=${compte.id})}">
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl mb-md"
+     th:each="domaine : ${domaines}" th:if="${!domaine.value.isEmpty()}">
+
+<div class="flex items-center justify-between px-lg py-md border-b border-outline-variant">
+<h3 class="font-headline-sm text-headline-sm text-primary" th:text="${domaine.key}">Domaine</h3>
+<button type="button" class="text-label-sm text-primary hover:underline js-bascule">Tout cocher / decocher</button>
+</div>
+
+<div class="divide-y divide-outline-variant">
+<label class="flex items-start gap-md px-lg py-md"
+       th:each="f : ${domaine.value}"
+       th:classappend="${f.attribuable()} ? 'cursor-pointer hover:bg-surface-container-low' : 'opacity-60'">
+
+<input type="checkbox" name="fonctionnalites" class="mt-1 shrink-0"
+       th:value="${f.code()}"
+       th:checked="${actives.contains(f.code())}"
+       th:disabled="${!f.attribuable()}"/>
+
+<span class="flex-1">
+<span class="flex flex-wrap items-center gap-sm">
+<span class="font-body-lg text-body-lg text-on-surface" th:text="${f.libelle()}">Fonctionnalite</span>
+<span class="px-sm py-[2px] rounded-full bg-surface-container text-on-surface-variant text-label-sm"
+      th:if="${defauts.contains(f.code())}">par defaut pour ce role</span>
+<span class="px-sm py-[2px] rounded-full bg-error-container text-on-error-container text-label-sm"
+      th:if="${!f.attribuable()}">ne se delegue pas</span>
+</span>
+<span class="block font-body-md text-body-md text-on-surface-variant mt-xs"
+      th:if="${f.precision() != null}" th:text="${f.precision()}">Precision</span>
+</span>
 </label>
 </div>
-<div class="flex justify-end gap-sm pt-md">
+</div>
+
+<div class="flex flex-wrap justify-end gap-sm py-md sticky bottom-0 bg-background/95 backdrop-blur border-t border-outline-variant">
 <a class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors"
    th:href="@{/parametres/roles}">Annuler</a>
-<button class="px-md py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-sm hover:bg-primary/90 transition-colors" type="submit">Enregistrer les acces</button>
+<button class="px-lg py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-sm hover:bg-primary/90 transition-colors" type="submit">Enregistrer les acces</button>
 </div>
 </form>
 
-<form method="post" th:if="${typeAcces == 'FINANCE' and modulesPersonnalises}"
-      th:action="@{/parametres/roles/{id}/acces/reinitialiser(id=${compte.id})}" class="pt-md">
-<button class="text-label-sm text-on-surface-variant hover:underline" type="submit">Reinitialiser aux droits par defaut du role</button>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mt-lg">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Enregistrer ce poste</h3>
+<p class="text-label-sm text-secondary mb-sm">
+Donne un nom au jeu de cases actuellement enregistre, pour le reappliquer a d'autres comptes.
+Utile pour les postes qui reviennent : chef de departement, president de jury, apparitorat.
+</p>
+<form class="flex flex-wrap items-center gap-sm" method="post"
+      th:action="@{/parametres/roles/{id}/acces/enregistrer-profil(id=${compte.id})}">
+<input class="rounded-lg border-outline-variant px-sm py-2 text-body-md flex-1 min-w-48" name="nomProfil"
+       placeholder="Ex : Chef de departement" required="required" type="text"/>
+<button class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors" type="submit">Enregistrer ce poste</button>
 </form>
 
-<div class="mt-lg pt-lg border-t border-outline-variant">
-<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Enregistrer comme profil reutilisable</h3>
-<p class="text-label-sm text-secondary mb-sm">Sauvegarde les droits actuellement enregistres pour ce compte sous un nom, pour les reappliquer en un clic a d'autres comptes du meme type.</p>
-<form class="flex flex-wrap items-center gap-sm" method="post" th:action="@{/parametres/roles/{id}/acces/enregistrer-profil(id=${compte.id})}">
-<input class="rounded-lg border-outline-variant px-sm py-2 text-body-md flex-1 min-w-48" name="nomProfil" placeholder="Ex: Tresorier junior" required="required" type="text"/>
-<button class="px-md py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-sm hover:bg-surface-container-low transition-colors" type="submit">Enregistrer ce profil</button>
+<form method="post" th:if="${personnalise}"
+      th:action="@{/parametres/roles/{id}/acces/reinitialiser(id=${compte.id})}" class="mt-md pt-md border-t border-outline-variant">
+<button class="text-label-sm text-on-surface-variant hover:underline" type="submit">
+Revenir aux acces par defaut du role
+</button>
 </form>
 </div>
-</div>
+
+<script>
+  // « Tout cocher / decocher » d un domaine : on bascule vers l etat minoritaire, pour
+  // qu un second clic fasse bien l inverse du premier.
+  document.querySelectorAll(".js-bascule").forEach(function (bouton) {
+    bouton.addEventListener("click", function () {
+      var bloc = bouton.closest("div").parentElement;
+      var cases = bloc.querySelectorAll("input[type=checkbox]:not([disabled])");
+      var cochees = 0;
+      cases.forEach(function (c) { if (c.checked) cochees++; });
+      var vise = cochees < cases.length;
+      cases.forEach(function (c) { c.checked = vise; });
+    });
+  });
+</script>
 
 </main>
 </body>

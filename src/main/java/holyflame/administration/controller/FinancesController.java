@@ -25,7 +25,7 @@ import holyflame.administration.repository.ParametreRepository;
 import holyflame.administration.repository.UtilisateurRepository;
 import holyflame.administration.service.EmailService;
 import holyflame.administration.service.EtablissementService;
-import holyflame.administration.service.FinanceModules;
+import holyflame.administration.service.Fonctionnalites;
 import holyflame.administration.service.FinanceParentService;
 import holyflame.administration.service.JournalService;
 import holyflame.administration.service.NombreEnLettresService;
@@ -105,10 +105,9 @@ public class FinancesController {
 
         // Segmentation Tresorier/Comptable : chaque compte n'a acces qu'aux onglets couverts par
         // ses modules financiers effectifs (personnalises par l'ADMIN, ou par defaut de son role
-        // sinon — voir FinanceModules). Un onglet demande hors de ce perimetre est neutralise vers
+        // sinon — voir Fonctionnalites). Un onglet demande hors de ce perimetre est neutralise vers
         // le premier onglet auquel l'utilisateur a droit.
-        Set<String> modulesFinance = FinanceModules.effectifs(utilisateurConnecte);
-        model.addAttribute("modulesFinanceActifs", modulesFinance);
+        Set<String> modulesFinance = Fonctionnalites.effectives(utilisateurConnecte);
         tab = ongletAutorise(tab, modulesFinance);
         model.addAttribute("tab", tab);
         model.addAttribute("annee", annee);
@@ -180,20 +179,20 @@ public class FinancesController {
     /** Ramene l'onglet demande vers le premier onglet accessible si l'utilisateur n'a pas le module requis. */
     private String ongletAutorise(String tabDemande, Set<String> modules) {
         String moduleRequis = switch (tabDemande) {
-            case "depenses" -> FinanceModules.DEPENSES;
-            case "budget" -> FinanceModules.BUDGET_PARAMETRAGE;
-            case "rapports" -> FinanceModules.RAPPORTS;
-            case "parametrage" -> null; // couvre solde initial (CAISSE) et taux de paie (BUDGET_PARAMETRAGE)
-            default -> FinanceModules.CAISSE; // journal, scolarite
+            case "depenses" -> Fonctionnalites.FIN_DEPENSES;
+            case "budget" -> Fonctionnalites.FIN_BUDGET;
+            case "rapports" -> Fonctionnalites.FIN_RAPPORTS;
+            case "parametrage" -> null; // couvre solde initial (caisse) et taux de paie (budget)
+            default -> Fonctionnalites.FIN_CAISSE; // journal, scolarite
         };
         boolean autorise = "parametrage".equals(tabDemande)
-            ? (modules.contains(FinanceModules.CAISSE) || modules.contains(FinanceModules.BUDGET_PARAMETRAGE))
+            ? (modules.contains(Fonctionnalites.FIN_CAISSE) || modules.contains(Fonctionnalites.FIN_BUDGET))
             : modules.contains(moduleRequis);
         if (autorise) return tabDemande;
-        if (modules.contains(FinanceModules.CAISSE)) return "journal";
-        if (modules.contains(FinanceModules.DEPENSES)) return "depenses";
-        if (modules.contains(FinanceModules.BUDGET_PARAMETRAGE)) return "budget";
-        if (modules.contains(FinanceModules.RAPPORTS)) return "rapports";
+        if (modules.contains(Fonctionnalites.FIN_CAISSE)) return "journal";
+        if (modules.contains(Fonctionnalites.FIN_DEPENSES)) return "depenses";
+        if (modules.contains(Fonctionnalites.FIN_BUDGET)) return "budget";
+        if (modules.contains(Fonctionnalites.FIN_RAPPORTS)) return "rapports";
         return "journal";
     }
 

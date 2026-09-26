@@ -14,7 +14,7 @@ import holyflame.administration.repository.*;
 import holyflame.administration.service.DocumentsComptablesService;
 import holyflame.administration.service.DocumentsComptablesService.Balance;
 import holyflame.administration.service.DocumentsComptablesService.CompteDetaille;
-import holyflame.administration.service.FinanceModules;
+import holyflame.administration.service.Fonctionnalites;
 import holyflame.administration.service.PlanComptableService;
 import holyflame.administration.service.SituationFinanciereService;
 import org.junit.jupiter.api.DisplayName;
@@ -67,7 +67,7 @@ class JeuDeTestComptableTest {
      * paie ni arbitrer le budget previsionnel.
      */
     private static final Set<String> MODULES_DEMO =
-        Set.of(FinanceModules.CAISSE, FinanceModules.DEPENSES, FinanceModules.RAPPORTS);
+        Set.of(Fonctionnalites.FIN_CAISSE, Fonctionnalites.FIN_DEPENSES, Fonctionnalites.FIN_RAPPORTS);
 
     @Autowired private DocumentsComptablesService documents;
     @Autowired private SituationFinanciereService situations;
@@ -168,18 +168,18 @@ class JeuDeTestComptableTest {
         Utilisateur comptable = utilisateurRepository.findByEmail(COMPTE_DEMO).orElseThrow(
             () -> new IllegalStateException("le compte livre avec le jeu de test est introuvable"));
 
-        assertTrue(FinanceModules.autorise(comptable, FinanceModules.CAISSE),
+        assertTrue(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_CAISSE),
             "le guide apprend a encaisser et a delivrer un recu");
-        assertTrue(FinanceModules.autorise(comptable, FinanceModules.DEPENSES),
+        assertTrue(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_DEPENSES),
             "le guide apprend a enregistrer une depense");
-        assertTrue(FinanceModules.autorise(comptable, FinanceModules.RAPPORTS),
+        assertTrue(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_RAPPORTS),
             "le guide demande d'editer et de remettre les documents comptables");
 
-        assertFalse(FinanceModules.autorise(comptable, FinanceModules.PAIE_PREPARATION),
+        assertFalse(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_PAIE_PREPARATION),
             "le guide annonce que les salaires du personnel lui sont fermes");
-        assertFalse(FinanceModules.autorise(comptable, FinanceModules.PAIE_PAIEMENT),
+        assertFalse(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_PAIE_PAIEMENT),
             "idem pour le declenchement de la paie");
-        assertFalse(FinanceModules.autorise(comptable, FinanceModules.BUDGET_PARAMETRAGE),
+        assertFalse(Fonctionnalites.autorise(comptable, Fonctionnalites.FIN_BUDGET),
             "le guide annonce que le budget previsionnel et les taux de paie lui sont fermes");
     }
 
@@ -238,14 +238,14 @@ class JeuDeTestComptableTest {
         u.setMotDePasse(passwordEncoder.encode(MOT_DE_PASSE_DEMO));
         u.setRole("COMPTABLE");
         u.setEtablissement(ecole);
-        // Les droits par defaut du role COMPTABLE (voir FinanceModules) excluent la caisse et
+        // Les acces par defaut du role COMPTABLE (voir Fonctionnalites) excluent la caisse et
         // ouvrent au contraire la paie et le budget previsionnel. Ce n'est pas la comptable que
         // le guide decrit : celle-ci encaisse, enregistre les depenses et edite les documents,
         // sans approcher les salaires ni arbitrer le budget. Le compte livre recoit donc
-        // exactement ces trois modules — ce qu'un ADMIN fait depuis Parametres > Roles > Acces
-        // aux interfaces. Sans cette ligne, le guide promettrait a la comptable des ecrans qui
-        // lui repondraient 403, et lui cacherait ceux qu'elle peut reellement ouvrir.
-        u.setModulesFinanceActifs(MODULES_DEMO);
+        // exactement ces trois cases — ce qu'un ADMIN fait depuis Parametres > Roles > Gerer
+        // les acces. Sans cette ligne, le guide promettrait a la comptable des ecrans qui lui
+        // repondraient 403, et lui cacherait ceux qu'elle peut reellement ouvrir.
+        u.setFonctionnalitesActives(MODULES_DEMO);
         utilisateurRepository.saveAndFlush(u);
     }
 

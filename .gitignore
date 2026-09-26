@@ -57,3 +57,7 @@ application-prod.yml
 
 ### Fichiers temporaires Office ###
 ~$*
+
+# Fichiers produits par les tests a la racine (exports de notes, modeles reecrits).
+# Sans cette ligne, chaque execution de la suite salit le depot de vingt classeurs.
+/Note_*.xlsx

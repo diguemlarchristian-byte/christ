@@ -50,8 +50,11 @@ class CoherenceRegimeUniversitaireTest {
         String bloc = menu.substring(Math.max(0, lien - 700), lien);
         assertTrue(bloc.contains("estUniversite == true"),
             "le lien doit apparaitre en regime LMD, ou Gestion academique n'est plus la");
-        assertTrue(bloc.contains("'ADMIN'") && bloc.contains("'DIRECTEUR'"),
-            "et n'etre propose qu'aux roles que /matieres autorise reellement");
+        // Le lien nomme la fonctionnalite, jamais des roles : les acces se cochent
+        // personne par personne, et une liste de roles ecrite ici divergerait des le
+        // premier compte dont on ajuste les droits.
+        assertTrue(bloc.contains("peutFaire.contains('MATIERES')"),
+            "et n'etre propose qu'a qui la securite autorise reellement sur /matieres");
     }
 
     @Test
