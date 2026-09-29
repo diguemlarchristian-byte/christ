@@ -335,6 +335,36 @@ Site activé
 </div>
 
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm mb-xs"><span class="material-symbols-outlined text-primary">how_to_reg</span>Demandes de pré-inscription</h3>
+<p class="text-body-md text-on-surface-variant mb-lg">
+Ouvre un formulaire sur le site public. Les familles y déposent une demande, que le
+secrétariat retrouve dans son écran « Demandes ». Rien n&#39;est inscrit automatiquement.
+</p>
+
+<p class="text-body-md text-amber-700 mb-lg" th:unless="${site.actif}">
+Publiez d&#39;abord le site public ci-dessus : le formulaire y vit, il lui faut une adresse.
+</p>
+
+<form method="post" th:action="@{/marketing/pre-inscription}" th:if="${site.actif}"
+      class="flex flex-col gap-md">
+<label class="flex items-center gap-sm text-body-md">
+<input name="ouverte" th:checked="${site.preinscriptionActive}" type="checkbox" value="true"/>
+Recevoir les demandes de pré-inscription
+</label>
+<p class="text-label-sm text-on-surface-variant">
+Fermez-les hors période de recrutement : laisser le formulaire ouvert toute l&#39;année
+fait attendre des familles pour rien.
+</p>
+<div class="flex flex-wrap items-center gap-md">
+<button class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md text-label-md" type="submit">Enregistrer</button>
+<a th:if="${site.preinscriptionActive}" class="flex items-center gap-xs text-primary font-label-md text-label-sm hover:underline" target="_blank" th:href="@{'/ecole/' + ${site.slug} + '/pre-inscription'}">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span> Voir le formulaire
+</a>
+</div>
+</form>
+</div>
+
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
 <h3 class="font-headline-sm text-headline-sm flex items-center gap-sm mb-lg"><span class="material-symbols-outlined text-primary">edit_note</span>Informations du site</h3>
 <form class="grid grid-cols-1 md:grid-cols-2 gap-md" method="post" th:action="@{/marketing/a-propos}">
 <div class="flex flex-col gap-xs md:col-span-2">
