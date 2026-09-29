@@ -49,6 +49,12 @@ class CouvertureSecuriteRoutesTest {
     private static final Set<String> TOLEREES = Set.of(
         // Pages du site vitrine public d'un etablissement, servies sans compte.
         "/actualites", "/a-propos", "/galerie", "/evenements", "/temoignages", "/equipe",
+        // Formulaire de pre-inscription, sur ce meme site public. Seule route de la liste
+        // qui ACCEPTE des donnees au lieu d'en publier : ce n'est donc pas « rien de
+        // sensible » qui la protege, mais le fait que PreInscriptionService borne, coupe et
+        // refuse tout ce qui arrive, et que rien n'atteint le registre de l'ecole sans
+        // qu'une personne du secretariat l'ait lu et converti. Voir PreInscriptionServiceTest.
+        "/pre-inscription",
         // Assistant de demarrage : n'affiche que l'avancement de la configuration en cours.
         "/demarrer",
         // Baremes et corrections : le controleur filtre sur les classes de l'enseignant.

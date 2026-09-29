@@ -93,6 +93,34 @@ Site public activé
 </section>
 
 <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm mb-md"><span class="material-symbols-outlined text-primary text-[18px]">how_to_reg</span>Demandes de pré-inscription</h3>
+<p class="text-xs text-on-surface-variant mb-md">
+Ouvre un formulaire sur le site public. Les familles y déposent une demande, que le
+secrétariat retrouve dans son écran « Demandes ». Rien n&#39;est inscrit automatiquement.
+</p>
+
+<p class="text-xs text-amber-700 mb-md" th:unless="${site.actif}">
+Publiez d&#39;abord le site public : le formulaire y vit, il lui faut une adresse.
+</p>
+
+<form method="post" th:action="@{/marketing/pre-inscription}" class="flex flex-col gap-md" th:if="${site.actif}">
+<label class="flex items-center gap-sm text-sm">
+<input name="ouverte" th:checked="${site.preinscriptionActive}" type="checkbox" value="true"/>
+Recevoir les demandes
+</label>
+<p class="text-xs text-on-surface-variant">
+Fermez-les hors période de recrutement : laisser le formulaire ouvert toute l&#39;année
+fait attendre des familles pour rien.
+</p>
+<button class="bg-primary text-on-primary py-3 rounded-xl font-label-md" type="submit">Enregistrer</button>
+</form>
+
+<a th:if="${site.actif and site.preinscriptionActive}" class="mt-md flex items-center justify-center gap-sm text-primary font-label-md text-sm border border-primary rounded-xl py-2" target="_blank" th:href="@{'/ecole/' + ${site.slug} + '/pre-inscription'}">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span> Voir le formulaire
+</a>
+</section>
+
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
 <h3 class="font-headline-sm text-headline-sm flex items-center gap-sm mb-md"><span class="material-symbols-outlined text-primary text-[18px]">edit_note</span>Informations du site</h3>
 <form class="flex flex-col gap-md" method="post" th:action="@{/marketing/a-propos}">
 <div class="flex flex-col gap-xs">

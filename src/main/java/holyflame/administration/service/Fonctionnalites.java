@@ -59,6 +59,7 @@ public final class Fonctionnalites {
     public static final String D_ADMINISTRATION = "Administration du logiciel";
 
     // ── Scolarité ────────────────────────────────────────────────────────────────
+    public static final String PREINSCRIPTIONS = "PREINSCRIPTIONS";
     public static final String ELEVES_INSCRIRE = "ELEVES_INSCRIRE";
     public static final String SECRETARIAT = "SECRETARIAT";
     public static final String ARCHIVES = "ARCHIVES";
@@ -144,6 +145,8 @@ public final class Fonctionnalites {
 
     static {
         // ── Scolarité ────────────────────────────────────────────────────────────
+        ajouter(PREINSCRIPTIONS, D_SCOLARITE, "Demandes de pré-inscription",
+            "Lire et trier les demandes déposées par les familles depuis le site public de l'établissement.");
         ajouter(ELEVES_INSCRIRE, D_SCOLARITE, "Inscrire un nouvel élève",
             "Le parcours d'inscription complet. Souvent confié au guichet qui encaisse aussi le premier versement.");
         ajouter(SECRETARIAT, D_SCOLARITE, "Dossiers des élèves et secrétariat",
@@ -291,12 +294,12 @@ public final class Fonctionnalites {
         // Le Directeur dirige la pédagogie et le personnel. Jamais la finance : ni caisse,
         // ni dépenses, ni budget, ni salaires — pas même en lecture.
         defaut("DIRECTEUR", avecSocle(
-            PASSAGE, ACADEMIQUE, CLASSES, SALLES, MATIERES, NOTES, EXAMENS, BULLETINS,
+            PREINSCRIPTIONS, PASSAGE, ACADEMIQUE, CLASSES, SALLES, MATIERES, NOTES, EXAMENS, BULLETINS,
             UNIV_RELEVE, PERSONNEL_CONSULTER, PERSONNEL_ENREGISTRER, PERSONNEL_GERER,
             MON_CONGE, MESSAGERIE, COMMUNICATION, PUBLICATIONS, ARCHIVES, DIRECTION));
 
         defaut("SECRETAIRE", avecSocle(
-            ELEVES_INSCRIRE, SECRETARIAT, ARCHIVES, PASSAGE, NOTES, EXAMENS, BULLETINS,
+            PREINSCRIPTIONS, ELEVES_INSCRIRE, SECRETARIAT, ARCHIVES, PASSAGE, NOTES, EXAMENS, BULLETINS,
             UNIV_RELEVE, PERSONNEL_CONSULTER, PERSONNEL_ENREGISTRER, MESSAGERIE,
             COMMUNICATION, PUBLICATIONS, INVENTAIRE, FIN_RECU));
 

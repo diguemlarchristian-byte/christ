@@ -1,6 +1,7 @@
 package holyflame.administration.controller;
 
 import holyflame.administration.model.ActualiteSite;
+import holyflame.administration.model.DemandeInscription;
 import holyflame.administration.model.Etablissement;
 import holyflame.administration.model.EvenementPublic;
 import holyflame.administration.model.PhotoGalerie;
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,6 +52,7 @@ public class SitePublicController {
     @Autowired private EleveRepository eleveRepository;
     @Autowired private PersonnelRepository personnelRepository;
     @Autowired private ClasseRepository classeRepository;
+    @Autowired private holyflame.administration.service.PreInscriptionService preInscriptionService;
 
     @GetMapping
     public String accueil(@PathVariable String slug, Model model, HttpServletResponse response) {
@@ -141,6 +146,83 @@ public class SitePublicController {
         Etablissement etab = chargerEtablissement(site, model, response);
         if (etab == null) return "site-public-introuvable";
         return "site-public-a-propos";
+    }
+
+    // ── Pre-inscription ─────────────────────────────────────────────────
+    //
+    // La seule page de ce site qui accepte quelque chose au lieu de se contenter de
+    // publier. Tout ce qui y entre vient d'un inconnu : le service qui la recoit borne,
+    // coupe et refuse, et rien n'atteint le registre de l'ecole sans qu'une personne du
+    // secretariat l'ait lu.
+
+    @GetMapping("/pre-inscription")
+    public String formulairePreInscription(@PathVariable String slug, Model model,
+                                           HttpServletResponse response) {
+        SiteVitrine site = chargerSiteActif(slug, response);
+        if (site == null) return "site-public-introuvable";
+        Etablissement etab = chargerEtablissement(site, model, response);
+        if (etab == null) return "site-public-introuvable";
+        if (!site.isPreinscriptionActive()) {
+            // Fermee n'est pas introuvable : la famille doit comprendre que l'ecole existe
+            // bien, mais qu'elle ne recoit pas de demande en ce moment.
+            return "site-public-preinscription-fermee";
+        }
+        model.addAttribute("niveaux", niveauxProposes(etab.getId()));
+        return "site-public-preinscription";
+    }
+
+    @PostMapping("/pre-inscription")
+    public String envoyerPreInscription(@PathVariable String slug,
+                                        @ModelAttribute DemandeInscription demande,
+                                        @RequestParam(required = false) String siteWeb,
+                                        Model model, HttpServletResponse response) {
+        SiteVitrine site = chargerSiteActif(slug, response);
+        if (site == null) return "site-public-introuvable";
+        Etablissement etab = chargerEtablissement(site, model, response);
+        if (etab == null) return "site-public-introuvable";
+        if (!site.isPreinscriptionActive()) return "site-public-preinscription-fermee";
+
+        // L'etablissement vient du site, jamais du formulaire : sans cela, un envoi forge
+        // deposerait une demande dans l'ecole de son choix.
+        demande.setEtablissementId(etab.getId());
+        demande.setEleveId(null);
+        demande.setTraiteePar(null);
+        demande.setNoteInterne(null);
+
+        String annee = etab.getAnneeScolaire() != null ? etab.getAnneeScolaire() : "";
+        var resultat = preInscriptionService.enregistrer(demande, annee, siteWeb);
+
+        if (!resultat.accepte()) {
+            if (resultat.message() == null) {
+                // Envoi automatique : on affiche la meme page de confirmation qu'a une
+                // famille, sans rien avoir enregistre.
+                model.addAttribute("reference", null);
+                return "site-public-preinscription-recue";
+            }
+            model.addAttribute("erreur", resultat.message());
+            model.addAttribute("demande", demande);
+            model.addAttribute("niveaux", niveauxProposes(etab.getId()));
+            return "site-public-preinscription";
+        }
+
+        model.addAttribute("reference", resultat.demande().getReference());
+        return "site-public-preinscription-recue";
+    }
+
+    /**
+     * Les niveaux que l'ecole ouvre reellement, lus dans ses classes.
+     *
+     * Une liste ecrite en dur proposerait la sixieme a une ecole primaire, et une famille
+     * deposerait une demande que personne ne peut satisfaire.
+     */
+    private java.util.List<String> niveauxProposes(Long etablissementId) {
+        return classeRepository.findByEtablissementId(etablissementId).stream()
+            .map(c -> c.getNiveau())
+            .filter(n -> n != null && !n.isBlank())
+            .map(String::trim)
+            .distinct()
+            .sorted()
+            .toList();
     }
 
     private SiteVitrine chargerSiteActif(String slug, HttpServletResponse response) {

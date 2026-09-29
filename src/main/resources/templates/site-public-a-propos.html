@@ -39,6 +39,9 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="text-accent" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
+<a class="px-4 py-2 rounded-full bg-accent text-white font-bold hover:bg-accent-dark transition"
+   th:if="${site.preinscriptionActive}"
+   th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
 </nav>
 <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center text-stone-700" type="button">
 <span class="material-symbols-outlined">menu</span>
@@ -50,6 +53,8 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="block py-2 font-semibold text-accent" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
+<a class="block py-2 font-bold text-accent" th:if="${site.preinscriptionActive}"
+   th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
 </div>
 </header>
 

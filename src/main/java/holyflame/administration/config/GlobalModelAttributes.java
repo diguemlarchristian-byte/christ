@@ -18,6 +18,7 @@ public class GlobalModelAttributes {
 
     @Autowired private EtablissementService etablissementService;
     @Autowired private holyflame.administration.repository.UtilisateurRepository utilisateurRepository;
+    @Autowired private holyflame.administration.service.PreInscriptionService preInscriptionService;
 
     @ModelAttribute("accentColor")
     public String accentColor() {
@@ -77,6 +78,29 @@ public class GlobalModelAttributes {
         } catch (Exception ignored) {
             // Page publique, ou compte introuvable : aucun menu a afficher.
             return java.util.Set.of();
+        }
+    }
+
+    /**
+     * Le nombre de demandes de pré-inscription qui attendent une décision.
+     *
+     * C'est le chiffre qui donne envie d'ouvrir l'écran. Sans lui, personne ne pense à
+     * aller voir, et une famille attend un rappel qui ne vient jamais.
+     *
+     * Il n'est compté que pour les personnes qui peuvent le traiter : inutile d'interroger
+     * la base à chaque page d'un enseignant, qui n'y verrait de toute façon aucun menu.
+     */
+    @ModelAttribute("demandesEnAttente")
+    public long demandesEnAttente() {
+        try {
+            if (!peutFaire().contains(holyflame.administration.service.Fonctionnalites.PREINSCRIPTIONS)) {
+                return 0;
+            }
+            Long etabId = etablissementService.getCurrentEtablissementId();
+            return etabId == null ? 0 : preInscriptionService.enAttente(etabId);
+        } catch (Exception ignored) {
+            // Un compteur absent vaut mieux qu'une page qui ne s'affiche pas.
+            return 0;
         }
     }
 

@@ -113,6 +113,38 @@ public class MarketingController {
         return "redirect:/marketing";
     }
 
+    /**
+     * Ouvrir ou fermer les demandes de pre-inscription.
+     *
+     * Separe de la publication du site : une ecole garde son site en ligne toute l annee
+     * et ne recrute que quelques semaines. Melanger les deux fermerait sa vitrine chaque
+     * fois qu elle arrete de recevoir des demandes.
+     */
+    @PostMapping("/pre-inscription")
+    public String basculerPreInscription(@RequestParam(required = false) Boolean ouverte,
+                                         RedirectAttributes ra) {
+        Long etabId = etablissementService.getCurrentEtablissementId();
+        SiteVitrine site = obtenirOuCreerSite(etabId);
+        boolean ouvrir = Boolean.TRUE.equals(ouverte);
+
+        if (ouvrir && !site.isActif()) {
+            // Le formulaire vit sur le site public : sans site publie, il n a pas d adresse
+            // ou exister, et l ecole attendrait des demandes qui ne peuvent pas arriver.
+            ra.addFlashAttribute("erreurMsg",
+                "Publiez d abord le site public : le formulaire de pre-inscription y vit.");
+            return "redirect:/marketing";
+        }
+
+        site.setPreinscriptionActive(ouvrir);
+        siteVitrineRepository.save(site);
+        journalService.log(ouvrir ? "PREINSCRIPTION_OUVERTE" : "PREINSCRIPTION_FERMEE",
+            "MARKETING", "Demandes de pre-inscription");
+        ra.addFlashAttribute("successMsg", ouvrir
+            ? "Les familles peuvent deposer une demande : /ecole/" + site.getSlug() + "/pre-inscription"
+            : "Les demandes de pre-inscription sont closes.");
+        return "redirect:/marketing";
+    }
+
     @PostMapping("/a-propos")
     public String enregistrerAPropos(
             @RequestParam(required = false) String accroche,

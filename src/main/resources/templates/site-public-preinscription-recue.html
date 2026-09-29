@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title th:text="'Événements — ' + ${etablissement.nom}">Événements</title>
+<title th:text="'Demande envoyée — ' + ${etablissement.nom}">Demande envoyée</title>
 <link rel="stylesheet" href="/css/fonts.css">
 <script src="/js/tailwind.js"></script>
 <style>
@@ -37,7 +37,7 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="hover:text-accent transition" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
 <a class="px-4 py-2 rounded-full bg-accent text-white font-bold hover:bg-accent-dark transition"
    th:if="${site.preinscriptionActive}"
@@ -51,7 +51,7 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="block py-2 font-semibold text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
 <a class="block py-2 font-bold text-accent" th:if="${site.preinscriptionActive}"
    th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
@@ -61,34 +61,45 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <section class="hero-accent text-white">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20 text-center">
 <span class="inline-flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
-<span class="material-symbols-outlined text-[18px]">event</span> Événements
+<span class="material-symbols-outlined text-[18px]">task_alt</span> Admissions
 </span>
-<h1 class="font-heading text-3xl md:text-4xl font-extrabold">Nos prochains rendez-vous</h1>
+<h1 class="font-heading text-3xl md:text-5xl font-extrabold mb-3">Votre demande est bien arrivée</h1>
+<p class="text-white/85 max-w-2xl mx-auto">L&#39;école vous rappellera au numéro que vous avez indiqué.</p>
 </div>
 </section>
 
-<main class="max-w-4xl mx-auto px-5 md:px-8 py-16">
-<div th:if="${evenements == null or #lists.isEmpty(evenements)}" class="text-center py-20 text-stone-400">
-<span class="material-symbols-outlined text-[56px] mb-3 block">event_busy</span>
-<p class="text-lg font-semibold">Aucun événement à venir pour le moment.</p>
-</div>
-<div class="flex flex-col gap-6" th:unless="${evenements == null or #lists.isEmpty(evenements)}">
-<div class="flex gap-5 items-start rounded-2xl border border-stone-200 bg-white p-6 hover:shadow-lg transition-shadow" th:each="e : ${evenements}">
-<div class="shrink-0 w-20 h-20 rounded-xl bg-accent text-white flex flex-col items-center justify-center leading-none" th:if="${e.dateEvenement != null}">
-<span class="text-2xl font-extrabold" th:text="${#temporals.format(e.dateEvenement, 'dd')}">01</span>
-<span class="text-xs uppercase" th:text="${#temporals.format(e.dateEvenement, 'MMM yyyy')}">jan 2026</span>
-</div>
-<div class="flex-1">
-<h3 class="font-heading text-lg font-bold text-stone-900" th:text="${e.titre}">Titre de l'événement</h3>
-<p class="text-sm text-stone-500 flex items-center gap-1 mt-1" th:if="${e.lieu != null and !#strings.isEmpty(e.lieu)}">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span th:text="${e.lieu}">Lieu</span>
+<section class="max-w-2xl mx-auto px-5 md:px-8 py-12 md:py-16 text-center">
+
+<div class="p-8 rounded-2xl bg-accent-soft border border-accent/30 mb-8" th:if="${reference != null}">
+<p class="text-sm font-semibold text-stone-600 mb-2">Votre référence</p>
+<p class="font-heading text-3xl md:text-4xl font-extrabold text-accent tracking-wider"
+   th:text="${reference}">PRE-2026-ABCD</p>
+<p class="text-sm text-stone-600 mt-3">
+Notez-la. Elle permet à l&#39;école de retrouver votre demande immédiatement si vous appelez.
 </p>
-<p class="text-stone-600 mt-3 leading-relaxed" th:if="${e.description != null and !#strings.isEmpty(e.description)}" th:text="${e.description}">Description de l'événement.</p>
 </div>
+
+<div class="p-8 rounded-2xl bg-accent-soft border border-accent/30 mb-8" th:if="${reference == null}">
+<p class="font-heading text-xl font-extrabold text-stone-900">Merci</p>
+<p class="text-stone-700 mt-2">Votre demande a bien été transmise à l&#39;établissement.</p>
 </div>
+
+<div class="text-left space-y-4 text-stone-700">
+<p class="font-heading text-xl font-extrabold text-stone-900">Et ensuite ?</p>
+<p>
+L&#39;école examine votre demande et vous rappelle. Aucun document ne vous est demandé
+tant que l&#39;inscription n&#39;est pas confirmée : ne vous déplacez pas avec un dossier
+avant d&#39;avoir été contacté.
+</p>
+<p th:if="${site.telephoneContact != null and !#strings.isEmpty(site.telephoneContact)}">
+Si vous n&#39;avez pas de nouvelles, vous pouvez joindre l&#39;établissement au
+<span class="font-bold text-accent" th:text="${site.telephoneContact}">—</span>.
+</p>
 </div>
-</main>
+
+<a class="inline-block mt-10 px-6 py-3 rounded-xl border-2 border-accent text-accent font-bold hover:bg-accent-soft transition"
+   th:href="@{/ecole/{slug}(slug=${site.slug})}">Retour à l&#39;accueil</a>
+</section>
 
 <footer class="bg-stone-900 text-stone-300 mt-4">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-12 grid gap-10 md:grid-cols-3">

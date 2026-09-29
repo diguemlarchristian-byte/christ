@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title th:text="'Événements — ' + ${etablissement.nom}">Événements</title>
+<title th:text="'Pré-inscription — ' + ${etablissement.nom}">Pré-inscription</title>
 <link rel="stylesheet" href="/css/fonts.css">
 <script src="/js/tailwind.js"></script>
 <style>
@@ -37,11 +37,8 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="hover:text-accent transition" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
-<a class="px-4 py-2 rounded-full bg-accent text-white font-bold hover:bg-accent-dark transition"
-   th:if="${site.preinscriptionActive}"
-   th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
 </nav>
 <button id="menu-toggle" class="md:hidden w-10 h-10 flex items-center justify-center text-stone-700" type="button">
 <span class="material-symbols-outlined">menu</span>
@@ -51,44 +48,135 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="block py-2 font-semibold text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
-<a class="block py-2 font-bold text-accent" th:if="${site.preinscriptionActive}"
-   th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
 </div>
 </header>
 
 <section class="hero-accent text-white">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20 text-center">
 <span class="inline-flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
-<span class="material-symbols-outlined text-[18px]">event</span> Événements
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span> Admissions
 </span>
-<h1 class="font-heading text-3xl md:text-4xl font-extrabold">Nos prochains rendez-vous</h1>
+<h1 class="font-heading text-3xl md:text-5xl font-extrabold mb-3">Demander une inscription</h1>
+<p class="text-white/85 max-w-2xl mx-auto">Remplissez ce formulaire, l&#39;école vous rappellera. Aucun document n&#39;est demandé à cette étape.</p>
 </div>
 </section>
 
-<main class="max-w-4xl mx-auto px-5 md:px-8 py-16">
-<div th:if="${evenements == null or #lists.isEmpty(evenements)}" class="text-center py-20 text-stone-400">
-<span class="material-symbols-outlined text-[56px] mb-3 block">event_busy</span>
-<p class="text-lg font-semibold">Aucun événement à venir pour le moment.</p>
+<section class="max-w-3xl mx-auto px-5 md:px-8 py-12 md:py-16">
+
+<div class="mb-8 p-5 rounded-2xl bg-accent-soft border border-accent/30"
+     th:if="${site.infosAdmissions != null and !#strings.isEmpty(site.infosAdmissions)}">
+<p class="font-heading font-bold text-stone-900 mb-1">Conditions d&#39;admission</p>
+<p class="text-stone-700 whitespace-pre-line" th:text="${site.infosAdmissions}">Informations</p>
 </div>
-<div class="flex flex-col gap-6" th:unless="${evenements == null or #lists.isEmpty(evenements)}">
-<div class="flex gap-5 items-start rounded-2xl border border-stone-200 bg-white p-6 hover:shadow-lg transition-shadow" th:each="e : ${evenements}">
-<div class="shrink-0 w-20 h-20 rounded-xl bg-accent text-white flex flex-col items-center justify-center leading-none" th:if="${e.dateEvenement != null}">
-<span class="text-2xl font-extrabold" th:text="${#temporals.format(e.dateEvenement, 'dd')}">01</span>
-<span class="text-xs uppercase" th:text="${#temporals.format(e.dateEvenement, 'MMM yyyy')}">jan 2026</span>
+
+<div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 font-semibold"
+     th:if="${erreur != null}" th:text="${erreur}">Erreur</div>
+
+<form method="post" class="space-y-8" th:action="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">
+
+<!--
+  Champ invisible : une personne ne le voit pas et le laisse vide, un robot remplit tout
+  ce qu il rencontre. C est une barriere modeste, mais elle n impose aucune epreuve a une
+  famille — contrairement a une image de caracteres a recopier, illisible sur un petit
+  telephone et infranchissable pour qui lit mal.
+-->
+<div style="position:absolute;left:-9999px" aria-hidden="true">
+<label>Site web<input type="text" name="siteWeb" tabindex="-1" autocomplete="off"/></label>
 </div>
-<div class="flex-1">
-<h3 class="font-heading text-lg font-bold text-stone-900" th:text="${e.titre}">Titre de l'événement</h3>
-<p class="text-sm text-stone-500 flex items-center gap-1 mt-1" th:if="${e.lieu != null and !#strings.isEmpty(e.lieu)}">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span th:text="${e.lieu}">Lieu</span>
+
+<fieldset class="space-y-4">
+<legend class="font-heading text-xl font-extrabold text-stone-900 mb-3">L&#39;enfant</legend>
+
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Nom et prénom de l&#39;enfant *</span>
+<input type="text" name="nomComplet" required="required" maxlength="120"
+       th:value="${demande != null} ? ${demande.nomComplet} : ''"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+
+<div class="grid sm:grid-cols-2 gap-4">
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Date de naissance</span>
+<input type="date" name="dateNaissance"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Lieu de naissance</span>
+<input type="text" name="lieuNaissance" maxlength="120"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-4">
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Sexe</span>
+<select name="sexe" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none">
+<option value="">Ne se prononce pas</option>
+<option value="M">Masculin</option>
+<option value="F">Féminin</option>
+</select>
+</label>
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Niveau demandé</span>
+<select name="niveauDemande" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none">
+<option value="">À déterminer avec l&#39;école</option>
+<option th:each="n : ${niveaux}" th:value="${n}" th:text="${n}">Niveau</option>
+</select>
+</label>
+</div>
+
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">École précédente</span>
+<input type="text" name="ecolePrecedente" maxlength="150"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+</fieldset>
+
+<fieldset class="space-y-4">
+<legend class="font-heading text-xl font-extrabold text-stone-900 mb-3">Parent ou tuteur</legend>
+
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Votre nom *</span>
+<input type="text" name="parentNom" required="required" maxlength="120"
+       th:value="${demande != null} ? ${demande.parentNom} : ''"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+
+<div class="grid sm:grid-cols-2 gap-4">
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Téléphone *</span>
+<input type="tel" name="parentTelephone" required="required" maxlength="30"
+       th:value="${demande != null} ? ${demande.parentTelephone} : ''"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+<span class="block text-xs text-stone-500 mt-1">C&#39;est par là que l&#39;école vous joindra.</span>
+</label>
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Adresse e-mail</span>
+<input type="email" name="parentEmail" maxlength="150"
+       class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"/>
+</label>
+</div>
+
+<label class="block">
+<span class="block text-sm font-semibold text-stone-700 mb-1">Votre message</span>
+<textarea name="message" rows="4" maxlength="1500"
+          class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-accent focus:outline-none"></textarea>
+</label>
+</fieldset>
+
+<div class="pt-2">
+<button type="submit" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-accent text-white font-bold text-lg hover:bg-accent-dark transition">
+Envoyer ma demande
+</button>
+<p class="text-xs text-stone-500 mt-3">
+Les champs marqués * sont obligatoires. Vos informations ne servent qu&#39;à traiter cette
+demande et ne sont transmises à personne d&#39;autre que l&#39;établissement.
 </p>
-<p class="text-stone-600 mt-3 leading-relaxed" th:if="${e.description != null and !#strings.isEmpty(e.description)}" th:text="${e.description}">Description de l'événement.</p>
 </div>
-</div>
-</div>
-</main>
+</form>
+</section>
 
 <footer class="bg-stone-900 text-stone-300 mt-4">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-12 grid gap-10 md:grid-cols-3">

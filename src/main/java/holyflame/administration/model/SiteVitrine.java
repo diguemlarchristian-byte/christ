@@ -29,6 +29,15 @@ public class SiteVitrine {
 
     private boolean actif = false;
 
+    /**
+     * Le formulaire de pre-inscription est-il ouvert sur le site public ?
+     *
+     * Une ecole ne recrute pas toute l annee. Laisser le formulaire ouvert en fevrier
+     * ferait attendre des familles pour rien, et remplirait le secretariat de demandes
+     * qu il faudra refuser une par une.
+     */
+    private boolean preinscriptionActive = false;
+
     @Column(unique = true)
     private String slug;
 
@@ -61,6 +70,9 @@ public class SiteVitrine {
 
     public Long getEtablissementId() { return etablissementId; }
     public void setEtablissementId(Long etablissementId) { this.etablissementId = etablissementId; }
+
+    public boolean isPreinscriptionActive() { return preinscriptionActive; }
+    public void setPreinscriptionActive(boolean preinscriptionActive) { this.preinscriptionActive = preinscriptionActive; }
 
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }

@@ -71,6 +71,12 @@
 <span class="material-symbols-outlined">group</span>
 <span class="font-label-md text-label-md" th:text="${estUniversite} ? 'Etudiants' : 'Eleves'">Eleves</span>
 </a>
+<a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'demandes'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${peutFaire.contains('PREINSCRIPTIONS')}" href="/secretariat/demandes">
+<span class="material-symbols-outlined">how_to_reg</span>
+<span class="font-label-md text-label-md">Demandes</span>
+<span class="ml-auto px-2 py-[1px] rounded-full bg-primary-fixed text-on-primary-fixed text-label-sm"
+      th:if="${demandesEnAttente != null and demandesEnAttente > 0}" th:text="${demandesEnAttente}">0</span>
+</a>
 <a th:class="'flex items-center px-lg py-md gap-md cursor-pointer active:scale-95 transition-all duration-200 ' + (${activePage == 'secretariat-absences'} ? 'text-on-primary-fixed border-l-4 border-primary-fixed bg-tertiary-container dark:bg-tertiary' : 'text-on-tertiary-container hover:text-on-tertiary hover:bg-tertiary-container/50')" th:if="${peutFaire.contains('SECRETARIAT')}" href="/secretariat/absences">
 <span class="material-symbols-outlined">event_busy</span>
 <span class="font-label-md text-label-md">Absences</span>

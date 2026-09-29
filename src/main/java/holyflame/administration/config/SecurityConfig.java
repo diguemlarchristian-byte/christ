@@ -125,6 +125,12 @@ public class SecurityConfig {
 
                 // ── Scolarite ────────────────────────────────────────────────────────
                 .requestMatchers("/passage/assistant/**").access(peut(Fonctionnalites.PASSAGE_CLOTURE))
+                // Les demandes de pre-inscription se lisent et se trient sans donner acces au
+                // reste du secretariat : une ecole peut confier ce tri a quelqu un qui ne touche
+                // pas aux dossiers. Cette regle doit rester avant /secretariat/** pour etre
+                // atteinte.
+                .requestMatchers("/secretariat/demandes", "/secretariat/demandes/**")
+                    .access(peut(Fonctionnalites.PREINSCRIPTIONS))
                 .requestMatchers("/secretariat/eleves/nouveau", "/secretariat/eleves/nouveau/**")
                     .access(peut(Fonctionnalites.ELEVES_INSCRIRE))
                 .requestMatchers("/secretariat/**").access(peut(Fonctionnalites.SECRETARIAT))

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title th:text="'Événements — ' + ${etablissement.nom}">Événements</title>
+<title th:text="'Admissions — ' + ${etablissement.nom}">Admissions</title>
 <link rel="stylesheet" href="/css/fonts.css">
 <script src="/js/tailwind.js"></script>
 <style>
@@ -37,7 +37,7 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="hover:text-accent transition" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="hover:text-accent transition" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
 <a class="px-4 py-2 rounded-full bg-accent text-white font-bold hover:bg-accent-dark transition"
    th:if="${site.preinscriptionActive}"
@@ -51,7 +51,7 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}(slug=${site.slug})}">Accueil</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/actualites(slug=${site.slug})}">Actualités</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/galerie(slug=${site.slug})}">Galerie</a>
-<a class="block py-2 font-semibold text-accent" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
+<a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/evenements(slug=${site.slug})}">Événements</a>
 <a class="block py-2 font-semibold text-stone-700" th:href="@{/ecole/{slug}/a-propos(slug=${site.slug})}">À propos</a>
 <a class="block py-2 font-bold text-accent" th:if="${site.preinscriptionActive}"
    th:href="@{/ecole/{slug}/pre-inscription(slug=${site.slug})}">Pré-inscription</a>
@@ -61,34 +61,33 @@ body { font-family: 'Inter', sans-serif; background: #fffdf9; }
 <section class="hero-accent text-white">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20 text-center">
 <span class="inline-flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
-<span class="material-symbols-outlined text-[18px]">event</span> Événements
+<span class="material-symbols-outlined text-[18px]">event_busy</span> Admissions
 </span>
-<h1 class="font-heading text-3xl md:text-4xl font-extrabold">Nos prochains rendez-vous</h1>
+<h1 class="font-heading text-3xl md:text-5xl font-extrabold mb-3">Les demandes sont closes pour le moment</h1>
+<p class="text-white/85 max-w-2xl mx-auto">L&#39;établissement ne reçoit pas de nouvelle demande en ce moment.</p>
 </div>
 </section>
 
-<main class="max-w-4xl mx-auto px-5 md:px-8 py-16">
-<div th:if="${evenements == null or #lists.isEmpty(evenements)}" class="text-center py-20 text-stone-400">
-<span class="material-symbols-outlined text-[56px] mb-3 block">event_busy</span>
-<p class="text-lg font-semibold">Aucun événement à venir pour le moment.</p>
-</div>
-<div class="flex flex-col gap-6" th:unless="${evenements == null or #lists.isEmpty(evenements)}">
-<div class="flex gap-5 items-start rounded-2xl border border-stone-200 bg-white p-6 hover:shadow-lg transition-shadow" th:each="e : ${evenements}">
-<div class="shrink-0 w-20 h-20 rounded-xl bg-accent text-white flex flex-col items-center justify-center leading-none" th:if="${e.dateEvenement != null}">
-<span class="text-2xl font-extrabold" th:text="${#temporals.format(e.dateEvenement, 'dd')}">01</span>
-<span class="text-xs uppercase" th:text="${#temporals.format(e.dateEvenement, 'MMM yyyy')}">jan 2026</span>
-</div>
-<div class="flex-1">
-<h3 class="font-heading text-lg font-bold text-stone-900" th:text="${e.titre}">Titre de l'événement</h3>
-<p class="text-sm text-stone-500 flex items-center gap-1 mt-1" th:if="${e.lieu != null and !#strings.isEmpty(e.lieu)}">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span th:text="${e.lieu}">Lieu</span>
+<section class="max-w-2xl mx-auto px-5 md:px-8 py-12 md:py-16 text-center space-y-6">
+<p class="text-stone-700">
+Les inscriptions rouvriront. En attendant, vous pouvez joindre l&#39;établissement
+directement — il vous dira quand déposer votre demande.
 </p>
-<p class="text-stone-600 mt-3 leading-relaxed" th:if="${e.description != null and !#strings.isEmpty(e.description)}" th:text="${e.description}">Description de l'événement.</p>
+
+<div class="p-6 rounded-2xl bg-accent-soft border border-accent/30 inline-block text-left"
+     th:if="${(site.telephoneContact != null and !#strings.isEmpty(site.telephoneContact)) or (site.emailContact != null and !#strings.isEmpty(site.emailContact))}">
+<p class="font-semibold text-stone-900 mb-2">Contacter l&#39;établissement</p>
+<p th:if="${site.telephoneContact != null and !#strings.isEmpty(site.telephoneContact)}"
+   class="text-accent font-bold text-lg" th:text="${site.telephoneContact}">—</p>
+<p th:if="${site.emailContact != null and !#strings.isEmpty(site.emailContact)}"
+   class="text-stone-700" th:text="${site.emailContact}">—</p>
 </div>
+
+<div>
+<a class="inline-block mt-4 px-6 py-3 rounded-xl border-2 border-accent text-accent font-bold hover:bg-accent-soft transition"
+   th:href="@{/ecole/{slug}(slug=${site.slug})}">Retour à l&#39;accueil</a>
 </div>
-</div>
-</main>
+</section>
 
 <footer class="bg-stone-900 text-stone-300 mt-4">
 <div class="max-w-6xl mx-auto px-5 md:px-8 py-12 grid gap-10 md:grid-cols-3">
