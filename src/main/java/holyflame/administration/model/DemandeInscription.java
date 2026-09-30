@@ -39,6 +39,16 @@ public class DemandeInscription {
     public static final String NOUVELLE = "NOUVELLE";
     /** Quelqu'un s'en occupe, ou attend une piece de la famille. */
     public static final String EN_COURS = "EN_COURS";
+    /**
+     * La commission a dit oui. L'eleve n'est pas inscrit pour autant.
+     *
+     * Entre l'admission et l'inscription, une famille change d'avis, part ailleurs, ou ne
+     * reunit pas les frais. Confondre les deux ferait compter des eleves qui ne viendront
+     * pas, et empecherait de rappeler la liste d'attente a temps.
+     */
+    public static final String ADMIS = "ADMIS";
+    /** Admissible, mais apres les autres. Le rang est celui de la note. */
+    public static final String LISTE_ATTENTE = "LISTE_ATTENTE";
     /** L'eleve a ete inscrit a partir de cette demande. */
     public static final String CONVERTIE = "CONVERTIE";
     /** L'ecole ne donne pas suite. Le motif est toujours renseigne. */
@@ -117,12 +127,59 @@ public class DemandeInscription {
     /** L'eleve cree a partir de cette demande, une fois convertie. */
     private Long eleveId;
 
+    // ── Etude du dossier ────────────────────────────────────────────────
+
+    /**
+     * La note du dossier sur vingt, ponderee par les poids des criteres.
+     *
+     * Recalculee a chaque saisie et conservee ici plutot que refaite a l'affichage : c'est
+     * elle qui ordonne la liste d'attente, et un classement qui changerait entre deux
+     * consultations ne serait pas defendable devant une famille.
+     */
+    private Double noteDossier;
+
+    /** Ce que la commission a retenu du dossier. Peut etre communique a la famille. */
+    @Column(length = 1000)
+    private String appreciation;
+
+    /** Qui a pris la decision, et quand — un jury rend des comptes. */
+    private String decidePar;
+
+    private LocalDateTime dateDecision;
+
+    public Double getNoteDossier() { return noteDossier; }
+    public void setNoteDossier(Double noteDossier) { this.noteDossier = noteDossier; }
+
+    public String getAppreciation() { return appreciation; }
+    public void setAppreciation(String appreciation) { this.appreciation = appreciation; }
+
+    public String getDecidePar() { return decidePar; }
+    public void setDecidePar(String decidePar) { this.decidePar = decidePar; }
+
+    public LocalDateTime getDateDecision() { return dateDecision; }
+    public void setDateDecision(LocalDateTime dateDecision) { this.dateDecision = dateDecision; }
+
     public DemandeInscription() {
     }
 
     /** Vrai tant que personne n'a tranche : la demande attend une decision. */
     public boolean estEnAttente() {
         return NOUVELLE.equals(statut) || EN_COURS.equals(statut);
+    }
+
+    /** Vrai quand la commission a dit oui, que l'inscription ait suivi ou non. */
+    public boolean estAdmise() {
+        return ADMIS.equals(statut) || CONVERTIE.equals(statut);
+    }
+
+    /**
+     * Vrai quand la place reste a prendre.
+     *
+     * C'est la liste que le secretariat rappelle en septembre, quand des admis ne se sont
+     * pas presentes. Une demande deja convertie n'y figure pas : elle a sa place.
+     */
+    public boolean attendSaPlace() {
+        return ADMIS.equals(statut) || LISTE_ATTENTE.equals(statut);
     }
 
     public Long getId() { return id; }
