@@ -10,6 +10,7 @@ import holyflame.administration.repository.EnseignantAutorisationRepository;
 import holyflame.administration.repository.MatiereRepository;
 import holyflame.administration.repository.UtilisateurRepository;
 import holyflame.administration.service.EtablissementService;
+import holyflame.administration.service.Fonctionnalites;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,8 +43,16 @@ public class GestionAcademiqueController {
         // unites d'enseignement a credits. Le menu ne propose plus l'entree, mais l'adresse
         // reste atteignable — mieux vaut renvoyer vers la maquette pedagogique que d'afficher
         // un formulaire de classes et de coefficients qui ne correspond a rien.
+        //
+        // Comme dans AcademiqueUniversiteController, le renvoi n'a lieu que si la personne peut
+        // ouvrir la maquette. Un directeur tient l'organisation academique sans tenir la
+        // maquette : le renvoyer la-bas lui repondrait 403 sur une adresse qu'il n'a pas
+        // demandee, alors que les matieres — dont dependent toutes les notes, y compris en
+        // LMD — se creent precisement depuis cet ecran.
         var etablissement = etablissementService.getCurrentEtablissement();
-        if (etablissement != null && etablissement.estRegimeLMD()) {
+        if (etablissement != null && etablissement.estRegimeLMD()
+                && Fonctionnalites.autorise(etablissementService.getCurrentUtilisateur(),
+                    Fonctionnalites.UNIV_MAQUETTE)) {
             return "redirect:/academique-universite";
         }
 

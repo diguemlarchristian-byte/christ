@@ -311,10 +311,12 @@
 </div>
 <h4 class="font-headline-sm text-headline-sm">Logo de l'etablissement</h4>
 </div>
-<div class="flex items-center gap-lg">
+<!-- Sur telephone le champ fichier et son bouton passent l'un sous l'autre : le widget natif
+     "Parcourir... / aucun fichier" reclame plus de 300 px et refuse de se reduire sans min-w-0. -->
+<div class="flex flex-wrap items-center gap-md md:gap-lg">
 <img alt="Logo actuel" class="w-16 h-16 object-contain border border-outline-variant rounded-lg" th:if="${p.get('LOGO_ETAB') != null}" th:src="@{'/uploads/' + ${p.get('LOGO_ETAB')}}"/>
-<div class="flex-1 flex items-center gap-md">
-<input accept="image/*" class="flex-1 text-body-md" form="form-logo" name="logo" required="required" type="file"/>
+<div class="flex-1 min-w-0 w-full flex flex-col sm:flex-row sm:items-center gap-md">
+<input accept="image/*" class="flex-1 min-w-0 text-body-md" form="form-logo" name="logo" required="required" type="file"/>
 <button class="px-lg py-2 bg-primary text-on-primary rounded-lg font-label-md" form="form-logo" type="submit">Televerser</button>
 </div>
 </div>

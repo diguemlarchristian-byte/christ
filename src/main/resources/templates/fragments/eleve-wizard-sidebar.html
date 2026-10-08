@@ -14,7 +14,7 @@
 <div class="flex items-center gap-md">
 <button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container transition-colors rounded-full">notifications</button>
 <button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container transition-colors rounded-full">help_outline</button>
-<div class="text-right ml-sm">
+<div class="text-right ml-sm hidden sm:block">
 <p class="font-label-md text-label-md text-on-surface leading-tight" th:if="${utilisateurConnecte != null}" th:text="${utilisateurConnecte.prenom} + ' ' + ${utilisateurConnecte.nom}">Admin</p>
 <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-tight">Administrateur</p>
 </div>

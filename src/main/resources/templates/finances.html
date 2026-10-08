@@ -55,7 +55,13 @@
 <body class="bg-background text-on-surface">
 <div class="flex h-screen overflow-hidden">
 <div class="no-print" th:replace="~{fragments/sidebar-tresorier :: admin('financier')}"></div>
-<main class="ml-0 md:ml-[260px] flex-1 flex flex-col h-screen bg-surface">
+<!--
+  min-w-0 : sans lui, cet element flex refuse de retrecir sous la largeur de son
+  contenu — la barre d onglets fait un millier de pixels — et le parent, qui est en
+  overflow-hidden, rogne tout ce qui depasse. Sur telephone, les deux tiers du formulaire
+  d encaissement etaient coupes a droite, sans barre de defilement pour y acceder.
+-->
+<main class="ml-0 md:ml-[260px] flex-1 min-w-0 flex flex-col h-screen bg-surface">
 <header class="no-print h-16 flex items-center justify-between px-md md:px-lg bg-surface border-b border-outline-variant sticky top-0 z-40">
 <div class="flex items-center flex-1 max-w-xl">
 <span class="font-headline-sm text-headline-sm font-bold text-primary">Comptabilite</span>
@@ -69,7 +75,7 @@ Exporter
 </div>
 </header>
 
-<div class="flex-1 overflow-y-auto p-md md:p-lg space-y-lg max-w-container-max mx-auto w-full">
+<div class="flex-1 overflow-y-auto p-md md:p-lg pb-24 md:pb-lg space-y-lg max-w-container-max mx-auto w-full">
 
 <div th:if="${successMsg}" class="p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
 <div th:if="${soldeInfoMsg}" class="p-md rounded-lg bg-primary-container/10 border border-primary text-primary font-body-md text-body-md font-bold" th:text="${soldeInfoMsg}"></div>

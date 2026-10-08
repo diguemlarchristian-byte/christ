@@ -8,6 +8,7 @@ import holyflame.administration.model.Utilisateur;
 import holyflame.administration.repository.ParcoursRepository;
 import holyflame.administration.repository.UtilisateurRepository;
 import holyflame.administration.service.EtablissementService;
+import holyflame.administration.service.Fonctionnalites;
 import holyflame.administration.service.MaquettePedagogiqueService;
 import holyflame.administration.service.MaquettePedagogiqueService.EtatSemestre;
 import holyflame.administration.service.MaquettePedagogiqueService.MaquetteRefusee;
@@ -57,7 +58,17 @@ public class AcademiqueUniversiteController {
         // Symetrique de la redirection posee dans GestionAcademiqueController : une ecole qui
         // arrive ici par l'adresse doit retomber sur son propre ecran, pas sur une maquette vide
         // qu'elle ne pourra jamais remplir.
-        if (etablissement != null && !etablissement.estRegimeLMD()) {
+        //
+        // Cette courtoisie ne vaut que pour qui peut ouvrir l'ecran d'arrivee. Tenir la maquette
+        // (UNIV_MAQUETTE) et tenir l'organisation academique (ACADEMIQUE) sont deux droits
+        // distincts, et un coordonnateur a le premier sans le second : il recevait donc un 403
+        // portant sur /gestion-academique, une adresse qu'il n'avait pas demandee. L'erreur
+        // accusait une porte dont il n'avait que faire et laissait croire que la maquette lui
+        // etait fermee. Faute de pouvoir le conduire ailleurs, mieux vaut lui montrer l'ecran
+        // qu'il a demande.
+        if (etablissement != null && !etablissement.estRegimeLMD()
+                && Fonctionnalites.autorise(etablissementService.getCurrentUtilisateur(),
+                    Fonctionnalites.ACADEMIQUE)) {
             return "redirect:/gestion-academique";
         }
 

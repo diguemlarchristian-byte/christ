@@ -12,13 +12,13 @@
 </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-<header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
+<header class="bg-white border-b border-gray-200 px-8 py-4 flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
 <div class="flex items-center gap-3">
 <a class="text-gray-500" href="/dashboard"><span class="material-symbols-outlined">arrow_back</span></a>
 <h1 class="text-xl font-bold text-blue-900">Resultats de recherche</h1>
 </div>
-<form action="/recherche" class="flex items-center gap-2" method="get">
-<input class="p-2 border border-gray-300 rounded-lg w-80" name="q" placeholder="Rechercher un eleve, un enseignant..." th:value="${q}" type="text"/>
+<form action="/recherche" class="flex items-center gap-2 w-full md:w-auto" method="get">
+<input class="p-2 border border-gray-300 rounded-lg w-full min-w-0 md:w-80" name="q" placeholder="Rechercher un eleve, un enseignant..." th:value="${q}" type="text"/>
 <button class="bg-blue-900 text-white px-4 py-2 rounded-lg" type="submit">
 <span class="material-symbols-outlined text-[18px]">search</span>
 </button>

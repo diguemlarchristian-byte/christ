@@ -50,8 +50,8 @@
 <div th:replace="~{fragments/sidebar-admin :: admin('passage')}"></div>
 <div th:replace="~{fragments/mobile-nav-admin :: nav('passage')}"></div>
 
-<main class="ml-sidebar-width min-h-screen flex flex-col">
-<header class="sticky top-0 z-40 bg-surface border-b border-outline-variant flex justify-between items-center h-16 px-gutter">
+<main class="ml-0 md:ml-sidebar-width min-h-screen flex flex-col">
+<header class="sticky top-0 z-40 bg-surface border-b border-outline-variant flex flex-wrap justify-between items-center gap-sm min-h-[64px] py-sm px-md md:px-gutter">
 <div class="flex items-center text-on-surface-variant font-label-sm text-label-sm">
 <span class="text-primary font-bold">Passage de classe</span>
 </div>
@@ -84,29 +84,34 @@
 <div th:if="${successMsg}" class="mb-lg p-md rounded-lg bg-success-container text-success font-body-md text-body-md" th:text="${successMsg}"></div>
 
 <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<!--
+  Gouttieres de cellules resserrees sur telephone : avec celles du bureau, la
+  colonne du bouton "Traiter" tombe si loin hors du champ visible que rien
+  ne laisse deviner que le tableau se fait defiler de cote.
+-->
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
 <thead class="bg-surface-container-low">
 <tr>
-<th class="px-lg py-md font-label-sm text-secondary uppercase tracking-wider">Classe</th>
-<th class="px-lg py-md font-label-sm text-secondary uppercase tracking-wider">Niveau</th>
-<th class="px-lg py-md font-label-sm text-secondary uppercase tracking-wider text-right">Effectif</th>
-<th class="px-lg py-md font-label-sm text-secondary uppercase tracking-wider"></th>
+<th class="px-md md:px-lg py-md font-label-sm text-secondary uppercase tracking-wider">Classe</th>
+<th class="px-md md:px-lg py-md font-label-sm text-secondary uppercase tracking-wider">Niveau</th>
+<th class="px-md md:px-lg py-md font-label-sm text-secondary uppercase tracking-wider text-right">Effectif</th>
+<th class="px-md md:px-lg py-md font-label-sm text-secondary uppercase tracking-wider"></th>
 </tr>
 </thead>
 <tbody class="divide-y divide-outline-variant">
 <tr class="hover:bg-surface-container/30 transition-colors" th:each="c : ${classes}">
-<td class="px-lg py-md font-medium" th:text="${c.nom}"></td>
-<td class="px-lg py-md text-secondary" th:text="${c.niveau}"></td>
-<td class="px-lg py-md text-right" th:text="${effectifParClasse.get(c.id)}"></td>
-<td class="px-lg py-md text-right">
+<td class="px-md md:px-lg py-md font-medium" th:text="${c.nom}"></td>
+<td class="px-md md:px-lg py-md text-secondary" th:text="${c.niveau}"></td>
+<td class="px-md md:px-lg py-md text-right" th:text="${effectifParClasse.get(c.id)}"></td>
+<td class="px-md md:px-lg py-md text-right">
 <a class="inline-flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-all" th:href="@{/passage/classe/{id}(id=${c.id})}">
 Traiter <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
 </a>
 </td>
 </tr>
 <tr th:if="${classes.isEmpty()}">
-<td class="px-lg py-8 text-center text-secondary" colspan="4">Aucune classe pour l'annee scolaire en cours.</td>
+<td class="px-md md:px-lg py-8 text-center text-secondary" colspan="4">Aucune classe pour l'annee scolaire en cours.</td>
 </tr>
 </tbody>
 </table>
@@ -119,22 +124,22 @@ Traiter <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
 <table class="w-full text-left border-collapse">
 <thead class="bg-surface-container-low">
 <tr>
-<th class="px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Classe</th>
-<th class="px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Session</th>
-<th class="px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Date</th>
-<th class="px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Statut</th>
-<th class="px-lg py-sm font-label-sm text-secondary uppercase tracking-wider"></th>
+<th class="px-md md:px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Classe</th>
+<th class="px-md md:px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Session</th>
+<th class="px-md md:px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Date</th>
+<th class="px-md md:px-lg py-sm font-label-sm text-secondary uppercase tracking-wider">Statut</th>
+<th class="px-md md:px-lg py-sm font-label-sm text-secondary uppercase tracking-wider"></th>
 </tr>
 </thead>
 <tbody class="divide-y divide-outline-variant">
 <tr th:each="s : ${seances}">
-<td class="px-lg py-sm font-medium" th:text="${s.classe.nom}"></td>
-<td class="px-lg py-sm text-secondary" th:text="${s.trimestre != null ? (s.trimestre + 'er/e trimestre') : 'Delibération finale'}"></td>
-<td class="px-lg py-sm text-secondary" th:text="${#temporals.format(s.dateSeance, 'dd/MM/yyyy')}"></td>
-<td class="px-lg py-sm">
+<td class="px-md md:px-lg py-sm font-medium" th:text="${s.classe.nom}"></td>
+<td class="px-md md:px-lg py-sm text-secondary" th:text="${s.trimestre != null ? (s.trimestre + 'er/e trimestre') : 'Delibération finale'}"></td>
+<td class="px-md md:px-lg py-sm text-secondary" th:text="${#temporals.format(s.dateSeance, 'dd/MM/yyyy')}"></td>
+<td class="px-md md:px-lg py-sm">
 <span class="px-sm py-1 rounded-full text-label-sm font-bold" th:classappend="${s.statut == 'CLOTUREE'} ? 'bg-success-container text-success' : 'bg-warning-container text-warning'" th:text="${s.statut == 'CLOTUREE'} ? 'PV généré' : 'En préparation'"></span>
 </td>
-<td class="px-lg py-sm text-right">
+<td class="px-md md:px-lg py-sm text-right">
 <a class="text-primary font-label-sm text-label-sm hover:underline" th:href="${s.statut == 'CLOTUREE' ? '/passage/pv/' + s.id : '/passage/jury/' + s.id}" th:text="${s.statut == 'CLOTUREE' ? 'Voir le PV' : 'Continuer'}"></a>
 </td>
 </tr>
