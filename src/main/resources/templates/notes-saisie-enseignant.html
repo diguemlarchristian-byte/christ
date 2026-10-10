@@ -59,11 +59,10 @@
     <div class="md:hidden bg-background min-h-screen pb-24" id="notes-saisie-mobile-section">
         <header
             class="w-full top-0 sticky flex justify-between items-center h-14 px-md z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
-            <div class="flex items-center gap-sm">
-                <span class="material-symbols-outlined text-primary"
-                    style="font-variation-settings: 'FILL' 1;">school</span>
-                <h1 class="font-headline-sm text-headline-sm font-bold text-primary">EduSystem Pro</h1>
-            </div>
+            <a class="flex items-center gap-sm" href="/tableau-enseignant">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+                <h1 class="font-headline-sm text-headline-sm font-bold text-primary">Mon espace</h1>
+            </a>
             <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-sm"
                 th:text="${utilisateurConnecte != null ? (#strings.isEmpty(utilisateurConnecte.prenom) ? '' : #strings.substring(utilisateurConnecte.prenom,0,1)) + (#strings.isEmpty(utilisateurConnecte.nom) ? '' : #strings.substring(utilisateurConnecte.nom,0,1)) : 'U'}">
                 U</div>
