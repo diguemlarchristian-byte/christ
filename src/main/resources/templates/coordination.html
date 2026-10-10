@@ -44,12 +44,19 @@
 <body class="bg-background text-on-surface">
 <div class="flex h-screen overflow-hidden">
 <div th:replace="~{fragments/sidebar-coordination :: admin('coordination')}"></div>
-<main class="ml-0 md:ml-[260px] flex-1 flex flex-col h-screen bg-surface">
+<!--
+  min-w-0 : meme piege que sur l ecran des finances. Sans lui, cet element flex garde pour
+  largeur minimale celle de son contenu — ici les tableaux d evolution — et le parent, qui
+  est en overflow-hidden, rogne le depassement sans laisser de barre de defilement. La
+  mesure ne voit rien : ce qui est coupe ne fait pas grandir scrollWidth. Seule l image le
+  montrait : les cartes et les colonnes tranchees net au bord droit du telephone.
+-->
+<main class="ml-0 md:ml-[260px] flex-1 min-w-0 flex flex-col h-screen bg-surface">
 <header class="h-16 flex items-center justify-between px-md md:px-lg bg-surface border-b border-outline-variant sticky top-0 z-40">
 <span class="font-headline-sm text-headline-sm font-bold text-primary">Coordination pedagogique</span>
 <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold border-2 border-primary-fixed-dim" th:text="${utilisateurConnecte != null ? (#strings.isEmpty(utilisateurConnecte.prenom) ? '' : #strings.substring(utilisateurConnecte.prenom,0,1)) + (#strings.isEmpty(utilisateurConnecte.nom) ? '' : #strings.substring(utilisateurConnecte.nom,0,1)) : 'U'}">U</div>
 </header>
-<div class="flex-1 overflow-y-auto p-md md:p-lg space-y-lg max-w-container-max mx-auto w-full">
+<div class="flex-1 overflow-y-auto p-md md:p-lg pb-24 md:pb-lg space-y-lg max-w-container-max mx-auto w-full">
 
 <div th:if="${successMsg}" class="p-md rounded-lg bg-success-container text-on-success-container font-body-md text-body-md" th:text="${successMsg}"></div>
 <div th:if="${erreur}" class="p-md rounded-lg bg-error-container text-on-error-container font-body-md text-body-md" th:text="${erreur}"></div>

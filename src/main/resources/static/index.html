@@ -1,419 +1,659 @@
 <!DOCTYPE html>
 <html class="scroll-smooth" lang="fr">
+
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>EduSystem Pro | La gestion scolaire simple et moderne</title>
-<meta name="description" content="EduSystem Pro : creez l'espace de votre ecole en une minute. Eleves, enseignants, emplois du temps, notes, bulletins et finances sur une interface unique.">
-<!--
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <title>EduSystem Pro | La gestion scolaire simple et moderne</title>
+        <meta name="description"
+                content="EduSystem Pro : creez l'espace de votre ecole en une minute. Eleves, enseignants, emplois du temps, notes, bulletins et finances sur une interface unique.">
+        <!--
   Ressources auto-hebergees (Tailwind, Inter, Material Symbols) : ce projet a
   volontairement supprime ses dependances CDN pour rester utilisable hors ligne
   et ne pas dependre d'un tiers. Ne pas reintroduire de <script src="https://...">.
 -->
-<link href="/css/fonts.css" rel="stylesheet">
-<script src="/js/tailwind.js"></script>
-<style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
-    </style>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "primary-fixed-dim": "#b6c4ff", "on-primary-fixed-variant": "#264191",
-                        "error-container": "#ffdad6", "on-background": "#191c1e",
-                        "primary-fixed": "#dce1ff", "on-error": "#ffffff",
-                        "surface-tint": "#4059aa", "surface-container-highest": "#e0e3e5",
-                        "surface-dim": "#d8dadc", "on-secondary-fixed-variant": "#38485d",
-                        "outline-variant": "#c5c5d3", "on-tertiary-fixed-variant": "#3f465c",
-                        "surface-container-high": "#e6e8ea", "error": "#ba1a1a",
-                        "tertiary-fixed": "#dae2fd", "surface": "#f7f9fb",
-                        "secondary": "#505f76", "primary": "#00236f",
-                        "surface-bright": "#f7f9fb", "inverse-surface": "#2d3133",
-                        "outline": "#757682", "on-secondary-fixed": "#0b1c30",
-                        "tertiary-container": "#384055", "on-tertiary": "#ffffff",
-                        "background": "#f7f9fb", "surface-container-lowest": "#ffffff",
-                        "inverse-on-surface": "#eff1f3", "on-tertiary-fixed": "#131b2e",
-                        "secondary-container": "#d0e1fb", "tertiary": "#222a3e",
-                        "inverse-primary": "#b6c4ff", "secondary-fixed-dim": "#b7c8e1",
-                        "on-primary-fixed": "#00164e", "on-secondary-container": "#54647a",
-                        "secondary-fixed": "#d3e4fe", "on-tertiary-container": "#a4acc5",
-                        "on-secondary": "#ffffff", "surface-variant": "#e0e3e5",
-                        "tertiary-fixed-dim": "#bec6e0", "on-primary": "#ffffff",
-                        "on-primary-container": "#90a8ff", "on-error-container": "#93000a",
-                        "on-surface-variant": "#444651", "surface-container": "#eceef0",
-                        "on-surface": "#191c1e", "surface-container-low": "#f2f4f6",
-                        "primary-container": "#1e3a8a",
-                        "success": "#1b7f4c"
-                    },
-                    "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
-                    "spacing": {
-                        "sidebar-width": "260px", "lg": "24px", "xs": "4px", "md": "16px",
-                        "base": "4px", "sm": "8px", "xl": "32px", "gutter": "24px", "container-max": "1440px"
-                    },
-                    "fontFamily": {
-                        "headline-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"],
-                        "code": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"],
-                        "body-md": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"]
-                    },
-                    "fontSize": {
-                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
-                        "headline-sm": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
-                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "code": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
-                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
-                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
-                    }
-                },
-            },
-        }
-    </script>
+        <link href="/css/fonts.css" rel="stylesheet">
+        <script src="/js/tailwind.js"></script>
+        <style>
+                .material-symbols-outlined {
+                        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+
+                body {
+                        font-family: 'Inter', sans-serif;
+                        background-color: #f7f9fb;
+                }
+        </style>
+        <script id="tailwind-config">
+                tailwind.config = {
+                        darkMode: "class",
+                        theme: {
+                                extend: {
+                                        "colors": {
+                                                "primary-fixed-dim": "#b6c4ff", "on-primary-fixed-variant": "#264191",
+                                                "error-container": "#ffdad6", "on-background": "#191c1e",
+                                                "primary-fixed": "#dce1ff", "on-error": "#ffffff",
+                                                "surface-tint": "#4059aa", "surface-container-highest": "#e0e3e5",
+                                                "surface-dim": "#d8dadc", "on-secondary-fixed-variant": "#38485d",
+                                                "outline-variant": "#c5c5d3", "on-tertiary-fixed-variant": "#3f465c",
+                                                "surface-container-high": "#e6e8ea", "error": "#ba1a1a",
+                                                "tertiary-fixed": "#dae2fd", "surface": "#f7f9fb",
+                                                "secondary": "#505f76", "primary": "#00236f",
+                                                "surface-bright": "#f7f9fb", "inverse-surface": "#2d3133",
+                                                "outline": "#757682", "on-secondary-fixed": "#0b1c30",
+                                                "tertiary-container": "#384055", "on-tertiary": "#ffffff",
+                                                "background": "#f7f9fb", "surface-container-lowest": "#ffffff",
+                                                "inverse-on-surface": "#eff1f3", "on-tertiary-fixed": "#131b2e",
+                                                "secondary-container": "#d0e1fb", "tertiary": "#222a3e",
+                                                "inverse-primary": "#b6c4ff", "secondary-fixed-dim": "#b7c8e1",
+                                                "on-primary-fixed": "#00164e", "on-secondary-container": "#54647a",
+                                                "secondary-fixed": "#d3e4fe", "on-tertiary-container": "#a4acc5",
+                                                "on-secondary": "#ffffff", "surface-variant": "#e0e3e5",
+                                                "tertiary-fixed-dim": "#bec6e0", "on-primary": "#ffffff",
+                                                "on-primary-container": "#90a8ff", "on-error-container": "#93000a",
+                                                "on-surface-variant": "#444651", "surface-container": "#eceef0",
+                                                "on-surface": "#191c1e", "surface-container-low": "#f2f4f6",
+                                                "primary-container": "#1e3a8a",
+                                                "success": "#1b7f4c"
+                                        },
+                                        "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                                        "spacing": {
+                                                "sidebar-width": "260px", "lg": "24px", "xs": "4px", "md": "16px",
+                                                "base": "4px", "sm": "8px", "xl": "32px", "gutter": "24px", "container-max": "1440px"
+                                        },
+                                        "fontFamily": {
+                                                "headline-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"],
+                                                "code": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"],
+                                                "body-md": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"]
+                                        },
+                                        "fontSize": {
+                                                "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                                                "headline-sm": ["18px", { "lineHeight": "28px", "fontWeight": "600" }],
+                                                "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                                                "code": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                                                "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                                                "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                                                "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                                                "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                                                "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                                        }
+                                },
+                        },
+                }
+        </script>
 </head>
+
 <body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
 
-<!-- Barre de navigation -->
-<nav class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-lg py-sm max-w-full mx-auto h-16">
-<div class="flex items-center gap-xl">
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-primary text-[28px]">school</span>
-<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">EduSystem Pro</span>
-</div>
-<div class="hidden md:flex items-center gap-lg">
-<a class="text-primary border-b-2 border-primary font-bold pb-1 font-body-md text-body-md transition-all duration-200" href="#comment-ca-marche">Comment ça marche</a>
-<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#avantages">Avantages</a>
-<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#tarifs">Tarifs &amp; Essai</a>
-<a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1" href="#temoignages">Témoignages</a>
-</div>
-</div>
-<div class="flex items-center gap-md">
-<a class="hidden sm:block text-secondary font-label-md text-label-md hover:text-primary transition-colors px-md py-sm" href="/login">Connexion</a>
-<a class="bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:opacity-90 active:opacity-80 transition-all inline-flex items-center gap-xs" href="/demarrer">
-<span class="material-symbols-outlined text-[18px]">rocket_launch</span>Inscrire mon école
-</a>
-</div>
-</nav>
+        <!-- Barre de navigation -->
+        <nav
+                class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center px-md md:px-lg py-sm max-w-full mx-auto h-16">
+                <div class="flex items-center gap-xl">
+                        <!--
+                          La barre est haute de 64 px et ne grandit pas. A 24 px, le nom de la marque et
+                          le bouton d inscription totalisent 429 px : sur un telephone de 390 px, les deux
+                          passaient a la ligne et se chevauchaient. Reduit a 18 px, avec des marges de 16 px
+                          au lieu de 24, l ensemble tient sur une seule ligne.
+                        -->
+                        <div class="flex items-center gap-sm">
+                                <span class="material-symbols-outlined text-primary text-[22px] md:text-[28px]">school</span>
+                                <span class="font-headline-md text-headline-sm md:text-headline-md font-bold text-primary tracking-tight whitespace-nowrap">EduSystem Pro</span>
+                        </div>
+                        <div class="hidden md:flex items-center gap-lg">
+                                <a class="text-primary border-b-2 border-primary font-bold pb-1 font-body-md text-body-md transition-all duration-200"
+                                        href="#comment-ca-marche">Comment ça marche</a>
+                                <a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1"
+                                        href="#avantages">Avantages</a>
+                                <a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1"
+                                        href="#tarifs">Tarifs &amp; Essai</a>
+                                <a class="text-secondary hover:text-primary hover:bg-surface-container-low transition-colors font-body-md text-body-md pb-1"
+                                        href="#temoignages">Témoignages</a>
+                        </div>
+                </div>
+                <div class="flex items-center gap-md">
+                        <a class="hidden sm:block text-secondary font-label-md text-label-md hover:text-primary transition-colors px-md py-sm"
+                                href="/login">Connexion</a>
+                        <a class="bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:opacity-90 active:opacity-80 transition-all inline-flex items-center gap-xs whitespace-nowrap"
+                                href="/demarrer">
+                                <span class="material-symbols-outlined text-[18px]">rocket_launch</span>Inscrire mon école
+                        </a>
+                </div>
+        </nav>
 
-<main class="pt-16">
+        <main class="pt-16">
 
-<!-- Hero -->
-<section class="relative pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-b from-surface-container-low via-background to-background">
-<div class="container mx-auto px-lg max-w-container-max relative z-10">
-<div class="grid lg:grid-cols-2 gap-xl items-center">
-<div class="space-y-md">
-<div class="inline-flex items-center gap-sm bg-primary-fixed text-on-primary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm shadow-sm">
-<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
-<span>Une interface pensée pour les équipes scolaires</span>
-</div>
-<h1 class="font-headline-lg text-headline-lg md:text-[50px] md:leading-[58px] text-primary font-bold">
-          La gestion scolaire simple, moderne et tout-en-un pour votre établissement.
-        </h1>
-<p class="font-body-lg text-body-lg text-secondary max-w-lg leading-relaxed">
-          Configurez votre école en <strong>3 étapes simples</strong> : gérez aisément vos élèves, enseignants, emplois du temps, notes et finances sur une interface fluide et intuitive conçue pour tous.
-        </p>
+                <!-- Hero -->
+                <section
+                        class="relative pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-b from-surface-container-low via-background to-background">
+                        <div class="container mx-auto px-lg max-w-container-max relative z-10">
+                                <div class="grid lg:grid-cols-2 gap-xl items-center">
+                                        <div class="space-y-md">
+                                                <div
+                                                        class="inline-flex items-center gap-sm bg-primary-fixed text-on-primary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm shadow-sm">
+                                                        <span
+                                                                class="material-symbols-outlined text-[18px] text-primary">verified</span>
+                                                        <span>Une interface pensée pour les équipes scolaires</span>
+                                                </div>
+                                                <h1
+                                                        class="font-headline-lg text-headline-lg md:text-[50px] md:leading-[58px] text-primary font-bold">
+                                                        La gestion scolaire simple, moderne et tout-en-un pour votre
+                                                        établissement.
+                                                </h1>
+                                                <p
+                                                        class="font-body-lg text-body-lg text-secondary max-w-lg leading-relaxed">
+                                                        Configurez votre école en <strong>3 étapes simples</strong> :
+                                                        gérez aisément vos élèves, enseignants, emplois du temps, notes
+                                                        et finances sur une interface fluide et intuitive conçue pour
+                                                        tous.
+                                                </p>
 
-<div class="pt-sm space-y-sm">
-<div class="flex flex-wrap items-center gap-md">
-<a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm" href="/demarrer">
-<span>Créer l'espace de mon école</span>
-<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-</a>
-<a class="border border-outline-variant text-primary bg-white font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:bg-surface-container-low transition-colors inline-flex items-center gap-sm shadow-sm" href="#comment-ca-marche">
-<span class="material-symbols-outlined text-primary text-[20px]">play_circle</span>
-<span>Voir comment ça marche</span>
-</a>
-</div>
-<div class="flex flex-wrap items-center gap-md text-secondary font-label-sm text-label-sm pt-xs">
-<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">check_circle</span> Sans carte bancaire</span>
-<span class="text-outline-variant">•</span>
-<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">schedule</span> Prêt en 2 minutes</span>
-<span class="text-outline-variant">•</span>
-<span class="inline-flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[16px]">support_agent</span> Accompagnement offert</span>
-</div>
-</div>
-</div>
+                                                <div class="pt-sm space-y-sm">
+                                                        <div class="flex flex-wrap items-center gap-md">
+                                                                <a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm"
+                                                                        href="/demarrer">
+                                                                        <span>Créer l'espace de mon école</span>
+                                                                        <span
+                                                                                class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                                                                </a>
+                                                                <a class="border border-outline-variant text-primary bg-white font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:bg-surface-container-low transition-colors inline-flex items-center gap-sm shadow-sm"
+                                                                        href="#comment-ca-marche">
+                                                                        <span
+                                                                                class="material-symbols-outlined text-primary text-[20px]">play_circle</span>
+                                                                        <span>Voir comment ça marche</span>
+                                                                </a>
+                                                        </div>
+                                                        <div
+                                                                class="flex flex-wrap items-center gap-md text-secondary font-label-sm text-label-sm pt-xs">
+                                                                <span class="inline-flex items-center gap-xs"><span
+                                                                                class="material-symbols-outlined text-success text-[16px]">check_circle</span>
+                                                                        Sans carte bancaire</span>
+                                                                <span class="text-outline-variant">•</span>
+                                                                <span class="inline-flex items-center gap-xs"><span
+                                                                                class="material-symbols-outlined text-success text-[16px]">schedule</span>
+                                                                        Prêt en 2 minutes</span>
+                                                                <span class="text-outline-variant">•</span>
+                                                                <span class="inline-flex items-center gap-xs"><span
+                                                                                class="material-symbols-outlined text-success text-[16px]">support_agent</span>
+                                                                        Accompagnement offert</span>
+                                                        </div>
+                                                </div>
+                                        </div>
 
-<!-- Apercu du tableau de bord : maquette en HTML, aucune image distante a charger -->
-<div class="relative">
-<div class="bg-white p-md md:p-lg rounded-2xl shadow-xl border border-outline-variant relative z-10">
-<div class="flex items-center justify-between pb-md border-b border-outline-variant mb-md">
-<div class="flex items-center gap-sm">
-<div class="w-3 h-3 rounded-full bg-red-400"></div>
-<div class="w-3 h-3 rounded-full bg-amber-400"></div>
-<div class="w-3 h-3 rounded-full bg-emerald-400"></div>
-<span class="text-secondary font-label-sm ml-2">Tableau de bord de rentrée</span>
-</div>
-<span class="bg-secondary-container text-on-secondary-container font-label-sm px-sm py-xs rounded-full">Année en cours</span>
-</div>
+                                        <!-- Apercu du tableau de bord : maquette en HTML, aucune image distante a charger -->
+                                        <div class="relative">
+                                                <div
+                                                        class="bg-white p-md md:p-lg rounded-2xl shadow-xl border border-outline-variant relative z-10">
+                                                        <div
+                                                                class="flex items-center justify-between pb-md border-b border-outline-variant mb-md">
+                                                                <div class="flex items-center gap-sm">
+                                                                        <div class="w-3 h-3 rounded-full bg-red-400">
+                                                                        </div>
+                                                                        <div class="w-3 h-3 rounded-full bg-amber-400">
+                                                                        </div>
+                                                                        <div
+                                                                                class="w-3 h-3 rounded-full bg-emerald-400">
+                                                                        </div>
+                                                                        <span class="text-secondary font-label-sm ml-2">Tableau
+                                                                                de bord de rentrée</span>
+                                                                </div>
+                                                                <span
+                                                                        class="bg-secondary-container text-on-secondary-container font-label-sm px-sm py-xs rounded-full">Année
+                                                                        en cours</span>
+                                                        </div>
 
-<div class="rounded-xl bg-surface-container-low p-md space-y-md">
-<div class="flex items-end justify-between gap-xs h-32">
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/25 rounded-t" style="height:42%"></div><span class="text-[10px] text-secondary">Sep</span></div>
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/35 rounded-t" style="height:58%"></div><span class="text-[10px] text-secondary">Oct</span></div>
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/50 rounded-t" style="height:71%"></div><span class="text-[10px] text-secondary">Nov</span></div>
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/65 rounded-t" style="height:63%"></div><span class="text-[10px] text-secondary">Déc</span></div>
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary/80 rounded-t" style="height:86%"></div><span class="text-[10px] text-secondary">Jan</span></div>
-<div class="flex-1 flex flex-col justify-end items-center gap-xs"><div class="w-full bg-primary rounded-t" style="height:100%"></div><span class="text-[10px] text-primary font-bold">Fév</span></div>
-</div>
-<div class="space-y-xs">
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-primary text-[18px]">groups</span>
-<div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary rounded-full" style="width:92%"></div></div>
-<span class="font-label-sm text-secondary w-20 text-right">Scolarité 92%</span>
-</div>
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-primary text-[18px]">event_available</span>
-<div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-success rounded-full" style="width:96%"></div></div>
-<span class="font-label-sm text-secondary w-20 text-right">Présence 96%</span>
-</div>
-</div>
-</div>
+                                                        <div
+                                                                class="rounded-xl bg-surface-container-low p-md space-y-md">
+                                                                <div class="flex items-end justify-between gap-xs h-32">
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary/25 rounded-t"
+                                                                                        style="height:42%"></div><span
+                                                                                        class="text-[10px] text-secondary">Sep</span>
+                                                                        </div>
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary/35 rounded-t"
+                                                                                        style="height:58%"></div><span
+                                                                                        class="text-[10px] text-secondary">Oct</span>
+                                                                        </div>
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary/50 rounded-t"
+                                                                                        style="height:71%"></div><span
+                                                                                        class="text-[10px] text-secondary">Nov</span>
+                                                                        </div>
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary/65 rounded-t"
+                                                                                        style="height:63%"></div><span
+                                                                                        class="text-[10px] text-secondary">Déc</span>
+                                                                        </div>
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary/80 rounded-t"
+                                                                                        style="height:86%"></div><span
+                                                                                        class="text-[10px] text-secondary">Jan</span>
+                                                                        </div>
+                                                                        <div
+                                                                                class="flex-1 flex flex-col justify-end items-center gap-xs">
+                                                                                <div class="w-full bg-primary rounded-t"
+                                                                                        style="height:100%"></div><span
+                                                                                        class="text-[10px] text-primary font-bold">Fév</span>
+                                                                        </div>
+                                                                </div>
+                                                                <div class="space-y-xs">
+                                                                        <div class="flex items-center gap-sm">
+                                                                                <span
+                                                                                        class="material-symbols-outlined text-primary text-[18px]">groups</span>
+                                                                                <div
+                                                                                        class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden">
+                                                                                        <div class="h-full bg-primary rounded-full"
+                                                                                                style="width:92%"></div>
+                                                                                </div>
+                                                                                <span
+                                                                                        class="font-label-sm text-secondary w-20 text-right">Scolarité
+                                                                                        92%</span>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-sm">
+                                                                                <span
+                                                                                        class="material-symbols-outlined text-primary text-[18px]">event_available</span>
+                                                                                <div
+                                                                                        class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden">
+                                                                                        <div class="h-full bg-success rounded-full"
+                                                                                                style="width:96%"></div>
+                                                                                </div>
+                                                                                <span
+                                                                                        class="font-label-sm text-secondary w-20 text-right">Présence
+                                                                                        96%</span>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
 
-<div class="grid grid-cols-3 gap-sm mt-md pt-sm text-center">
-<div class="p-sm bg-surface-container rounded-lg">
-<p class="font-label-sm text-secondary">Élèves inscrits</p>
-<p class="font-headline-sm text-primary font-bold">1 482</p>
-</div>
-<div class="p-sm bg-surface-container rounded-lg">
-<p class="font-label-sm text-secondary">Taux de présence</p>
-<p class="font-headline-sm text-success font-bold">96.5%</p>
-</div>
-<div class="p-sm bg-surface-container rounded-lg">
-<p class="font-label-sm text-secondary">Frais scolarité</p>
-<p class="font-headline-sm text-primary font-bold">92% réglés</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
+                                                        <div class="grid grid-cols-3 gap-sm mt-md pt-sm text-center">
+                                                                <div class="p-sm bg-surface-container rounded-lg">
+                                                                        <p class="font-label-sm text-secondary">Élèves
+                                                                                inscrits</p>
+                                                                        <p
+                                                                                class="font-headline-sm text-primary font-bold">
+                                                                                1 482</p>
+                                                                </div>
+                                                                <div class="p-sm bg-surface-container rounded-lg">
+                                                                        <p class="font-label-sm text-secondary">Taux de
+                                                                                présence</p>
+                                                                        <p
+                                                                                class="font-headline-sm text-success font-bold">
+                                                                                96.5%</p>
+                                                                </div>
+                                                                <div class="p-sm bg-surface-container rounded-lg">
+                                                                        <p class="font-label-sm text-secondary">Frais
+                                                                                scolarité</p>
+                                                                        <p
+                                                                                class="font-headline-sm text-primary font-bold">
+                                                                                92% réglés</p>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
 
-<!-- Comment ca marche -->
-<section class="py-xl bg-white border-y border-outline-variant" id="comment-ca-marche">
-<div class="container mx-auto px-lg max-w-container-max">
-<div class="text-center max-w-2xl mx-auto mb-xl">
-<span class="text-primary font-label-md uppercase tracking-wider bg-primary-fixed px-md py-xs rounded-full">Prise en main express</span>
-<h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Comment ça marche en 3 étapes simples</h2>
-<p class="font-body-lg text-body-lg text-secondary">Aucune compétence technique requise. Votre établissement est opérationnel le jour même.</p>
-</div>
-<div class="grid md:grid-cols-3 gap-lg relative">
-<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
-<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">1</div>
-<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Créez votre école</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-Indiquez le nom de votre établissement et son type : vos classes sont créées automatiquement, de la maternelle au lycée.
-        </p>
-<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
-<span class="material-symbols-outlined text-[16px]">timer</span> En moins d'une minute
-        </div>
-</div>
-<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
-<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">2</div>
-<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Invitez &amp; importez</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-Importez vos listes de classes et d'élèves via Excel en 1 clic ou ajout guidé. Envoyez les accès sécurisés à vos enseignants et surveillants.
-        </p>
-<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
-<span class="material-symbols-outlined text-[16px]">upload_file</span> Import Excel compatible
-        </div>
-</div>
-<div class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
-<div class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">3</div>
-<h3 class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">Commencez à gérer</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-Suivez les présences en direct, éditez les bulletins automatisés, encaissez les frais scolaires et communiquez directement avec les parents.
-        </p>
-<div class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
-<span class="material-symbols-outlined text-[16px]">verified</span> Gestion sereine et sans papier
-        </div>
-</div>
-</div>
-<div class="text-center mt-xl">
-<a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:opacity-90 transition-all inline-flex items-center gap-sm" href="/demarrer">
-<span class="material-symbols-outlined">how_to_reg</span>
-<span>Créer l'espace de mon école</span>
-</a>
-</div>
-</div>
-</section>
+                <!-- Comment ca marche -->
+                <section class="py-xl bg-white border-y border-outline-variant" id="comment-ca-marche">
+                        <div class="container mx-auto px-lg max-w-container-max">
+                                <div class="text-center max-w-2xl mx-auto mb-xl">
+                                        <span
+                                                class="text-primary font-label-md uppercase tracking-wider bg-primary-fixed px-md py-xs rounded-full">Prise
+                                                en main express</span>
+                                        <h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Comment
+                                                ça marche en 3 étapes simples</h2>
+                                        <p class="font-body-lg text-body-lg text-secondary">Aucune compétence technique
+                                                requise. Votre établissement est opérationnel le jour même.</p>
+                                </div>
+                                <div class="grid md:grid-cols-3 gap-lg relative">
+                                        <div
+                                                class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+                                                <div
+                                                        class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">
+                                                        1</div>
+                                                <h3
+                                                        class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">
+                                                        Créez votre école</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Indiquez le nom de votre établissement et son type : vos classes
+                                                        sont créées automatiquement, de la maternelle au lycée.
+                                                </p>
+                                                <div
+                                                        class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+                                                        <span class="material-symbols-outlined text-[16px]">timer</span>
+                                                        En moins d'une minute
+                                                </div>
+                                        </div>
+                                        <div
+                                                class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+                                                <div
+                                                        class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">
+                                                        2</div>
+                                                <h3
+                                                        class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">
+                                                        Invitez &amp; importez</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Importez vos listes de classes et d'élèves via Excel en 1 clic
+                                                        ou ajout guidé. Envoyez les accès sécurisés à vos enseignants et
+                                                        surveillants.
+                                                </p>
+                                                <div
+                                                        class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+                                                        <span
+                                                                class="material-symbols-outlined text-[16px]">upload_file</span>
+                                                        Import Excel compatible
+                                                </div>
+                                        </div>
+                                        <div
+                                                class="p-xl bg-surface-container-lowest rounded-2xl border border-outline-variant hover:border-primary transition-all duration-200 shadow-sm">
+                                                <div
+                                                        class="w-12 h-12 rounded-xl bg-primary text-on-primary font-bold font-headline-sm flex items-center justify-center mb-md">
+                                                        3</div>
+                                                <h3
+                                                        class="font-headline-sm text-headline-sm text-primary mb-sm font-bold">
+                                                        Commencez à gérer</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Suivez les présences en direct, éditez les bulletins
+                                                        automatisés, encaissez les frais scolaires et communiquez
+                                                        directement avec les parents.
+                                                </p>
+                                                <div
+                                                        class="inline-flex items-center gap-xs font-label-sm text-primary font-medium">
+                                                        <span
+                                                                class="material-symbols-outlined text-[16px]">verified</span>
+                                                        Gestion sereine et sans papier
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class="text-center mt-xl">
+                                        <a class="bg-primary text-on-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:opacity-90 transition-all inline-flex items-center gap-sm"
+                                                href="/demarrer">
+                                                <span class="material-symbols-outlined">how_to_reg</span>
+                                                <span>Créer l'espace de mon école</span>
+                                        </a>
+                                </div>
+                        </div>
+                </section>
 
-<!-- Avantages -->
-<section class="py-xl bg-surface" id="avantages">
-<div class="container mx-auto px-lg max-w-container-max">
-<div class="text-center max-w-2xl mx-auto mb-xl">
-<h2 class="font-headline-lg text-headline-lg text-primary mb-sm">Tout ce dont votre école a besoin, sans complexité</h2>
-<p class="font-body-lg text-body-lg text-secondary">Trois piliers fondamentaux pour libérer vos équipes des tâches répétitives.</p>
-</div>
-<div class="grid md:grid-cols-3 gap-lg">
-<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 bg-primary-container text-on-primary rounded-xl flex items-center justify-center mb-md">
-<span class="material-symbols-outlined text-[28px]">badge</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Administration &amp; Enseignants</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-          Finie la paperasse. Vos professeurs saisissent notes et appréciations depuis n'importe quel appareil, génèrent des bulletins infalsifiables et partagent les cours facilement.
-        </p>
-<ul class="space-y-xs text-secondary font-label-sm">
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Saisie des notes ultra-rapide</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Calcul automatique des moyennes</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Emplois du temps &amp; absences en direct</li>
-</ul>
-</div>
-<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-xl flex items-center justify-center mb-md">
-<span class="material-symbols-outlined text-[28px]">family_restroom</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Espace Parents &amp; Élèves</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-          Une transparence totale pour rassurer les familles. Les parents suivent les retards, devoirs, convocations et reçoivent les reçus de paiement en temps réel sur smartphone ou PC.
-        </p>
-<ul class="space-y-xs text-secondary font-label-sm">
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Notifications SMS d'absence</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Téléchargement des bulletins PDF</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Paiement en ligne et reçus officiels</li>
-</ul>
-</div>
-<div class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 bg-tertiary text-tertiary-fixed rounded-xl flex items-center justify-center mb-md">
-<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">lock</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-primary mb-sm font-bold">Sécurité &amp; Sauvegarde</h3>
-<p class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
-          Vos dossiers scolaires et registres financiers sont protégés. Chaque action sensible est tracée, et les accès sont strictement cloisonnés par rôle.
-        </p>
-<ul class="space-y-xs text-secondary font-label-sm">
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Mots de passe chiffrés</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Journal d'audit des actions</li>
-<li class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check</span> Droits d'accès stricts par rôle</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
+                <!-- Avantages -->
+                <section class="py-xl bg-surface" id="avantages">
+                        <div class="container mx-auto px-lg max-w-container-max">
+                                <div class="text-center max-w-2xl mx-auto mb-xl">
+                                        <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">Tout ce dont
+                                                votre école a besoin, sans complexité</h2>
+                                        <p class="font-body-lg text-body-lg text-secondary">Trois piliers fondamentaux
+                                                pour libérer vos équipes des tâches répétitives.</p>
+                                </div>
+                                <div class="grid md:grid-cols-3 gap-lg">
+                                        <div
+                                                class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+                                                <div
+                                                        class="w-12 h-12 bg-primary-container text-on-primary rounded-xl flex items-center justify-center mb-md">
+                                                        <span class="material-symbols-outlined text-[28px]">badge</span>
+                                                </div>
+                                                <h3
+                                                        class="font-headline-md text-headline-md text-primary mb-sm font-bold">
+                                                        Administration &amp; Enseignants</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Finie la paperasse. Vos professeurs saisissent notes et
+                                                        appréciations depuis n'importe quel appareil, génèrent des
+                                                        bulletins infalsifiables et partagent les cours facilement.
+                                                </p>
+                                                <ul class="space-y-xs text-secondary font-label-sm">
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Saisie des notes ultra-rapide</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Calcul automatique des moyennes</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Emplois du temps &amp; absences en direct</li>
+                                                </ul>
+                                        </div>
+                                        <div
+                                                class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+                                                <div
+                                                        class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-xl flex items-center justify-center mb-md">
+                                                        <span
+                                                                class="material-symbols-outlined text-[28px]">family_restroom</span>
+                                                </div>
+                                                <h3
+                                                        class="font-headline-md text-headline-md text-primary mb-sm font-bold">
+                                                        Espace Parents &amp; Élèves</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Une transparence totale pour rassurer les familles. Les parents
+                                                        suivent les retards, devoirs, convocations et reçoivent les
+                                                        reçus de paiement en temps réel sur smartphone ou PC.
+                                                </p>
+                                                <ul class="space-y-xs text-secondary font-label-sm">
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Notifications SMS d'absence</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Téléchargement des bulletins PDF</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Paiement en ligne et reçus officiels</li>
+                                                </ul>
+                                        </div>
+                                        <div
+                                                class="bg-white p-xl rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+                                                <div
+                                                        class="w-12 h-12 bg-tertiary text-tertiary-fixed rounded-xl flex items-center justify-center mb-md">
+                                                        <span class="material-symbols-outlined text-[28px]"
+                                                                style="font-variation-settings: 'FILL' 1;">lock</span>
+                                                </div>
+                                                <h3
+                                                        class="font-headline-md text-headline-md text-primary mb-sm font-bold">
+                                                        Sécurité &amp; Sauvegarde</h3>
+                                                <p
+                                                        class="font-body-md text-body-md text-secondary leading-relaxed mb-md">
+                                                        Vos dossiers scolaires et registres financiers sont protégés.
+                                                        Chaque action sensible est tracée, et les accès sont strictement
+                                                        cloisonnés par rôle.
+                                                </p>
+                                                <ul class="space-y-xs text-secondary font-label-sm">
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Mots de passe chiffrés</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Journal d'audit des actions</li>
+                                                        <li class="flex items-center gap-xs"><span
+                                                                        class="material-symbols-outlined text-success text-[18px]">check</span>
+                                                                Droits d'accès stricts par rôle</li>
+                                                </ul>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
 
-<!-- Tarifs -->
-<section class="py-xl bg-white border-t border-outline-variant" id="tarifs">
-<div class="container mx-auto px-lg max-w-container-max">
-<div class="text-center max-w-2xl mx-auto mb-xl">
-<span class="text-primary font-label-md uppercase tracking-wider bg-secondary-container px-md py-xs rounded-full font-bold">Tarification claire</span>
-<h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Commencez avec 30 jours d'essai 100% gratuit</h2>
-<p class="font-body-lg text-body-lg text-secondary">Aucun engagement. Testez toutes les fonctionnalités avec vos équipes avant de vous décider.</p>
-</div>
-<div class="max-w-3xl mx-auto bg-surface-container-low rounded-2xl border-2 border-primary p-xl relative shadow-md">
-<div class="absolute -top-4 right-8 bg-primary text-on-primary text-xs font-bold px-md py-xs rounded-full uppercase tracking-wider">
-        Offre Découverte
-      </div>
-<div class="flex flex-col md:flex-row items-center justify-between gap-xl">
-<div class="space-y-sm text-left">
-<h3 class="font-headline-md text-headline-md text-primary font-bold">Formule Établissement Complet</h3>
-<p class="font-body-md text-body-md text-secondary">Accès illimité à tous les modules : élèves, professeurs, bulletins, trésorerie et portail parents.</p>
-<div class="flex flex-wrap items-center gap-sm pt-xs text-secondary font-label-sm">
-<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check_circle</span> 0 F pendant 30 jours</span>
-<span>•</span>
-<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-success text-[18px]">check_circle</span> Aucun frais d'installation</span>
-</div>
-</div>
-<div class="text-center md:text-right shrink-0">
-<div class="text-primary font-headline-lg text-[40px] font-bold leading-none">0 F</div>
-<span class="text-secondary font-label-sm block mt-1">pendant 30 jours</span>
-<a class="mt-md inline-block bg-primary text-on-primary font-headline-sm text-headline-sm px-lg py-sm rounded-xl hover:opacity-90 transition-opacity" href="/demarrer">
-            Activer mon essai
-          </a>
-</div>
-</div>
-</div>
-</div>
-</section>
+                <!-- Tarifs -->
+                <section class="py-xl bg-white border-t border-outline-variant" id="tarifs">
+                        <div class="container mx-auto px-lg max-w-container-max">
+                                <div class="text-center max-w-2xl mx-auto mb-xl">
+                                        <span
+                                                class="text-primary font-label-md uppercase tracking-wider bg-secondary-container px-md py-xs rounded-full font-bold">Tarification
+                                                claire</span>
+                                        <h2 class="font-headline-lg text-headline-lg text-primary mt-sm mb-xs">Commencez
+                                                avec 30 jours d'essai 100% gratuit</h2>
+                                        <p class="font-body-lg text-body-lg text-secondary">Aucun engagement. Testez
+                                                toutes les fonctionnalités avec vos équipes avant de vous décider.</p>
+                                </div>
+                                <div
+                                        class="max-w-3xl mx-auto bg-surface-container-low rounded-2xl border-2 border-primary p-xl relative shadow-md">
+                                        <div
+                                                class="absolute -top-4 right-8 bg-primary text-on-primary text-xs font-bold px-md py-xs rounded-full uppercase tracking-wider">
+                                                Offre Découverte
+                                        </div>
+                                        <div class="flex flex-col md:flex-row items-center justify-between gap-xl">
+                                                <div class="space-y-sm text-left">
+                                                        <h3
+                                                                class="font-headline-md text-headline-md text-primary font-bold">
+                                                                Formule Établissement Complet</h3>
+                                                        <p class="font-body-md text-body-md text-secondary">Accès
+                                                                illimité à tous les modules : élèves, professeurs,
+                                                                bulletins, trésorerie et portail parents.</p>
+                                                        <div
+                                                                class="flex flex-wrap items-center gap-sm pt-xs text-secondary font-label-sm">
+                                                                <span class="flex items-center gap-xs"><span
+                                                                                class="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                                                                        0 F pendant 30 jours</span>
+                                                                <span>•</span>
+                                                                <span class="flex items-center gap-xs"><span
+                                                                                class="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                                                                        Aucun frais d'installation</span>
+                                                        </div>
+                                                </div>
+                                                <div class="text-center md:text-right shrink-0">
+                                                        <div
+                                                                class="text-primary font-headline-lg text-[40px] font-bold leading-none">
+                                                                0 F</div>
+                                                        <span class="text-secondary font-label-sm block mt-1">pendant 30
+                                                                jours</span>
+                                                        <a class="mt-md inline-block bg-primary text-on-primary font-headline-sm text-headline-sm px-lg py-sm rounded-xl hover:opacity-90 transition-opacity"
+                                                                href="/demarrer">
+                                                                Activer mon essai
+                                                        </a>
+                                                </div>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
 
-<!-- Temoignages : initiales plutot que photos distantes, comme ailleurs dans l'application -->
-<section class="py-xl bg-surface" id="temoignages">
-<div class="container mx-auto px-lg max-w-container-max">
-<h2 class="font-headline-lg text-headline-lg text-primary text-center mb-xl font-bold">Ils nous font confiance au quotidien</h2>
-<div class="grid md:grid-cols-3 gap-lg">
-<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
-<div class="flex items-center gap-md mb-md">
-<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold border-2 border-primary-container shrink-0">EV</div>
-<div>
-<p class="font-label-md text-label-md text-primary font-bold">Dr. Éléonore Vence</p>
-<p class="font-label-sm text-label-sm text-secondary">Collège Saint-Exupéry</p>
-</div>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
-          « La mise en place a pris seulement une matinée. L'édition des bulletins qui nous prenait deux semaines est désormais bouclée en quelques clics. »
-        </p>
-</div>
-<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
-<div class="flex items-center gap-md mb-md">
-<div class="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center font-bold border-2 border-secondary shrink-0">MS</div>
-<div>
-<p class="font-label-md text-label-md text-primary font-bold">Marc Sterling</p>
-<p class="font-label-sm text-label-sm text-secondary">Lycée International Bellevue</p>
-</div>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
-          « Les parents reçoivent les relevés et alertes immédiatement. Le suivi de l'assiduité s'est nettement amélioré dès le premier trimestre. »
-        </p>
-</div>
-<div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
-<div class="flex items-center gap-md mb-md">
-<div class="w-12 h-12 rounded-full bg-surface-tint text-white flex items-center justify-center font-bold border-2 border-surface-tint shrink-0">SJ</div>
-<div>
-<p class="font-label-md text-label-md text-primary font-bold">Sarah Jenkins</p>
-<p class="font-label-sm text-label-sm text-secondary">Groupe Scolaire Les Pépinières</p>
-</div>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
-          « La gestion des impayés était notre cauchemar. Avec les reçus automatisés et le suivi des arriérés, nous voyons enfin clair. »
-        </p>
-</div>
-</div>
-</div>
-</section>
+                <!-- Temoignages : initiales plutot que photos distantes, comme ailleurs dans l'application -->
+                <section class="py-xl bg-surface" id="temoignages">
+                        <div class="container mx-auto px-lg max-w-container-max">
+                                <h2 class="font-headline-lg text-headline-lg text-primary text-center mb-xl font-bold">
+                                        Ils nous font confiance au quotidien</h2>
+                                <div class="grid md:grid-cols-3 gap-lg">
+                                        <div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+                                                <div class="flex items-center gap-md mb-md">
+                                                        <div
+                                                                class="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold border-2 border-primary-container shrink-0">
+                                                                EV</div>
+                                                        <div>
+                                                                <p
+                                                                        class="font-label-md text-label-md text-primary font-bold">
+                                                                        Dr. Éléonore Vence</p>
+                                                                <p class="font-label-sm text-label-sm text-secondary">
+                                                                        Collège Saint-Exupéry</p>
+                                                        </div>
+                                                </div>
+                                                <p
+                                                        class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+                                                        « La mise en place a pris seulement une matinée. L'édition des
+                                                        bulletins qui nous prenait deux semaines est désormais bouclée
+                                                        en quelques clics. »
+                                                </p>
+                                        </div>
+                                        <div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+                                                <div class="flex items-center gap-md mb-md">
+                                                        <div
+                                                                class="w-12 h-12 rounded-full bg-secondary text-white flex items-center justify-center font-bold border-2 border-secondary shrink-0">
+                                                                MS</div>
+                                                        <div>
+                                                                <p
+                                                                        class="font-label-md text-label-md text-primary font-bold">
+                                                                        Marc Sterling</p>
+                                                                <p class="font-label-sm text-label-sm text-secondary">
+                                                                        Lycée International Bellevue</p>
+                                                        </div>
+                                                </div>
+                                                <p
+                                                        class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+                                                        « Les parents reçoivent les relevés et alertes immédiatement. Le
+                                                        suivi de l'assiduité s'est nettement amélioré dès le premier
+                                                        trimestre. »
+                                                </p>
+                                        </div>
+                                        <div class="bg-white p-xl rounded-xl border border-outline-variant shadow-sm">
+                                                <div class="flex items-center gap-md mb-md">
+                                                        <div
+                                                                class="w-12 h-12 rounded-full bg-surface-tint text-white flex items-center justify-center font-bold border-2 border-surface-tint shrink-0">
+                                                                SJ</div>
+                                                        <div>
+                                                                <p
+                                                                        class="font-label-md text-label-md text-primary font-bold">
+                                                                        Sarah Jenkins</p>
+                                                                <p class="font-label-sm text-label-sm text-secondary">
+                                                                        Groupe Scolaire Les Pépinières</p>
+                                                        </div>
+                                                </div>
+                                                <p
+                                                        class="font-body-md text-body-md text-on-surface-variant italic leading-relaxed">
+                                                        « La gestion des impayés était notre cauchemar. Avec les reçus
+                                                        automatisés et le suivi des arriérés, nous voyons enfin clair. »
+                                                </p>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
 
-<!-- Appel a l'action final -->
-<section class="py-xl bg-primary text-on-primary relative overflow-hidden" id="inscription-directe">
-<div class="container mx-auto px-lg max-w-container-max relative z-10">
-<div class="max-w-3xl mx-auto text-center space-y-md">
-<h2 class="font-headline-lg text-headline-lg md:text-[38px] leading-tight font-bold">Démarrez la rentrée sereinement avec EduSystem Pro</h2>
-<p class="font-body-lg text-body-lg text-primary-fixed opacity-90">
-        Quatre informations suffisent : le nom de votre école, son type, et qui l'administre.
-        Vos classes sont créées automatiquement et votre espace est accessible immédiatement.
-      </p>
-<div class="pt-sm">
-<a class="bg-white text-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm" href="/demarrer">
-<span class="material-symbols-outlined">how_to_reg</span>
-<span>Créer l'espace de mon école</span>
-</a>
-</div>
-<p class="font-label-sm text-label-sm text-primary-fixed opacity-80 pt-xs">
-        Sans engagement ni coordonnées bancaires. Vous avez déjà un compte ?
-        <a class="underline font-bold hover:opacity-80" href="/login">Se connecter</a>
-      </p>
-</div>
-</div>
-</section>
+                <!-- Appel a l'action final -->
+                <section class="py-xl bg-primary text-on-primary relative overflow-hidden" id="inscription-directe">
+                        <div class="container mx-auto px-lg max-w-container-max relative z-10">
+                                <div class="max-w-3xl mx-auto text-center space-y-md">
+                                        <h2
+                                                class="font-headline-lg text-headline-lg md:text-[38px] leading-tight font-bold">
+                                                Démarrez la rentrée sereinement avec EduSystem Pro</h2>
+                                        <p class="font-body-lg text-body-lg text-primary-fixed opacity-90">
+                                                Quatre informations suffisent : le nom de votre école, son type, et qui
+                                                l'administre.
+                                                Vos classes sont créées automatiquement et votre espace est accessible
+                                                immédiatement.
+                                        </p>
+                                        <div class="pt-sm">
+                                                <a class="bg-white text-primary font-headline-sm text-headline-sm px-xl py-md rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all inline-flex items-center gap-sm"
+                                                        href="/demarrer">
+                                                        <span class="material-symbols-outlined">how_to_reg</span>
+                                                        <span>Créer l'espace de mon école</span>
+                                                </a>
+                                        </div>
+                                        <p class="font-label-sm text-label-sm text-primary-fixed opacity-80 pt-xs">
+                                                Sans engagement ni coordonnées bancaires. Vous avez déjà un compte ?
+                                                <a class="underline font-bold hover:opacity-80" href="/login">Se
+                                                        connecter</a>
+                                        </p>
+                                </div>
+                        </div>
+                </section>
 
-</main>
+        </main>
 
-<footer class="w-full py-xl px-lg flex flex-col md:flex-row justify-between items-center gap-md bg-tertiary text-on-tertiary border-t border-tertiary-container">
-<div class="flex flex-col items-center md:items-start gap-xs">
-<div class="flex items-center gap-xs">
-<span class="material-symbols-outlined text-[20px]">school</span>
-<span class="font-headline-sm text-headline-sm text-on-tertiary font-bold">EduSystem Pro</span>
-</div>
-<p class="font-label-sm text-label-sm opacity-80">EduSystem Pro — La plateforme scolaire simple et moderne.</p>
-</div>
-<div class="flex flex-wrap justify-center gap-md">
-<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/demarrer">Créer mon école</a>
-<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/login">Connexion</a>
-<a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors" href="/inscription-parent">Espace parents</a>
-</div>
-</footer>
+        <footer
+                class="w-full py-xl px-lg flex flex-col md:flex-row justify-between items-center gap-md bg-tertiary text-on-tertiary border-t border-tertiary-container">
+                <div class="flex flex-col items-center md:items-start gap-xs">
+                        <div class="flex items-center gap-xs">
+                                <span class="material-symbols-outlined text-[20px]">school</span>
+                                <span class="font-headline-sm text-headline-sm text-on-tertiary font-bold">EduSystem
+                                        Pro</span>
+                        </div>
+                        <p class="font-label-sm text-label-sm opacity-80">EduSystem Pro — La plateforme scolaire simple
+                                et moderne.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-md">
+                        <a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors"
+                                href="/demarrer">Créer mon école</a>
+                        <a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors"
+                                href="/login">Connexion</a>
+                        <a class="font-label-sm text-label-sm text-on-tertiary-container hover:text-white transition-colors"
+                                href="/inscription-parent">Espace parents</a>
+                </div>
+        </footer>
 
 </body>
+
 </html>
