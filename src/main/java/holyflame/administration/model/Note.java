@@ -105,7 +105,7 @@ public class Note {
         if (type == null || type.isBlank())
             return type;
         String normalized = type.trim().toUpperCase(Locale.ROOT);
-        if ("DEV1".equals(normalized) || "DEVOIR1".equals(normalized))
+        if ("DEV1".equals(normalized) || "DEVOIR1".equals(normalized) || "DEVOIR 1".equals(normalized))
             return TYPE_DEVOIR;
         if ("DEV2".equals(normalized) || "DEVOIR 2".equals(normalized) || "DEVOIR2".equals(normalized))
             return TYPE_DEVOIR2;
